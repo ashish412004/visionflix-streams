@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Lock, FileText, Heart, Search, HelpCircle, Check, AlertCircle, QrCode, Gift, Users, Download, Share2, Zap } from "lucide-react"
 import { useWishlist } from "@/contexts/wishlist-context"
 import { WHATSAPP_URL } from "@/config/constants"
+import { supabase, Referral } from "@/lib/supabase"
 
 type Category = "All" | "OTT" | "AI Plans" | "18+" | "Softwares" | "Instagram Services" | "Combo Packs"
 type AccessType = "Shared" | "Personal"
@@ -78,8 +79,11 @@ export function SubscriptionCards() {
   const [referralData, setReferralData] = useState({
     mobileNumber: "",
     referralUrl: "",
-    qrCode: ""
+    qrCode: "",
+    points: 0,
+    referralCount: 0
   });
+  const [loadingReferral, setLoadingReferral] = useState(false);
   
   // Generate suggestions based on search term
   useEffect(() => {
@@ -142,19 +146,90 @@ export function SubscriptionCards() {
   };
 
   // Refer & Earn Functions
-  const generateReferralQR = () => {
-    if (!referralMobile.trim() || referralMobile.length < 10) return;
+  const generateReferralQR = async () => {
+    if (!referralMobile.trim() || referralMobile.length < 10) {
+      console.log('Validation failed: Invalid mobile number');
+      return;
+    }
     
-    const referralUrl = `https://initiators-tools.com?ref=${referralMobile}`;
-    const qrCode = `QR:${referralUrl}`; // Simple QR representation
+    console.log('Starting QR generation for mobile:', referralMobile);
+    setLoadingReferral(true);
     
-    setReferralData({
-      mobileNumber: referralMobile,
-      referralUrl: referralUrl,
-      qrCode: qrCode
-    });
-    
-    setShowReferralCard(true);
+    try {
+      // Check if referral already exists
+      console.log('Checking if referral exists for mobile:', referralMobile);
+      const { data: existingReferral, error: fetchError } = await supabase
+        .from('referrals')
+        .select('*')
+        .eq('mobile_number', referralMobile)
+        .single();
+
+      console.log('Fetch result:', { existingReferral, fetchError });
+
+      if (fetchError && fetchError.code !== 'PGRST116') {
+        console.error('Database fetch error:', fetchError.message, fetchError.details);
+        alert('Error checking referral: ' + fetchError.message);
+        setLoadingReferral(false);
+        return;
+      }
+
+      let referralData;
+      
+      if (existingReferral) {
+        // Use existing referral data
+        console.log('Found existing referral:', existingReferral);
+        referralData = existingReferral;
+      } else {
+        // Create new referral
+        console.log('Creating new referral for mobile:', referralMobile);
+        const insertData = {
+          mobile_number: referralMobile,
+          referral_code: referralMobile,
+          referral_count: 0
+        };
+        
+        console.log('Insert data:', insertData);
+        
+        const { data: newReferral, error: insertError } = await supabase
+          .from('referrals')
+          .insert(insertData)
+          .select()
+          .single();
+
+        if (insertError) {
+          console.error('Database insert error:', insertError.message, insertError.details);
+          alert('Error creating referral: ' + insertError.message);
+          setLoadingReferral(false);
+          return;
+        }
+
+        console.log('Successfully created new referral:', newReferral);
+        referralData = newReferral;
+      }
+
+      const qrCode = `QR:https://initiators-tools.com?ref=${referralMobile}`;
+      
+      console.log('Setting referral data for card display');
+      setReferralData({
+        mobileNumber: referralData.mobile_number,
+        referralUrl: `https://initiators-tools.com?ref=${referralData.mobile_number}`,
+        qrCode: qrCode,
+        points: 0, // Default 0 since points column doesn't exist
+        referralCount: referralData.referral_count
+      });
+      
+      console.log('Showing referral card');
+      setShowReferralCard(true);
+      
+      // Success message
+      alert('QR Card generated successfully!');
+      
+    } catch (error) {
+      console.error('Unexpected error in generateReferralQR:', error);
+      alert('Unexpected error: ' + (error as Error).message);
+    } finally {
+      setLoadingReferral(false);
+    }
   };
 
   const downloadReferralCard = () => {
@@ -641,11 +716,20 @@ export function SubscriptionCards() {
             </div>
             <button
               onClick={generateReferralQR}
-              disabled={!referralMobile.trim() || referralMobile.length < 10}
+              disabled={!referralMobile.trim() || referralMobile.length < 10 || loadingReferral}
               className="w-full py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold rounded-lg hover:from-purple-600 hover:to-pink-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 flex items-center justify-center gap-2"
             >
-              <QrCode className="w-5 h-5" />
-              Generate My QR
+              {loadingReferral ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <QrCode className="w-5 h-5" />
+                  Generate My QR
+                </>
+              )}
             </button>
           </div>
         </div>
@@ -699,11 +783,23 @@ export function SubscriptionCards() {
 
                   {/* Footer */}
                   <div className="text-center">
-                    <p className="text-gray-400 text-xs mb-2">Share with friends & earn 50 cashback</p>
-                    <div className="flex items-center justify-center gap-2 text-pink-400 text-sm">
-                      <Gift className="w-4 h-4" />
-                      <span>50 Cashback Per Referral</span>
+                    <div className="grid grid-cols-2 gap-4 mb-4">
+                      <div className="bg-white/10 rounded-lg p-3">
+                        <div className="flex items-center justify-center gap-2 text-green-400 mb-1">
+                          <Gift className="w-4 h-4" />
+                          <span className="text-xs">Points</span>
+                        </div>
+                        <p className="text-xl font-bold text-green-400">{referralData.points}</p>
+                      </div>
+                      <div className="bg-white/10 rounded-lg p-3">
+                        <div className="flex items-center justify-center gap-2 text-blue-400 mb-1">
+                          <Users className="w-4 h-4" />
+                          <span className="text-xs">Referrals</span>
+                        </div>
+                        <p className="text-xl font-bold text-blue-400">{referralData.referralCount}</p>
+                      </div>
                     </div>
+                    <p className="text-gray-400 text-xs">Share with friends & earn 50 cashback per referral</p>
                   </div>
                 </div>
               </div>
