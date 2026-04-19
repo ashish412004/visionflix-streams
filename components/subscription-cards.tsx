@@ -1,0 +1,741 @@
+"use client"
+
+import { useState, useEffect } from "react"
+import { motion, AnimatePresence } from "framer-motion"
+import { Lock, FileText, Heart, Search, HelpCircle, Check, AlertCircle, QrCode, Gift, Users, Download, Share2, Zap } from "lucide-react"
+import { useWishlist } from "@/contexts/wishlist-context"
+import { WHATSAPP_URL } from "@/config/constants"
+
+type Category = "All" | "OTT" | "AI Plans" | "18+" | "Softwares" | "Instagram Services" | "Combo Packs"
+type AccessType = "Shared" | "Personal"
+
+interface Subscription {
+  id: number;
+  name: string;
+  logo: string;
+  logoSubtext: string;
+  price: number;
+  originalPrice?: number;
+  period: string;
+  description: string;
+  bgColor: string;
+  popular?: boolean;
+  category: Category;
+  accessType: AccessType;
+  isCombo?: boolean;
+  comboItems?: string[];
+  isVIP?: boolean;
+}
+
+const allSubscriptions: Subscription[] = [
+  // VIP Pass - Special Card
+  { id: 0, name: "VIP Membership", logo: "VIP", logoSubtext: "PASS", price: 99, period: "1 Year", description: "Exclusive access to all premium services.", bgColor: "bg-black", popular: true, category: "All", accessType: "Shared", isVIP: true },
+  // OTT Shared
+  { id: 1, name: "Netflix", logo: "N", logoSubtext: "Netflix", price: 199, period: "1 Month", description: "Premium streaming entertainment.", bgColor: "bg-red-600", popular: true, category: "OTT", accessType: "Shared" },
+  { id: 2, name: "Prime Video", logo: "P", logoSubtext: "Prime", price: 199, period: "1 Year", description: "Movies and originals.", bgColor: "bg-blue-600", category: "OTT", accessType: "Shared" },
+  { id: 3, name: "Zee5", logo: "Z", logoSubtext: "Zee5", price: 249, period: "1 Year", description: "Premium content no ads.", bgColor: "bg-purple-700", category: "OTT", accessType: "Shared" },
+  { id: 4, name: "Sony LIV", logo: "S", logoSubtext: "Sony LIV", price: 399, period: "1 Year", description: "Live sports entertainment.", bgColor: "bg-gray-700", category: "OTT", accessType: "Shared" },
+  { id: 5, name: "Hotstar", logo: "D+", logoSubtext: "Hotstar", price: 699, period: "1 Year", description: "Super Plan content.", bgColor: "bg-blue-800", category: "OTT", accessType: "Shared" },
+  // OTT Personal
+  { id: 6, name: "Prime Video", logo: "P", logoSubtext: "Prime", price: 499, period: "1 Year", description: "Personal Prime account.", bgColor: "bg-blue-600", popular: true, category: "OTT", accessType: "Personal" },
+  { id: 7, name: "Sony LIV", logo: "S", logoSubtext: "Sony LIV", price: 499, period: "1 Year", description: "Personal Sony LIV.", bgColor: "bg-gray-700", category: "OTT", accessType: "Personal" },
+  { id: 8, name: "Zee5", logo: "Z", logoSubtext: "Zee5", price: 499, period: "1 Year", description: "Personal Zee5 access.", bgColor: "bg-purple-700", category: "OTT", accessType: "Personal" },
+  { id: 9, name: "YouTube Premium", logo: "YT", logoSubtext: "YouTube", price: 999, period: "1 Year", description: "Ad-free YouTube.", bgColor: "bg-red-600", category: "OTT", accessType: "Personal" },
+  { id: 10, name: "Amazon Full Benefit", logo: "A", logoSubtext: "Amazon", price: 1099, period: "1 Year", description: "Complete benefits.", bgColor: "bg-orange-600", popular: true, category: "OTT", accessType: "Personal" },
+  // Softwares
+  { id: 11, name: "Adobe CC", logo: "Ad", logoSubtext: "Adobe", price: 999, period: "4 Months", description: "All Adobe apps.", bgColor: "bg-red-600", category: "Softwares", accessType: "Shared" },
+  { id: 12, name: "Adobe CC", logo: "Ad", logoSubtext: "Adobe", price: 5999, period: "1 Year", description: "Best Value Pack.", bgColor: "bg-red-700", popular: true, category: "Softwares", accessType: "Shared" },
+  { id: 13, name: "LinkedIn Career", logo: "in", logoSubtext: "LinkedIn", price: 3499, period: "1 Year", description: "Professional journey.", bgColor: "bg-blue-700", category: "Softwares", accessType: "Shared" },
+  { id: 14, name: "LinkedIn Sales", logo: "in", logoSubtext: "LinkedIn", price: 3499, period: "1 Month", description: "For sales pros.", bgColor: "bg-blue-800", category: "Softwares", accessType: "Shared" },
+  { id: 15, name: "Microsoft 365", logo: "MS", logoSubtext: "MS", price: 799, period: "1 Year", description: "Office + 1TB Cloud.", bgColor: "bg-blue-600", popular: true, category: "Softwares", accessType: "Shared" },
+  { id: 16, name: "Canva Pro", logo: "C", logoSubtext: "Canva", price: 499, period: "1 Year", description: "Design pro style.", bgColor: "bg-cyan-600", category: "Softwares", accessType: "Shared" },
+  // AI Plans
+  { id: 17, name: "ChatGPT Plus", logo: "GPT", logoSubtext: "OpenAI", price: 499, period: "1 Month", description: "Advanced AI.", bgColor: "bg-emerald-600", popular: true, category: "AI Plans", accessType: "Shared" },
+  { id: 18, name: "Rezi AI", logo: "RZ", logoSubtext: "Rezi", price: 1299, period: "1 Year", description: "AI Resume builder.", bgColor: "bg-indigo-600", category: "AI Plans", accessType: "Shared" },
+  { id: 19, name: "Gemini AI", logo: "GM", logoSubtext: "Google", price: 499, period: "1 Year", description: "Advanced Assistant.", bgColor: "bg-blue-500", category: "AI Plans", accessType: "Shared" },
+  { id: 20, name: "Perplexity AI", logo: "PX", logoSubtext: "AI", price: 1999, period: "1 Year", description: "Search AI.", bgColor: "bg-purple-600", popular: true, category: "AI Plans", accessType: "Shared" },
+  // Instagram
+  { id: 21, name: "1K Followers", logo: "IG", logoSubtext: "Insta", price: 249, period: "Lifetime", description: "High Quality.", bgColor: "bg-pink-600", category: "Instagram Services", accessType: "Shared" },
+  { id: 22, name: "1K Likes", logo: "IG", logoSubtext: "Insta", price: 149, period: "Fast", description: "Real accounts.", bgColor: "bg-red-500", category: "Instagram Services", accessType: "Shared" },
+  // Combo Packs
+  { id: 23, name: "Student Pack", logo: "SP", logoSubtext: "Student", price: 3999, originalPrice: 4497, period: "1 Year", description: "Perfect for students and creators.", bgColor: "bg-gradient-to-br from-purple-600 to-blue-600", popular: true, category: "Combo Packs", accessType: "Shared", isCombo: true, comboItems: ["ChatGPT Plus", "Canva Pro", "LinkedIn Career"] },
+  { id: 24, name: "OTT Bonanza", logo: "OB", logoSubtext: "Bonanza", price: 949, originalPrice: 1097, period: "1 Year", description: "Ultimate entertainment bundle.", bgColor: "bg-gradient-to-br from-red-600 to-orange-600", popular: true, category: "Combo Packs", accessType: "Shared", isCombo: true, comboItems: ["Netflix", "Hotstar", "Prime Video"] },
+  { id: 25, name: "AI Pro Pack", logo: "AI", logoSubtext: "Pro Pack", price: 2499, originalPrice: 2997, period: "1 Year", description: "Complete AI toolkit.", bgColor: "bg-gradient-to-br from-emerald-600 to-cyan-600", popular: true, category: "Combo Packs", accessType: "Shared", isCombo: true, comboItems: ["Gemini AI", "Perplexity AI", "ChatGPT Plus"] }
+];
+
+export function SubscriptionCards() {
+  const { addItem, removeItem, isInWishlist } = useWishlist();
+  const [category, setCategory] = useState<Category>("OTT");
+  const [accessType, setAccessType] = useState<AccessType>("Shared");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [activeFilter, setActiveFilter] = useState("");
+  
+  // Refer & Earn State
+  const [referralMobile, setReferralMobile] = useState("");
+  const [showReferralCard, setShowReferralCard] = useState(false);
+  const [referralData, setReferralData] = useState({
+    mobileNumber: "",
+    referralUrl: "",
+    qrCode: ""
+  });
+  
+  // Generate suggestions based on search term
+  useEffect(() => {
+    if (searchTerm.trim() === "") {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    const filteredSuggestions = allSubscriptions
+      .filter(sub => 
+        sub.name.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+      .map(sub => sub.name)
+      .slice(0, 5);
+
+    setSuggestions(filteredSuggestions);
+    setShowSuggestions(true);
+  }, [searchTerm]);
+
+  // Handle search execution
+  const handleSearch = () => {
+    setActiveFilter(searchTerm);
+    setShowSuggestions(false);
+  };
+
+  // Handle suggestion click
+  const handleSuggestionClick = (suggestion: string) => {
+    setSearchTerm(suggestion);
+    setActiveFilter(suggestion);
+    setShowSuggestions(false);
+  };
+
+  // Handle Enter key
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
+
+  const filtered = allSubscriptions.filter(sub => {
+    const matchesSearch = activeFilter === "" || sub.name.toLowerCase().includes(activeFilter.toLowerCase());
+    const matchesCategory = category === "All" || sub.category === category;
+    const matchesType = category !== "OTT" || sub.accessType === accessType;
+    return matchesSearch && matchesCategory && matchesType;
+  });
+
+  // Highlight matching text in suggestions
+  const highlightMatch = (text: string, query: string) => {
+    if (!query) return text;
+    const regex = new RegExp(`(${query})`, 'gi');
+    const parts = text.split(regex);
+    return parts.map((part, index) => 
+      regex.test(part) ? (
+        <span key={index} className="text-purple-400 font-bold">{part}</span>
+      ) : (
+        <span key={index}>{part}</span>
+      )
+    );
+  };
+
+  // Refer & Earn Functions
+  const generateReferralQR = () => {
+    if (!referralMobile.trim() || referralMobile.length < 10) return;
+    
+    const referralUrl = `https://initiators-tools.com?ref=${referralMobile}`;
+    const qrCode = `QR:${referralUrl}`; // Simple QR representation
+    
+    setReferralData({
+      mobileNumber: referralMobile,
+      referralUrl: referralUrl,
+      qrCode: qrCode
+    });
+    
+    setShowReferralCard(true);
+  };
+
+  const downloadReferralCard = () => {
+    const element = document.getElementById('referral-card');
+    if (!element) return;
+
+    // Create a canvas and convert the card to image
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // Set canvas size (phone screen size)
+    canvas.width = 375;
+    canvas.height = 667;
+
+    // Draw background gradient (Deep Purple/Black)
+    const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    gradient.addColorStop(0, '#1a0033');
+    gradient.addColorStop(0.5, '#2d1b69');
+    gradient.addColorStop(1, '#0a0014');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Add neon pink glow effect
+    ctx.shadowColor = '#ff1493';
+    ctx.shadowBlur = 20;
+
+    // Draw title
+    ctx.fillStyle = '#ff1493';
+    ctx.font = 'bold 24px Arial';
+    ctx.fillText('INITIATORS TOOLS', 20, 60);
+
+    // Draw QR code placeholder (center)
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '16px Arial';
+    ctx.fillText('QR CODE', 140, 320);
+    ctx.font = '12px Arial';
+    ctx.fillText(referralData.qrCode.substring(0, 30) + '...', 80, 340);
+
+    // Draw referral code
+    ctx.fillStyle = '#00ff88';
+    ctx.font = 'bold 18px Arial';
+    ctx.fillText(`Referral Code: ${referralData.mobileNumber}`, 50, 600);
+
+    // Download the image
+    const link = document.createElement('a');
+    link.download = 'referral-card.png';
+    link.href = canvas.toDataURL();
+    link.click();
+  };
+
+  // Check for referral parameter in URL
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const refParam = urlParams.get('ref');
+    if (refParam) {
+      // Store referral info for WhatsApp message
+      localStorage.setItem('referralCode', refParam);
+    }
+  }, []);
+
+  return (
+    <section className="px-4 py-12 max-w-7xl mx-auto">
+      <div className="relative max-w-xl mx-auto mb-12">
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+        <input 
+          type="text" 
+          placeholder="Search services..." 
+          className="w-full pl-12 pr-20 py-3 bg-white/5 border border-white/10 rounded-full text-white focus:outline-none focus:border-purple-500 focus:shadow-lg focus:shadow-purple-500/20 transition-all duration-300"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          onKeyDown={handleKeyPress}
+          onFocus={() => setShowSuggestions(true)}
+        />
+        <button
+          onClick={handleSearch}
+          className="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-1.5 bg-gradient-to-r from-pink-500 to-purple-500 text-white text-sm font-medium rounded-full hover:from-pink-600 hover:to-purple-600 transition-all duration-300"
+        >
+          Search
+        </button>
+
+        {/* Suggestions Dropdown */}
+        <AnimatePresence>
+          {showSuggestions && suggestions.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="absolute top-full left-0 right-0 mt-2 bg-black/80 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl z-50 max-h-60 overflow-y-auto"
+            >
+              <div className="p-2">
+                {suggestions.map((suggestion, index) => (
+                  <motion.div
+                    key={suggestion}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    onClick={() => handleSuggestionClick(suggestion)}
+                    className="flex items-center gap-3 p-3 hover:bg-white/10 rounded-lg cursor-pointer transition-all duration-200"
+                  >
+                    <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center text-white font-bold text-xs">
+                      {suggestion.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <p className="text-white font-medium">
+                        {highlightMatch(suggestion, searchTerm)}
+                      </p>
+                      <p className="text-gray-400 text-xs">
+                        {allSubscriptions.find(sub => sub.name === suggestion)?.category}
+                      </p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      <div className="flex flex-wrap justify-center gap-2 mb-8 relative">
+        {["All", "OTT", "Softwares", "AI Plans", "Instagram Services", "18+", "Combo Packs"].map((cat) => (
+          <motion.button
+            key={cat}
+            onClick={() => {
+              setCategory(cat as Category);
+              setSearchTerm("");
+              setActiveFilter("");
+              setShowSuggestions(false);
+            }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all duration-300 relative ${
+              category === cat 
+                ? "text-white shadow-lg" 
+                : "text-gray-400 border border-white/20 hover:text-white"
+            }`}
+          >
+            {category === cat && (
+              <motion.div
+                layoutId="activeCategory"
+                className="absolute inset-0 bg-gradient-to-r from-pink-500 via-purple-500 to-pink-500 rounded-full"
+                style={{
+                  boxShadow: "0 0 20px rgba(236, 72, 153, 0.3), 0 0 40px rgba(168, 85, 247, 0.2)"
+                }}
+              />
+            )}
+            <span className="relative z-10">{cat}</span>
+          </motion.button>
+        ))}
+      </div>
+
+      {category === "OTT" && (
+        <div className="flex justify-center gap-4 mb-12">
+          <button onClick={() => {
+            setAccessType("Shared");
+            setSearchTerm("");
+            setActiveFilter("");
+            setShowSuggestions(false);
+          }} className={`px-6 py-2 rounded-lg flex items-center gap-2 ${accessType === "Shared" ? "bg-white/20 text-white" : "text-gray-500"}`}><Lock size={16}/> Shared</button>
+          <button onClick={() => {
+            setAccessType("Personal");
+            setSearchTerm("");
+            setActiveFilter("");
+            setShowSuggestions(false);
+          }} className={`px-6 py-2 rounded-lg flex items-center gap-2 ${accessType === "Personal" ? "bg-white/20 text-white" : "text-gray-500"}`}><FileText size={16}/> Personal</button>
+        </div>
+      )}
+
+      {/* Comparison Table */}
+      {category === "OTT" && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="mb-12"
+        >
+          <div className="text-center mb-6">
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <HelpCircle className="w-5 h-5 text-purple-400" />
+              <h2 className="text-xl font-bold text-white">Shared vs Personal: Which one is for you?</h2>
+            </div>
+            <p className="text-gray-400 text-sm">Choose the best plan according to your needs and budget.</p>
+          </div>
+          
+          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden">
+            {/* Mobile Responsive Wrapper */}
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[600px]">
+                <thead>
+                  <tr className="border-b border-white/10">
+                    <th className="px-4 py-3 text-left text-white font-semibold">Feature</th>
+                    <th className="px-4 py-3 text-center text-white font-semibold">
+                      <div className="flex items-center justify-center gap-2">
+                        <Lock className="w-4 h-4 text-orange-400" />
+                        Shared Access
+                      </div>
+                    </th>
+                    <th className="px-4 py-3 text-center text-white font-semibold">
+                      <div className="flex items-center justify-center gap-2">
+                        <FileText className="w-4 h-4 text-green-400" />
+                        Personal Access
+                      </div>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="border-b border-white/5">
+                    <td className="px-4 py-3 text-gray-300 font-medium">Price</td>
+                    <td className="px-4 py-3 text-center">
+                      <div className="flex items-center justify-center gap-2">
+                        <AlertCircle className="w-4 h-4 text-orange-400" />
+                        <span className="text-orange-400 font-medium">Budget Friendly</span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <div className="flex items-center justify-center gap-2">
+                        <Check className="w-4 h-4 text-green-400" />
+                        <span className="text-green-400 font-medium">Premium Price</span>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr className="border-b border-white/5">
+                    <td className="px-4 py-3 text-gray-300 font-medium">Privacy</td>
+                    <td className="px-4 py-3 text-center">
+                      <div className="flex items-center justify-center gap-2">
+                        <AlertCircle className="w-4 h-4 text-orange-400" />
+                        <span className="text-orange-400">Shared with others</span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <div className="flex items-center justify-center gap-2">
+                        <Check className="w-4 h-4 text-green-400" />
+                        <span className="text-green-400">100% Private</span>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr className="border-b border-white/5">
+                    <td className="px-4 py-3 text-gray-300 font-medium">Profile Lock</td>
+                    <td className="px-4 py-3 text-center">
+                      <div className="flex items-center justify-center gap-2">
+                        <AlertCircle className="w-4 h-4 text-orange-400" />
+                        <span className="text-orange-400">No (Use Admin Profile)</span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <div className="flex items-center justify-center gap-2">
+                        <Check className="w-4 h-4 text-green-400" />
+                        <span className="text-green-400">Yes (Your own PIN)</span>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr className="border-b border-white/5">
+                    <td className="px-4 py-3 text-gray-300 font-medium">Device Login</td>
+                    <td className="px-4 py-3 text-center">
+                      <div className="flex items-center justify-center gap-2">
+                        <AlertCircle className="w-4 h-4 text-orange-400" />
+                        <span className="text-orange-400">1 Device Only</span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <div className="flex items-center justify-center gap-2">
+                        <Check className="w-4 h-4 text-green-400" />
+                        <span className="text-green-400">Multiple Devices</span>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="px-4 py-3 text-gray-300 font-medium">Password Change</td>
+                    <td className="px-4 py-3 text-center">
+                      <div className="flex items-center justify-center gap-2">
+                        <AlertCircle className="w-4 h-4 text-orange-400" />
+                        <span className="text-orange-400">Not Allowed</span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <div className="flex items-center justify-center gap-2">
+                        <Check className="w-4 h-4 text-green-400" />
+                        <span className="text-green-400">Fully Allowed</span>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
+      <motion.div 
+          key={category}
+          layout
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+        >
+          <AnimatePresence mode="wait">
+            {filtered.map((sub, index) => (
+              <motion.div
+                key={sub.id}
+                layout
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ 
+                  opacity: 1, 
+                  y: 0,
+                  transition: {
+                    type: "spring",
+                    stiffness: 100,
+                    damping: 15,
+                    delay: index * 0.05
+                  }
+                }}
+                exit={{ 
+                  opacity: 0,
+                  y: -20,
+                  transition: {
+                    type: "spring",
+                    stiffness: 100,
+                    damping: 15
+                  }
+                }}
+                whileHover={{ scale: 1.05 }}
+                className={`bg-white/5 ${sub.isVIP ? 'border-2 border-[#FFD700]' : sub.isCombo ? 'border-2 border-dashed border-purple-400/50' : 'border border-white/10'} p-5 rounded-2xl relative group ${sub.isVIP ? 'hover:border-[#FFD700] hover:shadow-[0_0_20px_rgba(255,215,0,0.3)]' : 'hover:border-purple-500/50'} transition-all h-full flex flex-col`}
+              >
+                {/* VIP Limited Seats Badge */}
+                {sub.isVIP && (
+                  <div className="absolute -top-3 right-4">
+                    <span className="px-3 py-1 bg-red-500 text-white text-xs font-bold rounded-full shadow-lg animate-pulse">
+                      Limited Seats
+                    </span>
+                  </div>
+                )}
+
+                {/* Combo Badge */}
+                {sub.isCombo && (
+                  <div className="absolute -top-3 right-4">
+                    <span className="px-3 py-1 bg-gradient-to-r from-yellow-500 to-orange-500 text-black text-xs font-bold rounded-full shadow-lg">
+                      Value Pack
+                    </span>
+                  </div>
+                )}
+
+                <div className={`w-12 h-12 ${sub.bgColor} ${sub.isVIP ? 'border border-[#FFD700]' : ''} rounded-xl mb-4 flex flex-col items-center justify-center font-bold text-white`}>
+                  <span className="text-lg">{sub.logo}</span>
+                  <span className="text-[8px]">{sub.logoSubtext}</span>
+                </div>
+                <h3 className={`font-bold mb-1 ${sub.isVIP ? 'text-[#FFD700]' : 'text-white'}`}>{sub.name}</h3>
+                <p className="text-gray-400 text-xs mb-3">{sub.period}</p>
+                
+                {/* Price with Original Price for Combos */}
+                <div className="flex items-baseline gap-2 mb-4">
+                  <span className={`text-2xl font-bold ${sub.isVIP ? 'text-[#FFD700]' : 'text-white'}`}>₹{sub.price}</span>
+                  {sub.originalPrice && (
+                    <span className="text-gray-500 text-sm line-through ml-2">₹{sub.originalPrice}</span>
+                  )}
+                </div>
+
+                {/* Combo Items Display */}
+                {sub.isCombo && sub.comboItems && (
+                  <div className="mb-4 p-3 bg-white/5 rounded-lg">
+                    <p className="text-gray-300 text-xs font-medium mb-2">Includes:</p>
+                    <div className="flex flex-wrap gap-2">
+                      {sub.comboItems.map((item, idx) => (
+                        <span key={idx} className="px-2 py-1 bg-purple-500/20 border border-purple-400/30 text-purple-300 text-xs rounded-full">
+                          {item}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex gap-2 mt-auto">
+                  <button 
+                    onClick={() => {
+                      const referralCode = localStorage.getItem('referralCode');
+                      const baseMessage = sub.isVIP 
+                        ? `Hi, I'm interested in VIP Membership. Please send payment details for 99 Yearly Pass!`
+                        : `I want to buy ${sub.name}`;
+                      const referralText = referralCode ? `\n\n Referred by: ${referralCode}` : '';
+                      window.open(`${WHATSAPP_URL}?text=${encodeURIComponent(baseMessage + referralText)}`);
+                    }}
+                    className={`flex-1 py-2 rounded-xl font-bold text-sm ${sub.isVIP 
+                      ? 'bg-gradient-to-r from-[#FFD700] to-yellow-600 text-black hover:from-yellow-600 hover:to-orange-600' 
+                      : 'bg-gradient-to-r from-pink-500 to-purple-600 text-white'
+                    }`}
+                  >
+                    Buy Now
+                  </button>
+                  <button 
+                    onClick={() => isInWishlist(sub.id) ? removeItem(sub.id) : addItem(sub)}
+                    className={`p-2 rounded-xl border ${isInWishlist(sub.id) ? "bg-pink-500 border-pink-500 text-white" : "border-white/10 text-gray-400"}`}
+                  >
+                    <Heart size={20} fill={isInWishlist(sub.id) ? "white" : "none"}/>
+                  </button>
+                </div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </motion.div>
+
+      {/* Refer & Earn Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="mt-16 mb-12"
+      >
+        {/* Section Header */}
+        <div className="text-center mb-12">
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-lg">
+              <Zap className="w-6 h-6 text-white" />
+            </div>
+            <h2 className="text-3xl font-bold text-white">Refer & Earn Cashback</h2>
+          </div>
+          <p className="text-gray-400 text-lg max-w-2xl mx-auto">
+            Turn your friends into discounts! Generate your unique QR and start earning.
+          </p>
+        </div>
+
+        {/* How It Works - 3 Step Guide */}
+        <div className="max-w-4xl mx-auto mb-12">
+          <h3 className="text-xl font-semibold text-white text-center mb-8">How It Works</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Step 1 */}
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 text-center"
+            >
+              <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <QrCode className="w-8 h-8 text-white" />
+              </div>
+              <div className="text-2xl font-bold text-purple-400 mb-2">Step 1</div>
+              <h4 className="text-white font-semibold mb-2">Generate QR</h4>
+              <p className="text-gray-400 text-sm">
+                Enter your mobile number and generate your unique Referral QR Card.
+              </p>
+            </motion.div>
+
+            {/* Step 2 */}
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 text-center"
+            >
+              <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Share2 className="w-8 h-8 text-white" />
+              </div>
+              <div className="text-2xl font-bold text-purple-400 mb-2">Step 2</div>
+              <h4 className="text-white font-semibold mb-2">Share with Friends</h4>
+              <p className="text-gray-400 text-sm">
+                Share the card on your WhatsApp Status or with friends.
+              </p>
+            </motion.div>
+
+            {/* Step 3 */}
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 text-center"
+            >
+              <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Gift className="w-8 h-8 text-white" />
+              </div>
+              <div className="text-2xl font-bold text-purple-400 mb-2">Step 3</div>
+              <h4 className="text-white font-semibold mb-2">Earn Cashback</h4>
+              <p className="text-gray-400 text-sm">
+                When your friend buys using your QR, they get a discount, and you get <span className="text-green-400 font-bold">50 cashback</span> on your next order!
+              </p>
+            </motion.div>
+          </div>
+        </div>
+
+        {/* QR Generator */}
+        <div className="max-w-md mx-auto mb-8">
+          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
+            <div className="mb-4">
+              <label className="block text-gray-300 text-sm font-medium mb-2">
+                Enter Your Mobile Number
+              </label>
+              <input
+                type="text"
+                value={referralMobile}
+                onChange={(e) => setReferralMobile(e.target.value)}
+                placeholder="Enter your mobile number"
+                className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all duration-300"
+                onKeyPress={(e) => e.key === 'Enter' && generateReferralQR()}
+              />
+            </div>
+            <button
+              onClick={generateReferralQR}
+              disabled={!referralMobile.trim() || referralMobile.length < 10}
+              className="w-full py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold rounded-lg hover:from-purple-600 hover:to-pink-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 flex items-center justify-center gap-2"
+            >
+              <QrCode className="w-5 h-5" />
+              Generate My QR
+            </button>
+          </div>
+        </div>
+
+        {/* Referral Card Display */}
+        <AnimatePresence>
+          {showReferralCard && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8, rotateY: 90 }}
+              animate={{ opacity: 1, scale: 1, rotateY: 0 }}
+              exit={{ opacity: 0, scale: 0.8, rotateY: -90 }}
+              transition={{ duration: 0.6, ease: "easeInOut" }}
+              className="flex justify-center"
+            >
+              <div 
+                id="referral-card"
+                className="w-[375px] h-[667px] bg-gradient-to-br from-purple-950 via-pink-950 to-purple-950 rounded-3xl p-8 relative overflow-hidden shadow-2xl border border-pink-500/20"
+                style={{
+                  boxShadow: "0 0 40px rgba(236, 72, 153, 0.4), 0 0 80px rgba(168, 85, 247, 0.2)"
+                }}
+              >
+                {/* Neon Glow Effect */}
+                <div className="absolute inset-0 bg-gradient-to-t from-pink-500/10 to-purple-500/10 rounded-3xl"></div>
+                
+                {/* Card Content */}
+                <div className="relative z-10 flex flex-col h-full">
+                  {/* Header */}
+                  <div className="text-center mb-8">
+                    <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                      <span className="text-white font-bold text-xl">IT</span>
+                    </div>
+                    <h3 className="text-2xl font-bold text-pink-400 mb-2">
+                      Initiators Tools
+                    </h3>
+                    <p className="text-gray-300 text-sm">Refer & Earn Program</p>
+                  </div>
+
+                  {/* QR Code Area */}
+                  <div className="flex-1 flex flex-col items-center justify-center">
+                    <div className="w-48 h-48 bg-white rounded-2xl flex items-center justify-center mb-6 shadow-xl">
+                      <div className="text-center">
+                        <QrCode className="w-24 h-24 text-purple-600 mx-auto mb-2" />
+                        <p className="text-xs text-gray-600">Scan to Refer</p>
+                      </div>
+                    </div>
+                    <div className="text-center mb-6">
+                      <p className="text-gray-300 text-sm mb-2">Referral Code:</p>
+                      <p className="text-2xl font-bold text-green-400">{referralData.mobileNumber}</p>
+                    </div>
+                  </div>
+
+                  {/* Footer */}
+                  <div className="text-center">
+                    <p className="text-gray-400 text-xs mb-2">Share with friends & earn 50 cashback</p>
+                    <div className="flex items-center justify-center gap-2 text-pink-400 text-sm">
+                      <Gift className="w-4 h-4" />
+                      <span>50 Cashback Per Referral</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Action Buttons */}
+        {showReferralCard && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.3 }}
+            className="flex gap-4 justify-center mt-8"
+          >
+            <button
+              onClick={downloadReferralCard}
+              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all duration-300"
+            >
+              <Download className="w-5 h-5" />
+              Download Image
+            </button>
+            <button
+              onClick={() => window.open(`${WHATSAPP_URL}?text=${encodeURIComponent(`Hey! Check out this amazing service: ${referralData.referralUrl}`)}`, '_blank')}
+              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-300"
+            >
+              <Share2 className="w-5 h-5" />
+              Share on WhatsApp
+            </button>
+          </motion.div>
+        )}
+      </motion.div>
+    </section>
+  );
+}
