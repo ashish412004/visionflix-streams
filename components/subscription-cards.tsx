@@ -147,6 +147,8 @@ export function SubscriptionCards() {
 
   // Refer & Earn Functions
   const generateReferralQR = async () => {
+    console.log('Button Clicked!');
+    
     if (!referralMobile.trim() || referralMobile.length < 10) {
       console.log('Validation failed: Invalid mobile number');
       return;
@@ -182,6 +184,9 @@ export function SubscriptionCards() {
       } else {
         // Create new referral
         console.log('Creating new referral for mobile:', referralMobile);
+        console.log('Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL);
+        console.log('Supabase Key:', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'Key exists' : 'Key missing');
+        
         const insertData = {
           mobile_number: referralMobile,
           referral_code: referralMobile,
