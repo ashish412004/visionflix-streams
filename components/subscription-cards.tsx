@@ -785,7 +785,6 @@ export function SubscriptionCards() {
             </button>
           </div>
         </div>
-
         {/* Referral Card Display */}
         <AnimatePresence>
           {showReferralCard && (
