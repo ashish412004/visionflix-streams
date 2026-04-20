@@ -78,10 +78,10 @@ export function SmartFAQChatbot() {
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-24 left-6 z-50 w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 rounded-full flex items-center justify-center shadow-lg shadow-purple-500/30 transition-colors"
+        className="fixed bottom-22 left-6 z-50 w-12 h-12 md:w-14 md:h-14 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 rounded-full flex items-center justify-center shadow-lg shadow-purple-500/30 transition-colors"
         aria-label="Open FAQ Chatbot"
       >
-        {isOpen ? <X className="w-5 h-5 text-white" /> : <Bot className="w-5 h-5 text-white" />}
+        {isOpen ? <X className="w-4 h-4 md:w-5 md:h-5 text-white" /> : <Bot className="w-4 h-4 md:w-5 md:h-5 text-white" />}
       </motion.button>
 
       {/* Chat Window */}
@@ -92,30 +92,30 @@ export function SmartFAQChatbot() {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.8, y: 20 }}
             transition={{ duration: 0.3 }}
-            className="fixed bottom-24 left-6 z-50 w-[350px] max-w-[calc(100vw-3rem)]"
+            className="fixed bottom-36 left-6 z-50 w-[300px] md:w-[350px] max-w-[calc(100vw-2rem)]"
           >
             <div className="backdrop-blur-xl bg-black/80 border border-white/20 rounded-2xl shadow-2xl overflow-hidden">
               {/* Header */}
-              <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-4 relative">
+              <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-3 md:p-4 relative">
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="absolute top-4 right-4 w-8 h-8 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-colors"
+                  className="absolute top-3 right-3 md:top-4 md:right-4 w-7 h-7 md:w-8 md:h-8 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-colors"
                 >
-                  <X className="w-4 h-4 text-white" />
+                  <X className="w-3.5 h-3.5 md:w-4 md:h-4 text-white" />
                 </button>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                    <Bot className="w-5 h-5 text-white" />
+                <div className="flex items-center gap-2 md:gap-3">
+                  <div className="w-8 h-8 md:w-10 md:h-10 bg-white/20 rounded-full flex items-center justify-center">
+                    <Bot className="w-4 h-4 md:w-5 md:h-5 text-white" />
                   </div>
                   <div>
-                    <h3 className="text-white font-bold text-sm">Smart FAQ Assistant</h3>
-                    <p className="text-white/80 text-xs">Always here to help</p>
+                    <h3 className="text-white font-bold text-xs md:text-sm">Smart FAQ Assistant</h3>
+                    <p className="text-white/80 text-[10px] md:text-xs">Always here to help</p>
                   </div>
                 </div>
               </div>
 
               {/* Messages */}
-              <div className="h-[300px] overflow-y-auto p-4 space-y-3">
+              <div className="h-[200px] md:h-[300px] overflow-y-auto p-3 md:p-4 space-y-2 md:space-y-3">
                 {messages.map((message, index) => (
                   <motion.div
                     key={index}
@@ -125,14 +125,14 @@ export function SmartFAQChatbot() {
                     className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
                   >
                     <div
-                      className={`max-w-[80%] rounded-2xl p-3 ${
+                      className={`max-w-[80%] rounded-2xl p-2 md:p-3 ${
                         message.isUser
                           ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white'
                           : 'bg-white/10 text-white border border-white/20'
                       }`}
                     >
-                      <p className="text-xs leading-relaxed">{message.text}</p>
-                      <p className="text-[10px] opacity-70 mt-1">
+                      <p className="text-[10px] md:text-xs leading-relaxed">{message.text}</p>
+                      <p className="text-[9px] md:text-[10px] opacity-70 mt-0.5 md:mt-1">
                         {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </p>
                     </div>
@@ -141,19 +141,19 @@ export function SmartFAQChatbot() {
               </div>
 
               {/* Quick Actions */}
-              <div className="p-3 border-t border-white/10">
-                <p className="text-gray-400 text-xs mb-2">Quick Actions:</p>
-                <div className="grid grid-cols-2 gap-2">
+              <div className="p-2 md:p-3 border-t border-white/10">
+                <p className="text-gray-400 text-[10px] md:text-xs mb-1.5 md:mb-2">Quick Actions:</p>
+                <div className="grid grid-cols-2 gap-1.5 md:gap-2">
                   {quickActions.map((action, index) => (
                     <motion.button
                       key={index}
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={() => handleQuickAction(action)}
-                      className="flex items-center gap-2 p-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg transition-all"
+                      className="flex items-center gap-1.5 md:gap-2 p-1.5 md:p-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg transition-all"
                     >
-                      <span className="text-sm">{action.icon}</span>
-                      <span className="text-xs text-gray-300 text-left">{action.label}</span>
+                      <span className="text-xs md:text-sm">{action.icon}</span>
+                      <span className="text-[10px] md:text-xs text-gray-300 text-left">{action.label}</span>
                     </motion.button>
                   ))}
                 </div>

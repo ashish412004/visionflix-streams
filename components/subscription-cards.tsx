@@ -8,6 +8,7 @@ import { useCart } from "@/contexts/cart-context"
 import { WHATSAPP_URL } from "@/config/constants"
 import { useSound } from "@/contexts/sound-context"
 import { supabase, Referral } from "@/lib/supabase"
+import { MiniCartConfirmation } from "./mini-cart-confirmation"
 
 type Category = "All" | "OTT" | "AI Plans" | "18+" | "Softwares" | "Instagram Services" | "Combo Packs"
 type AccessType = "Shared" | "Personal"
@@ -22,6 +23,7 @@ interface Subscription {
   period: string;
   description: string;
   bgColor: string;
+  borderColor?: string;
   popular?: boolean;
   category: Category;
   accessType: AccessType;
@@ -32,38 +34,38 @@ interface Subscription {
 
 const allSubscriptions: Subscription[] = [
   // VIP Pass - Special Card
-  { id: 0, name: "VIP Membership", logo: "VIP", logoSubtext: "PASS", price: 99, period: "1 Year", description: "Exclusive access to all premium services.", bgColor: "bg-black", popular: true, category: "All", accessType: "Shared", isVIP: true },
+  { id: 0, name: "VIP Membership", logo: "VIP", logoSubtext: "PASS", price: 99, period: "1 Year", description: "Exclusive access to all premium services.", bgColor: "bg-black", borderColor: "border-[#FFD700]", popular: true, category: "All", accessType: "Shared", isVIP: true },
   // OTT Shared
-  { id: 1, name: "Netflix", logo: "N", logoSubtext: "Netflix", price: 199, period: "1 Month", description: "Premium streaming entertainment.", bgColor: "bg-red-600", popular: true, category: "OTT", accessType: "Shared" },
-  { id: 2, name: "Prime Video", logo: "P", logoSubtext: "Prime", price: 199, period: "1 Year", description: "Movies and originals.", bgColor: "bg-blue-600", category: "OTT", accessType: "Shared" },
-  { id: 3, name: "Zee5", logo: "Z", logoSubtext: "Zee5", price: 249, period: "1 Year", description: "Premium content no ads.", bgColor: "bg-purple-700", category: "OTT", accessType: "Shared" },
-  { id: 4, name: "Sony LIV", logo: "S", logoSubtext: "Sony LIV", price: 399, period: "1 Year", description: "Live sports entertainment.", bgColor: "bg-gray-700", category: "OTT", accessType: "Shared" },
-  { id: 5, name: "Hotstar", logo: "D+", logoSubtext: "Hotstar", price: 699, period: "1 Year", description: "Super Plan content.", bgColor: "bg-blue-800", category: "OTT", accessType: "Shared" },
+  { id: 1, name: "Netflix", logo: "N", logoSubtext: "Netflix", price: 199, period: "1 Month", description: "Premium streaming entertainment.", bgColor: "bg-red-600", borderColor: "border-red-500", popular: true, category: "OTT", accessType: "Shared" },
+  { id: 2, name: "Prime Video", logo: "P", logoSubtext: "Prime", price: 199, period: "1 Year", description: "Movies and originals.", bgColor: "bg-blue-600", borderColor: "border-blue-500", category: "OTT", accessType: "Shared" },
+  { id: 3, name: "Zee5", logo: "Z", logoSubtext: "Zee5", price: 249, period: "1 Year", description: "Premium content no ads.", bgColor: "bg-purple-700", borderColor: "border-purple-500", category: "OTT", accessType: "Shared" },
+  { id: 4, name: "Sony LIV", logo: "S", logoSubtext: "Sony LIV", price: 399, period: "1 Year", description: "Live sports entertainment.", bgColor: "bg-gray-700", borderColor: "border-blue-600", category: "OTT", accessType: "Shared" },
+  { id: 5, name: "Hotstar", logo: "D+", logoSubtext: "Hotstar", price: 699, period: "1 Year", description: "Super Plan content.", bgColor: "bg-blue-800", borderColor: "border-blue-700", category: "OTT", accessType: "Shared" },
   // OTT Personal
-  { id: 6, name: "Prime Video", logo: "P", logoSubtext: "Prime", price: 499, period: "1 Year", description: "Personal Prime account.", bgColor: "bg-blue-600", popular: true, category: "OTT", accessType: "Personal" },
-  { id: 7, name: "Sony LIV", logo: "S", logoSubtext: "Sony LIV", price: 499, period: "1 Year", description: "Personal Sony LIV.", bgColor: "bg-gray-700", category: "OTT", accessType: "Personal" },
-  { id: 8, name: "Zee5", logo: "Z", logoSubtext: "Zee5", price: 499, period: "1 Year", description: "Personal Zee5 access.", bgColor: "bg-purple-700", category: "OTT", accessType: "Personal" },
-  { id: 9, name: "YouTube Premium", logo: "YT", logoSubtext: "YouTube", price: 999, period: "1 Year", description: "Ad-free YouTube.", bgColor: "bg-red-600", category: "OTT", accessType: "Personal" },
-  { id: 10, name: "Amazon Full Benefit", logo: "A", logoSubtext: "Amazon", price: 1099, period: "1 Year", description: "Complete benefits.", bgColor: "bg-orange-600", popular: true, category: "OTT", accessType: "Personal" },
+  { id: 6, name: "Prime Video", logo: "P", logoSubtext: "Prime", price: 499, period: "1 Year", description: "Personal Prime account.", bgColor: "bg-blue-600", borderColor: "border-blue-500", popular: true, category: "OTT", accessType: "Personal" },
+  { id: 7, name: "Sony LIV", logo: "S", logoSubtext: "Sony LIV", price: 499, period: "1 Year", description: "Personal Sony LIV.", bgColor: "bg-gray-700", borderColor: "border-blue-600", category: "OTT", accessType: "Personal" },
+  { id: 8, name: "Zee5", logo: "Z", logoSubtext: "Zee5", price: 499, period: "1 Year", description: "Personal Zee5 access.", bgColor: "bg-purple-700", borderColor: "border-purple-500", category: "OTT", accessType: "Personal" },
+  { id: 9, name: "YouTube Premium", logo: "YT", logoSubtext: "YouTube", price: 999, period: "1 Year", description: "Ad-free YouTube.", bgColor: "bg-red-600", borderColor: "border-red-500", category: "OTT", accessType: "Personal" },
+  { id: 10, name: "Amazon Full Benefit", logo: "A", logoSubtext: "Amazon", price: 1099, period: "1 Year", description: "Complete benefits.", bgColor: "bg-orange-600", borderColor: "border-orange-500", popular: true, category: "OTT", accessType: "Personal" },
   // Softwares
-  { id: 11, name: "Adobe CC", logo: "Ad", logoSubtext: "Adobe", price: 999, period: "4 Months", description: "All Adobe apps.", bgColor: "bg-red-600", category: "Softwares", accessType: "Shared" },
-  { id: 12, name: "Adobe CC", logo: "Ad", logoSubtext: "Adobe", price: 5999, period: "1 Year", description: "Best Value Pack.", bgColor: "bg-red-700", popular: true, category: "Softwares", accessType: "Shared" },
-  { id: 13, name: "LinkedIn Career", logo: "in", logoSubtext: "LinkedIn", price: 3499, period: "1 Year", description: "Professional journey.", bgColor: "bg-blue-700", category: "Softwares", accessType: "Shared" },
-  { id: 14, name: "LinkedIn Sales", logo: "in", logoSubtext: "LinkedIn", price: 3499, period: "1 Month", description: "For sales pros.", bgColor: "bg-blue-800", category: "Softwares", accessType: "Shared" },
-  { id: 15, name: "Microsoft 365", logo: "MS", logoSubtext: "MS", price: 799, period: "1 Year", description: "Office + 1TB Cloud.", bgColor: "bg-blue-600", popular: true, category: "Softwares", accessType: "Shared" },
-  { id: 16, name: "Canva Pro", logo: "C", logoSubtext: "Canva", price: 499, period: "1 Year", description: "Design pro style.", bgColor: "bg-cyan-600", category: "Softwares", accessType: "Shared" },
+  { id: 11, name: "Adobe CC", logo: "Ad", logoSubtext: "Adobe", price: 999, period: "4 Months", description: "All Adobe apps.", bgColor: "bg-red-600", borderColor: "border-red-500", category: "Softwares", accessType: "Shared" },
+  { id: 12, name: "Adobe CC", logo: "Ad", logoSubtext: "Adobe", price: 5999, period: "1 Year", description: "Best Value Pack.", bgColor: "bg-red-700", borderColor: "border-red-600", popular: true, category: "Softwares", accessType: "Shared" },
+  { id: 13, name: "LinkedIn Career", logo: "in", logoSubtext: "LinkedIn", price: 3499, period: "1 Year", description: "Professional journey.", bgColor: "bg-blue-700", borderColor: "border-blue-600", category: "Softwares", accessType: "Shared" },
+  { id: 14, name: "LinkedIn Sales", logo: "in", logoSubtext: "LinkedIn", price: 3499, period: "1 Month", description: "For sales pros.", bgColor: "bg-blue-800", borderColor: "border-blue-700", category: "Softwares", accessType: "Shared" },
+  { id: 15, name: "Microsoft 365", logo: "MS", logoSubtext: "MS", price: 799, period: "1 Year", description: "Office + 1TB Cloud.", bgColor: "bg-blue-600", borderColor: "border-blue-500", popular: true, category: "Softwares", accessType: "Shared" },
+  { id: 16, name: "Canva Pro", logo: "C", logoSubtext: "Canva", price: 499, period: "1 Year", description: "Design pro style.", bgColor: "bg-cyan-600", borderColor: "border-cyan-500", category: "Softwares", accessType: "Shared" },
   // AI Plans
-  { id: 17, name: "ChatGPT Plus", logo: "GPT", logoSubtext: "OpenAI", price: 499, period: "1 Month", description: "Advanced AI.", bgColor: "bg-emerald-600", popular: true, category: "AI Plans", accessType: "Shared" },
-  { id: 18, name: "Rezi AI", logo: "RZ", logoSubtext: "Rezi", price: 1299, period: "1 Year", description: "AI Resume builder.", bgColor: "bg-indigo-600", category: "AI Plans", accessType: "Shared" },
-  { id: 19, name: "Gemini AI", logo: "GM", logoSubtext: "Google", price: 499, period: "1 Year", description: "Advanced Assistant.", bgColor: "bg-blue-500", category: "AI Plans", accessType: "Shared" },
-  { id: 20, name: "Perplexity AI", logo: "PX", logoSubtext: "AI", price: 1999, period: "1 Year", description: "Search AI.", bgColor: "bg-purple-600", popular: true, category: "AI Plans", accessType: "Shared" },
+  { id: 17, name: "ChatGPT Plus", logo: "GPT", logoSubtext: "OpenAI", price: 499, period: "1 Month", description: "Advanced AI.", bgColor: "bg-emerald-600", borderColor: "border-emerald-500", popular: true, category: "AI Plans", accessType: "Shared" },
+  { id: 18, name: "Rezi AI", logo: "RZ", logoSubtext: "Rezi", price: 1299, period: "1 Year", description: "AI Resume builder.", bgColor: "bg-indigo-600", borderColor: "border-indigo-500", category: "AI Plans", accessType: "Shared" },
+  { id: 19, name: "Gemini AI", logo: "GM", logoSubtext: "Google", price: 499, period: "1 Year", description: "Advanced Assistant.", bgColor: "bg-blue-500", borderColor: "border-blue-400", category: "AI Plans", accessType: "Shared" },
+  { id: 20, name: "Perplexity AI", logo: "PX", logoSubtext: "AI", price: 1999, period: "1 Year", description: "Search AI.", bgColor: "bg-purple-600", borderColor: "border-purple-500", popular: true, category: "AI Plans", accessType: "Shared" },
   // Instagram
-  { id: 21, name: "1K Followers", logo: "IG", logoSubtext: "Insta", price: 249, period: "Lifetime", description: "High Quality.", bgColor: "bg-pink-600", category: "Instagram Services", accessType: "Shared" },
-  { id: 22, name: "1K Likes", logo: "IG", logoSubtext: "Insta", price: 149, period: "Fast", description: "Real accounts.", bgColor: "bg-red-500", category: "Instagram Services", accessType: "Shared" },
+  { id: 21, name: "1K Followers", logo: "IG", logoSubtext: "Insta", price: 249, period: "Lifetime", description: "High Quality.", bgColor: "bg-pink-600", borderColor: "border-pink-500", category: "Instagram Services", accessType: "Shared" },
+  { id: 22, name: "1K Likes", logo: "IG", logoSubtext: "Insta", price: 149, period: "Fast", description: "Real accounts.", bgColor: "bg-red-500", borderColor: "border-red-400", category: "Instagram Services", accessType: "Shared" },
   // Combo Packs
-  { id: 23, name: "Student Pack", logo: "SP", logoSubtext: "Student", price: 3999, originalPrice: 4497, period: "1 Year", description: "Perfect for students and creators.", bgColor: "bg-gradient-to-br from-purple-600 to-blue-600", popular: true, category: "Combo Packs", accessType: "Shared", isCombo: true, comboItems: ["ChatGPT Plus", "Canva Pro", "LinkedIn Career"] },
-  { id: 24, name: "OTT Bonanza", logo: "OB", logoSubtext: "Bonanza", price: 949, originalPrice: 1097, period: "1 Year", description: "Ultimate entertainment bundle.", bgColor: "bg-gradient-to-br from-red-600 to-orange-600", popular: true, category: "Combo Packs", accessType: "Shared", isCombo: true, comboItems: ["Netflix", "Hotstar", "Prime Video"] },
-  { id: 25, name: "AI Pro Pack", logo: "AI", logoSubtext: "Pro Pack", price: 2499, originalPrice: 2997, period: "1 Year", description: "Complete AI toolkit.", bgColor: "bg-gradient-to-br from-emerald-600 to-cyan-600", popular: true, category: "Combo Packs", accessType: "Shared", isCombo: true, comboItems: ["Gemini AI", "Perplexity AI", "ChatGPT Plus"] }
+  { id: 23, name: "Student Pack", logo: "SP", logoSubtext: "Student", price: 3999, originalPrice: 4497, period: "1 Year", description: "Perfect for students and creators.", bgColor: "bg-gradient-to-br from-purple-600 to-blue-600", borderColor: "border-purple-400", popular: true, category: "Combo Packs", accessType: "Shared", isCombo: true, comboItems: ["ChatGPT Plus", "Canva Pro", "LinkedIn Career"] },
+  { id: 24, name: "OTT Bonanza", logo: "OB", logoSubtext: "Bonanza", price: 949, originalPrice: 1097, period: "1 Year", description: "Ultimate entertainment bundle.", bgColor: "bg-gradient-to-br from-red-600 to-orange-600", borderColor: "border-orange-500", popular: true, category: "Combo Packs", accessType: "Shared", isCombo: true, comboItems: ["Netflix", "Hotstar", "Prime Video"] },
+  { id: 25, name: "AI Pro Pack", logo: "AI", logoSubtext: "Pro Pack", price: 2499, originalPrice: 2997, period: "1 Year", description: "Complete AI toolkit.", bgColor: "bg-gradient-to-br from-emerald-600 to-cyan-600", borderColor: "border-emerald-500", popular: true, category: "Combo Packs", accessType: "Shared", isCombo: true, comboItems: ["Gemini AI", "Perplexity AI", "ChatGPT Plus"] }
 ];
 
 export function SubscriptionCards() {
@@ -77,6 +79,9 @@ export function SubscriptionCards() {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [activeFilter, setActiveFilter] = useState("");
   const [addedAnimation, setAddedAnimation] = useState<number | null>(null);
+  const [toast, setToast] = useState<{ message: string; visible: boolean }>({ message: "", visible: false });
+  const [miniCartOpen, setMiniCartOpen] = useState(false);
+  const [addedProduct, setAddedProduct] = useState<Subscription | null>(null);
   
   // Refer & Earn State
   const [referralMobile, setReferralMobile] = useState("");
@@ -246,11 +251,18 @@ export function SubscriptionCards() {
     navigator.clipboard.writeText(referralData.referralUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 1000);
+    showToast("Copied to clipboard!");
   };
 
   const shareOnWhatsApp = () => {
     const message = `Bhai, check out Initiators Services for premium OTT & Tools! Use my link to get deals and I get ₹30 cashback: ${referralData.referralUrl}`;
     window.open(`${WHATSAPP_URL}?text=${encodeURIComponent(message)}`, '_blank');
+    showToast("Shared on WhatsApp!");
+  };
+
+  const showToast = (message: string) => {
+    setToast({ message, visible: true });
+    setTimeout(() => setToast({ message: "", visible: false }), 2000);
   };
 
   const downloadReferralCard = () => {
@@ -313,13 +325,13 @@ export function SubscriptionCards() {
   }, []);
 
   return (
-    <section className="px-4 py-12 max-w-7xl mx-auto">
-      <div className="relative max-w-xl mx-auto mb-12">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+    <section className="px-3 py-8 md:px-4 md:py-12 max-w-7xl mx-auto">
+      <div className="relative max-w-xl mx-auto mb-8 md:mb-12">
+        <Search className="absolute left-3 md:left-4 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 md:w-5 md:h-5" />
         <input 
           type="text" 
           placeholder="Search services..." 
-          className="w-full pl-12 pr-20 py-3 bg-white/5 border border-white/10 rounded-full text-white focus:outline-none focus:border-purple-500 focus:shadow-lg focus:shadow-purple-500/20 transition-all duration-300"
+          className="w-full pl-10 md:pl-12 pr-16 md:pr-20 py-2.5 md:py-3 bg-white/5 border border-white/10 rounded-full text-white text-sm md:text-base focus:outline-none focus:border-purple-500 focus:shadow-lg focus:shadow-purple-500/20 transition-all duration-300"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           onKeyDown={handleKeyPress}
@@ -327,7 +339,7 @@ export function SubscriptionCards() {
         />
         <button
           onClick={handleSearch}
-          className="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-1.5 bg-gradient-to-r from-pink-500 to-purple-500 text-white text-sm font-medium rounded-full hover:from-pink-600 hover:to-purple-600 transition-all duration-300"
+          className="absolute right-2 top-1/2 -translate-y-1/2 px-3 md:px-4 py-1 md:py-1.5 bg-gradient-to-r from-pink-500 to-purple-500 text-white text-xs md:text-sm font-medium rounded-full hover:from-pink-600 hover:to-purple-600 transition-all duration-300"
         >
           Search
         </button>
@@ -370,7 +382,7 @@ export function SubscriptionCards() {
         </AnimatePresence>
       </div>
 
-      <div className="flex flex-wrap justify-center gap-2 mb-8 relative">
+      <div className="flex flex-wrap justify-center gap-1.5 md:gap-2 mb-6 md:mb-8 relative">
         {["All", "OTT", "Softwares", "AI Plans", "Instagram Services", "18+", "Combo Packs"].map((cat) => (
           <motion.button
             key={cat}
@@ -382,7 +394,7 @@ export function SubscriptionCards() {
             }}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all duration-300 relative ${
+            className={`px-4 md:px-6 py-2 md:py-2.5 rounded-full text-xs md:text-sm font-bold transition-all duration-300 relative ${
               category === cat 
                 ? "text-white shadow-lg" 
                 : "text-gray-400 border border-white/20 hover:text-white"
@@ -403,19 +415,19 @@ export function SubscriptionCards() {
       </div>
 
       {category === "OTT" && (
-        <div className="flex justify-center gap-4 mb-12">
+        <div className="flex justify-center gap-3 md:gap-4 mb-8 md:mb-12">
           <button onClick={() => {
             setAccessType("Shared");
             setSearchTerm("");
             setActiveFilter("");
             setShowSuggestions(false);
-          }} className={`px-6 py-2 rounded-lg flex items-center gap-2 ${accessType === "Shared" ? "bg-white/20 text-white" : "text-gray-500"}`}><Lock size={16}/> Shared</button>
+          }} className={`px-4 md:px-6 py-2 rounded-lg flex items-center gap-2 text-xs md:text-sm ${accessType === "Shared" ? "bg-white/20 text-white" : "text-gray-500"}`}><Lock className="text-lg md:text-xl"/> Shared</button>
           <button onClick={() => {
             setAccessType("Personal");
             setSearchTerm("");
             setActiveFilter("");
             setShowSuggestions(false);
-          }} className={`px-6 py-2 rounded-lg flex items-center gap-2 ${accessType === "Personal" ? "bg-white/20 text-white" : "text-gray-500"}`}><FileText size={16}/> Personal</button>
+          }} className={`px-4 md:px-6 py-2 rounded-lg flex items-center gap-2 text-xs md:text-sm ${accessType === "Personal" ? "bg-white/20 text-white" : "text-gray-500"}`}><FileText className="text-lg md:text-xl"/> Personal</button>
         </div>
       )}
 
@@ -542,7 +554,7 @@ export function SubscriptionCards() {
       <motion.div 
           key={category}
           layout
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+          className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6"
         >
           <AnimatePresence mode="wait">
             {filtered.map((sub, index) => (
@@ -570,25 +582,33 @@ export function SubscriptionCards() {
                   }
                 }}
                 whileHover={{ scale: 1.05 }}
-                className={`backdrop-blur-xl bg-white/5 ${sub.isVIP ? 'border-2 border-[#FFD700] shadow-[0_0_15px_rgba(255,215,0,0.3)]' : sub.isCombo ? 'border-2 border-dashed border-purple-400/50 shadow-[0_0_15px_rgba(168,85,247,0.3)]' : 'border border-white/10 shadow-[0_0_15px_rgba(236,72,153,0.2)]'} p-5 rounded-2xl relative group ${sub.isVIP ? 'hover:border-[#FFD700] hover:shadow-[0_0_30px_rgba(255,215,0,0.5)]' : sub.isCombo ? 'hover:border-purple-400 hover:shadow-[0_0_30px_rgba(168,85,247,0.5)]' : 'hover:border-pink-500/50 hover:shadow-[0_0_30px_rgba(236,72,153,0.5)]'} transition-all h-full flex flex-col`}
+                className={`backdrop-blur-xl bg-white/5 ${sub.isVIP ? 'border-2 border-[#FFD700] shadow-[0_0_15px_rgba(255,215,0,0.3)]' : sub.isCombo ? 'border-2 border-dashed border-purple-400/50 shadow-[0_0_15px_rgba(168,85,247,0.3)]' : `border-2 ${sub.borderColor || 'border-white/10'} shadow-[0_0_15px_rgba(236,72,153,0.2)]`} p-3 md:p-5 rounded-2xl relative group ${sub.isVIP ? 'hover:border-[#FFD700] hover:shadow-[0_0_30px_rgba(255,215,0,0.5)]' : sub.isCombo ? 'hover:border-purple-400 hover:shadow-[0_0_30px_rgba(168,85,247,0.5)]' : `hover:${sub.borderColor || 'hover:border-pink-500/50'} hover:shadow-[0_0_30px_rgba(236,72,153,0.5)]`} transition-all h-full flex flex-col`}
               >
                 {/* Heart/Wishlist Button - Top Right Corner */}
-                <button
+                <motion.button
                   onClick={() => {
                     playClickSound();
-                    isInWishlist(sub.id) ? removeItem(sub.id) : addItem(sub);
+                    if (isInWishlist(sub.id)) {
+                      removeItem(sub.id);
+                      showToast("Removed from wishlist");
+                    } else {
+                      addItem(sub);
+                      showToast("Added to wishlist!");
+                    }
                   }}
                   onMouseEnter={playHoverSound}
-                  className="absolute top-4 right-4 p-2 rounded-full border transition-all duration-300 hover:scale-110 z-10 bg-black/30 backdrop-blur-sm"
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                  className="absolute top-3 right-3 md:top-4 md:right-4 p-3 md:p-2 rounded-full border transition-all duration-300 hover:scale-110 z-10 bg-black/30 backdrop-blur-sm"
                   style={{ borderColor: isInWishlist(sub.id) ? 'rgba(236, 72, 153, 0.8)' : 'rgba(255, 255, 255, 0.1)' }}
                 >
-                  <Heart size={18} fill={isInWishlist(sub.id) ? "#ec4899" : "none"} className={isInWishlist(sub.id) ? "text-pink-500" : "text-gray-400 hover:text-pink-400"} />
-                </button>
+                  <Heart size={16} className={`w-4 h-4 md:w-[18px] md:h-[18px] ${isInWishlist(sub.id) ? 'fill-pink-500 text-pink-500' : 'text-gray-400 hover:text-pink-400'}`} />
+                </motion.button>
 
                 {/* VIP Limited Seats Badge */}
                 {sub.isVIP && (
-                  <div className="absolute -top-3 left-4">
-                    <span className="px-3 py-1 bg-red-500 text-white text-xs font-bold rounded-full shadow-lg animate-pulse">
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 md:-top-3">
+                    <span className="px-1.5 py-0.5 md:px-2 md:py-0.5 bg-red-500 text-white text-[8px] md:text-[10px] font-bold rounded-full shadow-lg animate-pulse">
                       Limited Seats
                     </span>
                   </div>
@@ -596,8 +616,8 @@ export function SubscriptionCards() {
 
                 {/* Combo Badge */}
                 {sub.isCombo && (
-                  <div className="absolute -top-3 left-4">
-                    <span className="px-3 py-1 bg-gradient-to-r from-yellow-500 to-orange-500 text-black text-xs font-bold rounded-full shadow-lg">
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 md:-top-3">
+                    <span className="px-1.5 py-0.5 md:px-2 md:py-0.5 bg-gradient-to-r from-yellow-500 to-orange-500 text-black text-[8px] md:text-[10px] font-bold rounded-full shadow-lg">
                       Value Pack
                     </span>
                   </div>
@@ -605,30 +625,30 @@ export function SubscriptionCards() {
 
                 {/* Hot Deal Badge for regular cards */}
                 {!sub.isVIP && !sub.isCombo && (
-                  <div className="absolute -top-3 left-4">
-                    <span className="px-3 py-1 bg-gradient-to-r from-pink-500 to-purple-500 text-white text-xs font-bold rounded-full shadow-lg">
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 md:-top-3">
+                    <span className="px-1.5 py-0.5 md:px-2 md:py-0.5 bg-gradient-to-r from-pink-500 to-purple-500 text-white text-[8px] md:text-[10px] font-bold rounded-full shadow-lg">
                       Hot Deal
                     </span>
                   </div>
                 )}
 
-                <div className={`w-12 h-12 ${sub.bgColor} ${sub.isVIP ? 'border border-[#FFD700]' : ''} rounded-xl mb-4 flex flex-col items-center justify-center font-bold text-white`}>
-                  <span className="text-lg">{sub.logo}</span>
-                  <span className="text-[8px]">{sub.logoSubtext}</span>
+                <div className={`w-10 h-10 md:w-12 md:h-12 ${sub.bgColor} ${sub.isVIP ? 'border border-[#FFD700]' : ''} rounded-xl mb-3 md:mb-4 flex flex-col items-center justify-center font-bold text-white`}>
+                  <span className="text-base md:text-lg">{sub.logo}</span>
+                  <span className="text-[7px] md:text-[8px]">{sub.logoSubtext}</span>
                 </div>
-                <h3 className={`font-bold mb-1 ${sub.isVIP ? 'text-[#FFD700]' : 'text-white'}`}>{sub.name}</h3>
-                <p className="text-gray-400 text-xs mb-3">{sub.period}</p>
+                <h3 className={`font-bold text-sm md:text-base mb-1 ${sub.isVIP ? 'text-[#FFD700]' : 'text-white'}`}>{sub.name}</h3>
+                <p className="text-gray-400 text-[10px] md:text-xs mb-2 md:mb-3">{sub.period}</p>
                 
                 {/* Price with Original Price for Combos */}
-                <div className="flex items-baseline gap-2 mb-4">
-                  <span className={`text-2xl font-bold ${sub.isVIP ? 'text-[#FFD700]' : 'text-white'}`}>₹{sub.price}</span>
+                <div className="flex items-baseline gap-2 mb-3 md:mb-4">
+                  <span className={`text-xl md:text-2xl font-bold ${sub.isVIP ? 'text-[#FFD700]' : 'text-white'}`}>₹{sub.price}</span>
                   {sub.originalPrice && (
-                    <span className="text-gray-500 text-sm line-through ml-2">₹{sub.originalPrice}</span>
+                    <span className="text-gray-500 text-xs md:text-sm line-through ml-2">₹{sub.originalPrice}</span>
                   )}
                 </div>
 
-              <div className="flex gap-2 mt-auto">
-                <button 
+              <div className="flex gap-1.5 md:gap-2 mt-auto">
+                <motion.button 
                   onClick={() => {
                     playClickSound();
                     const referralCode = localStorage.getItem('referralCode');
@@ -639,14 +659,16 @@ export function SubscriptionCards() {
                     window.open(`${WHATSAPP_URL}?text=${encodeURIComponent(baseMessage + referralText)}`);
                   }}
                   onMouseEnter={playHoverSound}
-                  className={`flex-1 py-2.5 rounded-xl font-bold text-sm ${sub.isVIP 
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                  className={`flex-1 py-3 md:py-2.5 min-h-[48px] md:min-h-auto rounded-xl font-bold text-xs md:text-sm ${sub.isVIP 
                     ? 'bg-gradient-to-r from-[#FFD700] to-yellow-600 text-black hover:from-yellow-600 hover:to-orange-600 hover:shadow-[0_0_20px_rgba(255,215,0,0.5)]' 
                     : 'bg-gradient-to-r from-pink-500 to-purple-600 text-white hover:from-pink-600 hover:to-purple-700 hover:shadow-[0_0_20px_rgba(236,72,153,0.5)]'
                   } transition-all duration-300`}
                 >
                   Buy Now
-                </button>
-                <button 
+                </motion.button>
+                <motion.button 
                   onClick={() => {
                     playClickSound();
                     if (!isInCart(sub.id)) {
@@ -659,20 +681,24 @@ export function SubscriptionCards() {
                       });
                       setAddedAnimation(sub.id);
                       setTimeout(() => setAddedAnimation(null), 1000);
+                      setAddedProduct(sub);
+                      setMiniCartOpen(true);
                     }
                   }}
                   onMouseEnter={playHoverSound}
-                  className={`px-3 py-2.5 rounded-xl font-bold text-sm border-2 transition-all duration-300 ${isInCart(sub.id) 
-                    ? 'bg-green-500 border-green-500 text-white' 
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                  className={`px-3 md:px-3 py-3 md:py-2.5 min-w-[48px] md:min-w-auto min-h-[48px] md:min-h-auto rounded-xl font-bold text-xs md:text-sm border-2 transition-all duration-300 ${isInCart(sub.id) 
+                    ? 'bg-red-500 border-red-500 text-white' 
                     : 'border-white/20 text-gray-400 hover:border-purple-400 hover:text-purple-400'
                   } ${addedAnimation === sub.id ? 'scale-110' : ''}`}
                 >
                   {addedAnimation === sub.id ? (
-                    <span className="text-green-400">Added!</span>
+                    <span className="text-red-400 text-[10px] md:text-xs">Added!</span>
                   ) : (
-                    <ShoppingCart size={18} />
+                    <ShoppingCart size={14} className="w-3.5 h-3.5 md:w-[18px] md:h-[18px]" />
                   )}
-                </button>
+                </motion.button>
               </div>
             </motion.div>
           ))}
@@ -687,33 +713,33 @@ export function SubscriptionCards() {
         className="mt-16 mb-12"
       >
         {/* Section Header */}
-        <div className="text-center mb-12">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-lg">
-              <Zap className="w-6 h-6 text-white" />
+        <div className="text-center mb-8 md:mb-12">
+          <div className="flex items-center justify-center gap-2 md:gap-3 mb-3 md:mb-4">
+            <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-lg">
+              <Zap className="w-5 h-5 md:w-6 md:h-6 text-white" />
             </div>
-            <h2 className="text-3xl font-bold text-white">Refer & Earn Cashback</h2>
+            <h2 className="text-2xl md:text-3xl font-bold text-white">Refer & Earn Cashback</h2>
           </div>
-          <p className="text-gray-400 text-lg max-w-2xl mx-auto">
+          <p className="text-gray-400 text-sm md:text-lg max-w-2xl mx-auto px-4">
             Turn your friends into discounts! Generate your unique QR and start earning.
           </p>
         </div>
 
         {/* How It Works - 3 Step Guide */}
-        <div className="max-w-4xl mx-auto mb-12">
-          <h3 className="text-xl font-semibold text-white text-center mb-8">How It Works</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="max-w-4xl mx-auto mb-8 md:mb-12">
+          <h3 className="text-lg md:text-xl font-semibold text-white text-center mb-6 md:mb-8">How It Works</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
             {/* Step 1 */}
             <motion.div
               whileHover={{ scale: 1.05 }}
-              className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 text-center"
+              className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 md:p-6 text-center"
             >
-              <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                <QrCode className="w-8 h-8 text-white" />
+              <div className="w-12 h-12 md:w-16 md:h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4">
+                <QrCode className="w-6 h-6 md:w-8 md:h-8 text-white" />
               </div>
-              <div className="text-2xl font-bold text-purple-400 mb-2">Step 1</div>
-              <h4 className="text-white font-semibold mb-2">Generate QR</h4>
-              <p className="text-gray-400 text-sm">
+              <div className="text-xl md:text-2xl font-bold text-purple-400 mb-1 md:mb-2">Step 1</div>
+              <h4 className="text-white font-semibold text-sm md:text-base mb-1 md:mb-2">Generate QR</h4>
+              <p className="text-gray-400 text-xs md:text-sm">
                 Enter your mobile number and generate your unique Referral QR Card.
               </p>
             </motion.div>
@@ -721,14 +747,14 @@ export function SubscriptionCards() {
             {/* Step 2 */}
             <motion.div
               whileHover={{ scale: 1.05 }}
-              className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 text-center"
+              className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 md:p-6 text-center"
             >
-              <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Share2 className="w-8 h-8 text-white" />
+              <div className="w-12 h-12 md:w-16 md:h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4">
+                <Share2 className="w-6 h-6 md:w-8 md:h-8 text-white" />
               </div>
-              <div className="text-2xl font-bold text-purple-400 mb-2">Step 2</div>
-              <h4 className="text-white font-semibold mb-2">Share with Friends</h4>
-              <p className="text-gray-400 text-sm">
+              <div className="text-xl md:text-2xl font-bold text-purple-400 mb-1 md:mb-2">Step 2</div>
+              <h4 className="text-white font-semibold text-sm md:text-base mb-1 md:mb-2">Share with Friends</h4>
+              <p className="text-gray-400 text-xs md:text-sm">
                 Share the card on your WhatsApp Status or with friends.
               </p>
             </motion.div>
@@ -736,14 +762,14 @@ export function SubscriptionCards() {
             {/* Step 3 */}
             <motion.div
               whileHover={{ scale: 1.05 }}
-              className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 text-center"
+              className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 md:p-6 text-center"
             >
-              <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Gift className="w-8 h-8 text-white" />
+              <div className="w-12 h-12 md:w-16 md:h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4">
+                <Gift className="w-6 h-6 md:w-8 md:h-8 text-white" />
               </div>
-              <div className="text-2xl font-bold text-purple-400 mb-2">Step 3</div>
-              <h4 className="text-white font-semibold mb-2">Earn Cashback</h4>
-              <p className="text-gray-400 text-sm">
+              <div className="text-xl md:text-2xl font-bold text-purple-400 mb-1 md:mb-2">Step 3</div>
+              <h4 className="text-white font-semibold text-sm md:text-base mb-1 md:mb-2">Earn Cashback</h4>
+              <p className="text-gray-400 text-xs md:text-sm">
                 When your friend buys using your QR, they get a discount, and you get <span className="text-green-400 font-bold">50 cashback</span> on your next order!
               </p>
             </motion.div>
@@ -751,10 +777,10 @@ export function SubscriptionCards() {
         </div>
 
         {/* QR Generator */}
-        <div className="max-w-md mx-auto mb-8">
-          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
-            <div className="mb-4">
-              <label className="block text-gray-300 text-sm font-medium mb-2">
+        <div className="max-w-md mx-auto mb-6 md:mb-8 px-4">
+          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 md:p-6">
+            <div className="mb-3 md:mb-4">
+              <label className="block text-gray-300 text-xs md:text-sm font-medium mb-2">
                 Enter Your Mobile Number
               </label>
               <input
@@ -762,24 +788,24 @@ export function SubscriptionCards() {
                 value={referralMobile}
                 onChange={(e) => setReferralMobile(e.target.value)}
                 placeholder="Enter your mobile number"
-                className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all duration-300"
+                className="w-full px-3 md:px-4 py-2.5 md:py-3 bg-white/10 border border-white/20 rounded-lg text-white text-sm md:text-base placeholder-gray-400 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all duration-300"
                 onKeyPress={(e) => e.key === 'Enter' && generateReferralQR()}
               />
             </div>
             <button
               onClick={generateReferralQR}
               disabled={!referralMobile.trim() || !/^\d{10}$/.test(referralMobile) || loadingReferral}
-              className="w-full py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold rounded-lg hover:from-purple-600 hover:to-pink-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 flex items-center justify-center gap-2"
+              className="w-full py-2.5 md:py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold text-sm md:text-base rounded-lg hover:from-purple-600 hover:to-pink-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 flex items-center justify-center gap-2"
             >
               {loadingReferral ? (
                 <>
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                  Generating...
+                  <div className="w-4 h-4 md:w-5 md:h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  <span className="text-xs md:text-sm">Generating...</span>
                 </>
               ) : (
                 <>
-                  <QrCode className="w-5 h-5" />
-                  Generate My QR
+                  <QrCode className="w-4 h-4 md:w-5 md:h-5" />
+                  <span className="text-xs md:text-sm">Generate My QR</span>
                 </>
               )}
             </button>
@@ -797,7 +823,7 @@ export function SubscriptionCards() {
             >
               <div 
                 id="referral-card"
-                className="w-[375px] h-[667px] bg-gradient-to-br from-purple-950 via-pink-950 to-purple-950 rounded-3xl p-8 relative overflow-hidden shadow-2xl border border-pink-500/20"
+                className="w-[320px] md:w-[375px] h-[568px] md:h-[667px] bg-gradient-to-br from-purple-950 via-pink-950 to-purple-950 rounded-3xl p-4 md:p-8 relative overflow-hidden shadow-2xl border border-pink-500/20"
                 style={{
                   boxShadow: "0 0 40px rgba(236, 72, 153, 0.4), 0 0 80px rgba(168, 85, 247, 0.2)"
                 }}
@@ -808,48 +834,48 @@ export function SubscriptionCards() {
                 {/* Card Content */}
                 <div className="relative z-10 flex flex-col h-full">
                   {/* Header */}
-                  <div className="text-center mb-6">
-                    <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-                      <span className="text-white font-bold text-xl">IT</span>
+                  <div className="text-center mb-4 md:mb-6">
+                    <div className="w-12 h-12 md:w-16 md:h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-3 md:mb-4 shadow-lg">
+                      <span className="text-white font-bold text-lg md:text-xl">IT</span>
                     </div>
-                    <h3 className="text-2xl font-bold text-pink-400 mb-2">
+                    <h3 className="text-xl md:text-2xl font-bold text-pink-400 mb-1 md:mb-2">
                       Initiators Tools
                     </h3>
-                    <p className="text-gray-300 text-sm">Refer & Earn Program</p>
+                    <p className="text-gray-300 text-xs md:text-sm">Refer & Earn Program</p>
                   </div>
 
                   {/* Cashback Branding */}
-                  <div className="text-center mb-6">
-                    <p className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-500 leading-tight">
+                  <div className="text-center mb-4 md:mb-6">
+                    <p className="text-sm md:text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-500 leading-tight">
                       Share this link & Get ₹30 Instant Cashback on every successful referral!
                     </p>
                   </div>
 
                   {/* QR Code Area */}
                   <div className="flex-1 flex flex-col items-center justify-center">
-                    <div className="w-48 h-48 bg-white rounded-2xl flex items-center justify-center mb-6 shadow-xl">
+                    <div className="w-36 h-36 md:w-48 md:h-48 bg-white rounded-2xl flex items-center justify-center mb-4 md:mb-6 shadow-xl">
                       <div className="text-center">
-                        <QrCode className="w-24 h-24 text-purple-600 mx-auto mb-2" />
-                        <p className="text-xs text-gray-600">Scan to Refer</p>
+                        <QrCode className="w-18 h-18 md:w-24 md:h-24 text-purple-600 mx-auto mb-1 md:mb-2" />
+                        <p className="text-[10px] md:text-xs text-gray-600">Scan to Refer</p>
                       </div>
                     </div>
-                    <div className="text-center mb-6">
-                      <p className="text-gray-300 text-sm mb-2">Referral Code:</p>
-                      <p className="text-2xl font-bold text-green-400">{referralData.mobileNumber}</p>
+                    <div className="text-center mb-4 md:mb-6">
+                      <p className="text-gray-300 text-xs md:text-sm mb-1 md:mb-2">Referral Code:</p>
+                      <p className="text-xl md:text-2xl font-bold text-green-400">{referralData.mobileNumber}</p>
                     </div>
                   </div>
 
                   {/* Stylish Neon Link Box */}
-                  <div className="mb-4">
-                    <div className="bg-black/40 backdrop-blur-sm border-2 border-green-400/50 rounded-xl p-4 relative overflow-hidden">
+                  <div className="mb-3 md:mb-4">
+                    <div className="bg-black/40 backdrop-blur-sm border-2 border-green-400/50 rounded-xl p-3 md:p-4 relative overflow-hidden">
                       <div className="absolute inset-0 bg-gradient-to-r from-green-400/10 to-emerald-500/10"></div>
                       <div className="relative z-10">
-                        <p className="text-xs text-green-400 mb-1 font-semibold">Your Referral Link</p>
+                        <p className="text-[10px] md:text-xs text-green-400 mb-1 font-semibold">Your Referral Link</p>
                         <div className="flex items-center gap-2">
-                          <p className="text-sm text-white break-all flex-1">{referralData.referralUrl}</p>
+                          <p className="text-[10px] md:text-sm text-white break-all flex-1">{referralData.referralUrl}</p>
                           <button
                             onClick={copyToClipboard}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-300 flex items-center gap-1 ${
+                            className={`px-2 py-1 md:px-3 md:py-1.5 rounded-lg text-[10px] md:text-xs font-bold transition-all duration-300 flex items-center gap-1 ${
                               copied 
                                 ? 'bg-green-500 text-white' 
                                 : 'bg-white/10 text-green-400 hover:bg-green-500 hover:text-white'
@@ -865,31 +891,31 @@ export function SubscriptionCards() {
                   {/* WhatsApp Share Button */}
                   <button
                     onClick={shareOnWhatsApp}
-                    className="w-full py-3 bg-gradient-to-r from-green-500 to-green-600 text-white font-bold rounded-xl hover:from-green-600 hover:to-green-700 transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-green-500/30"
+                    className="w-full py-2.5 md:py-3 bg-gradient-to-r from-green-500 to-green-600 text-white font-bold text-xs md:text-sm rounded-xl hover:from-green-600 hover:to-green-700 transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-green-500/30"
                   >
-                    <Share2 className="w-5 h-5" />
-                    Share on WhatsApp
+                    <Share2 className="w-4 h-4 md:w-5 md:h-5" />
+                    <span className="text-xs md:text-sm">Share on WhatsApp</span>
                   </button>
 
                   {/* Footer */}
-                  <div className="text-center mt-4">
-                    <div className="grid grid-cols-2 gap-4 mb-4">
-                      <div className="bg-white/10 rounded-lg p-3">
-                        <div className="flex items-center justify-center gap-2 text-green-400 mb-1">
-                          <Gift className="w-4 h-4" />
-                          <span className="text-xs">Points</span>
+                  <div className="text-center mt-3 md:mt-4">
+                    <div className="grid grid-cols-2 gap-2 md:gap-4 mb-3 md:mb-4">
+                      <div className="bg-white/10 rounded-lg p-2 md:p-3">
+                        <div className="flex items-center justify-center gap-1 md:gap-2 text-green-400 mb-1">
+                          <Gift className="w-3 h-3 md:w-4 md:h-4" />
+                          <span className="text-[10px] md:text-xs">Points</span>
                         </div>
-                        <p className="text-xl font-bold text-green-400">{referralData.points}</p>
+                        <p className="text-lg md:text-xl font-bold text-green-400">{referralData.points}</p>
                       </div>
-                      <div className="bg-white/10 rounded-lg p-3">
-                        <div className="flex items-center justify-center gap-2 text-blue-400 mb-1">
-                          <Users className="w-4 h-4" />
-                          <span className="text-xs">Referrals</span>
+                      <div className="bg-white/10 rounded-lg p-2 md:p-3">
+                        <div className="flex items-center justify-center gap-1 md:gap-2 text-blue-400 mb-1">
+                          <Users className="w-3 h-3 md:w-4 md:h-4" />
+                          <span className="text-[10px] md:text-xs">Referrals</span>
                         </div>
-                        <p className="text-xl font-bold text-blue-400">{referralData.referralCount}</p>
+                        <p className="text-lg md:text-xl font-bold text-blue-400">{referralData.referralCount}</p>
                       </div>
                     </div>
-                    <p className="text-gray-400 text-xs">Share with friends & earn ₹30 cashback per referral</p>
+                    <p className="text-gray-400 text-[10px] md:text-xs">Share with friends & earn ₹30 cashback per referral</p>
                   </div>
                 </div>
               </div>
@@ -903,25 +929,40 @@ export function SubscriptionCards() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: 0.3 }}
-            className="flex gap-4 justify-center mt-8"
+            className="flex gap-3 md:gap-4 justify-center mt-6 md:mt-8 flex-col sm:flex-row px-4"
           >
             <button
               onClick={downloadReferralCard}
-              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all duration-300"
+              className="flex items-center justify-center gap-2 px-4 md:px-6 py-2.5 md:py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold text-xs md:text-sm rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all duration-300"
             >
-              <Download className="w-5 h-5" />
-              Download Image
+              <Download className="w-4 h-4 md:w-5 md:h-5" />
+              <span className="text-xs md:text-sm">Download Image</span>
             </button>
             <button
               onClick={() => window.open(`${WHATSAPP_URL}?text=${encodeURIComponent(`Hey! Check out this amazing service: ${referralData.referralUrl}`)}`, '_blank')}
-              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-300"
+              className="flex items-center justify-center gap-2 px-4 md:px-6 py-2.5 md:py-3 bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold text-xs md:text-sm rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-300"
             >
-              <Share2 className="w-5 h-5" />
-              Share on WhatsApp
+              <Share2 className="w-4 h-4 md:w-5 md:h-5" />
+              <span className="text-xs md:text-sm">Share on WhatsApp</span>
             </button>
           </motion.div>
         )}
       </motion.div>
+
+      {/* Mini Cart Confirmation Drawer */}
+      {addedProduct && (
+        <MiniCartConfirmation
+          isOpen={miniCartOpen}
+          onClose={() => setMiniCartOpen(false)}
+          product={{
+            id: addedProduct.id,
+            name: addedProduct.name,
+            price: addedProduct.price,
+            period: addedProduct.period,
+            bgColor: addedProduct.bgColor
+          }}
+        />
+      )}
     </section>
   );
 }

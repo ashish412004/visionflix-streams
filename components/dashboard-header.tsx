@@ -1,13 +1,14 @@
 "use client"
 
 import { useState } from "react"
-import { Shield, LogOut, X, MessageCircle, Zap, ShieldCheck, Headphones, DollarSign, Sun, Moon, Instagram, Volume2, VolumeX, ShoppingCart, ShoppingBag } from "lucide-react"
+import { Shield, LogOut, X, MessageCircle, Zap, ShieldCheck, Headphones, DollarSign, Sun, Moon, Instagram, Volume2, VolumeX, ShoppingCart, ShoppingBag, Menu } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
-import { FlashSaleBanner } from "./flash-sale-banner"
 import { CartDrawer } from "./cart-drawer"
+import { WishlistDrawer } from "./wishlist-drawer"
 import { WHATSAPP_URL } from "@/config/constants"
 import { useSound } from "@/contexts/sound-context"
 import { useCart } from "@/contexts/cart-context"
+import { useWishlist } from "@/contexts/wishlist-context"
 
 interface DashboardHeaderProps {
   email: string
@@ -16,40 +17,30 @@ interface DashboardHeaderProps {
 
 export function DashboardHeader({ email, onLogout }: DashboardHeaderProps) {
   const [showAboutModal, setShowAboutModal] = useState(false)
+  const [showMobileMenu, setShowMobileMenu] = useState(false)
   const { isMuted, toggleMute } = useSound()
-  const { itemCount } = useCart()
-  const [isCartOpen, setIsCartOpen] = useState(false)
+  const { itemCount, isCartOpen, setIsCartOpen } = useCart()
+  const { isWishlistOpen, setIsWishlistOpen } = useWishlist()
 
   return (
     <>
-      <FlashSaleBanner />
       <motion.header
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className="relative z-9999 backdrop-blur-xl bg-black/30 border-b border-white/10 mb-4"
       >
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-3 py-2 md:px-4 md:py-4 flex items-center justify-between">
           {/* Logo Section */}
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 overflow-hidden border border-white/20 bg-white/5 backdrop-blur-sm rounded-lg">
+          <div className="flex items-center gap-2 md:gap-3">
+            <div className="w-9 h-9 md:w-12 md:h-12 overflow-hidden border border-white/20 bg-white/5 backdrop-blur-sm rounded-lg">
               <img src="/logo.svg" alt="Logo" className="w-full h-full object-contain p-1" />
             </div>
-            <motion.div
-              animate={{
-                boxShadow: [
-                  "0 0 20px rgba(99, 102, 241, 0.3)",
-                  "0 0 30px rgba(168, 85, 247, 0.4)",
-                  "0 0 20px rgba(99, 102, 241, 0.3)"
-                ]
-              }}
-              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-              className="px-2"
-            >
-              <span className="font-bold tracking-wide text-sm md:text-lg bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+            <div className="px-1 md:px-2">
+              <span className="font-bold tracking-wide text-[10px] md:text-sm lg:text-lg bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
                 INITIATORS TOOLS AND SERVICES
               </span>
-            </motion.div>
+            </div>
           </div>
 
           {/* Desktop Navigation */}
@@ -73,13 +64,48 @@ export function DashboardHeader({ email, onLogout }: DashboardHeaderProps) {
           </div>
 
           {/* Mobile Right Icons */}
-          <div className="flex md:hidden items-center gap-4">
-             <a href="https://www.instagram.com/initiators_tools_and_services" target="_blank">
-                <Instagram className="w-5 h-5 text-gray-400" />
-             </a>
+          <div className="flex md:hidden items-center gap-3">
+            <button onClick={() => setIsCartOpen(true)} className="relative hover:text-purple-400 transition-colors">
+              <ShoppingCart className="w-5 h-5" />
+              {itemCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-pink-500 text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+                  {itemCount}
+                </span>
+              )}
+            </button>
+            <button onClick={() => setShowMobileMenu(!showMobileMenu)} className="hover:text-purple-400 transition-colors">
+              <Menu className="w-5 h-5" />
+            </button>
           </div>
         </div>
       </motion.header>
+
+      {/* Mobile Menu Dropdown */}
+      <AnimatePresence>
+        {showMobileMenu && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="md:hidden bg-black/95 backdrop-blur-xl border-b border-white/10 overflow-hidden"
+          >
+            <div className="px-4 py-3 space-y-3">
+              <button onClick={() => { toggleMute(); setShowMobileMenu(false); }} className="flex items-center gap-3 text-gray-400 hover:text-white w-full">
+                {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                <span className="text-sm">{isMuted ? 'Unmute' : 'Mute'}</span>
+              </button>
+              <button onClick={() => { setShowAboutModal(true); setShowMobileMenu(false); }} className="flex items-center gap-3 text-gray-400 hover:text-white w-full">
+                <MessageCircle className="w-4 h-4" />
+                <span className="text-sm">About Us</span>
+              </button>
+              <a href="https://www.instagram.com/initiators_tools_and_services" target="_blank" className="flex items-center gap-3 text-gray-400 hover:text-white w-full">
+                <Instagram className="w-4 h-4" />
+                <span className="text-sm">Instagram</span>
+              </a>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* About Us Modal */}
       <AnimatePresence>
@@ -90,21 +116,20 @@ export function DashboardHeader({ email, onLogout }: DashboardHeaderProps) {
           >
             <motion.div 
               initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }}
-              className="relative w-full max-w-2xl bg-zinc-900 border border-white/10 rounded-2xl p-8"
+              className="relative w-full max-w-2xl bg-zinc-900 border border-white/10 rounded-2xl p-4 md:p-8"
             >
-              <button onClick={() => setShowAboutModal(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white">
-                <X className="w-6 h-6" />
+              <button onClick={() => setShowAboutModal(false)} className="absolute top-3 right-3 md:top-4 md:right-4 text-gray-400 hover:text-white">
+                <X className="w-5 h-5 md:w-6 md:h-6" />
               </button>
-              <h2 className="text-2xl font-bold text-white mb-4 text-center">About Initiators Services</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="flex items-center gap-3"><Zap className="text-pink-400"/> <span>Instant Activation</span></div>
-                <div className="flex items-center gap-3"><ShieldCheck className="text-green-400"/> <span>Full Warranty</span></div>
-                <div className="flex items-center gap-3"><DollarSign className="text-yellow-400"/> <span>Best Prices</span></div>
-                <div className="flex items-center gap-3"><Headphones className="text-blue-400"/> <span>24/7 Support</span></div>
+              <h2 className="text-xl md:text-2xl font-bold text-white mb-3 md:mb-4 text-center">About Initiators Services</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                <div className="flex items-center gap-2 md:gap-3 text-sm md:text-base"><Zap className="text-pink-400 w-4 h-4 md:w-5 md:h-5"/> <span>Instant Activation</span></div>
+                <div className="flex items-center gap-2 md:gap-3 text-sm md:text-base"><ShieldCheck className="text-green-400 w-4 h-4 md:w-5 md:h-5"/> <span>Full Warranty</span></div>
+                <div className="flex items-center gap-2 md:gap-3 text-sm md:text-base"><DollarSign className="text-yellow-400 w-4 h-4 md:w-5 md:h-5"/> <span>Best Prices</span></div>
+                <div className="flex items-center gap-2 md:gap-3 text-sm md:text-base"><Headphones className="text-blue-400 w-4 h-4 md:w-5 md:h-5"/> <span>24/7 Support</span></div>
               </div>
-              <div className="mt-8 flex gap-4">
-                <button className="flex-1 py-3 bg-blue-600 rounded-xl font-bold">Join Telegram</button>
-                <button onClick={() => window.open(WHATSAPP_URL)} className="flex-1 py-3 bg-green-600 rounded-xl font-bold">WhatsApp</button>
+              <div className="mt-6 md:mt-8 flex gap-2 md:gap-4">
+                <button onClick={() => window.open(WHATSAPP_URL)} className="flex-1 py-2.5 md:py-3 bg-green-600 rounded-xl font-bold text-xs md:text-sm">WhatsApp</button>
               </div>
             </motion.div>
           </motion.div>
@@ -112,21 +137,7 @@ export function DashboardHeader({ email, onLogout }: DashboardHeaderProps) {
       </AnimatePresence>
 
       <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
-
-      {/* 🚀 FIXED FLOATING CART BUTTON - AUTO HIDE & Z-INDEX FIX */}
-      <div className={`fixed inset-0 pointer-events-none flex items-end justify-end md:hidden ${isCartOpen ? 'hidden' : 'z-10'} transition-all duration-300`}>
-        <button 
-          onClick={() => setIsCartOpen(true)}
-          className="pointer-events-auto absolute bottom-44 right-6 flex h-14 w-14 items-center justify-center rounded-full bg-pink-600 text-white shadow-[0_15px_30px_-5px_rgba(236,72,153,0.6)] border-2 border-white/20 transition-all hover:scale-110 active:scale-95"
-        >
-          <ShoppingBag className="h-7 w-7" />
-          {itemCount > 0 && (
-            <span className="absolute -top-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-white text-[12px] font-bold text-pink-600 shadow-md">
-              {itemCount}
-            </span>
-          )}
-        </button>
-      </div>
+      <WishlistDrawer isOpen={isWishlistOpen} onClose={() => setIsWishlistOpen(false)} />
     </>
   )
 }

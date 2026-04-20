@@ -42,8 +42,8 @@ export function RecentSalesToast() {
     // Show first sale immediately
     const timer = setTimeout(showRandomSale, 2000)
     
-    // Then show sales every 30 seconds
-    const interval = setInterval(showRandomSale, 30000)
+    // Then show sales every 2 minutes
+    const interval = setInterval(showRandomSale, 120000)
 
     return () => {
       clearTimeout(timer)
@@ -61,14 +61,14 @@ export function RecentSalesToast() {
           transition={{ duration: 0.5, ease: "easeInOut" }}
           className="fixed bottom-4 left-4 z-50 pointer-events-none"
         >
-          <div className="bg-black/80 backdrop-blur-xl border border-white/20 rounded-xl shadow-2xl p-4 pointer-events-auto">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-emerald-500 rounded-lg flex items-center justify-center">
-                <Check className="w-4 h-4 text-white" />
+          <div className="bg-black/80 backdrop-blur-xl border border-white/20 rounded-xl shadow-2xl p-3 pointer-events-auto">
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 bg-gradient-to-br from-green-500 to-emerald-500 rounded-lg flex items-center justify-center">
+                <Check className="w-3 h-3 text-white" />
               </div>
               <div>
-                <p className="text-white font-medium text-sm">
-                  <span className="font-semibold">{currentSale.customer}</span> from <span className="font-semibold">{currentSale.city}</span> just bought <span className="font-semibold text-green-400">{currentSale.product}</span>! ✅
+                <p className="text-white font-medium text-xs">
+                  <span className="font-semibold">{currentSale.customer}</span> from <span className="font-semibold">{currentSale.city}</span> bought <span className="font-semibold text-green-400">{currentSale.product}</span>! ✅
                 </p>
               </div>
             </div>
