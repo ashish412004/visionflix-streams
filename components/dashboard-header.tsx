@@ -9,6 +9,7 @@ import { WHATSAPP_URL } from "@/config/constants"
 import { useSound } from "@/contexts/sound-context"
 import { useCart } from "@/contexts/cart-context"
 import { useWishlist } from "@/contexts/wishlist-context"
+import Image from "next/image"
 
 interface DashboardHeaderProps {
   email: string
@@ -34,7 +35,7 @@ export function DashboardHeader({ email, onLogout }: DashboardHeaderProps) {
           {/* Logo Section */}
           <div className="flex items-center gap-2 md:gap-3">
             <div className="w-9 h-9 md:w-12 md:h-12 overflow-hidden border border-white/20 bg-white/5 backdrop-blur-sm rounded-lg">
-              <img src="/logo.svg" alt="Logo" className="w-full h-full object-contain p-1" />
+              <Image src="/logo.svg" alt="Initiators Tools and Services Logo - Premium Digital Subscriptions" width={48} height={48} className="w-full h-full object-contain p-1" priority />
             </div>
             <div className="px-1 md:px-2">
               <span className="font-extrabold tracking-wide text-[11px] md:text-sm lg:text-lg bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">

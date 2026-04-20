@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { motion } from "framer-motion"
 import { Shield } from "lucide-react"
+import Image from "next/image"
 
 interface User {
   email: string
@@ -110,7 +111,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
           >
             <div className="flex items-center gap-3 bg-gradient-to-r from-purple-600/30 to-pink-600/30 border border-purple-500/50 rounded-full px-5 py-2">
               <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-pink-400/50 bg-white">
-                <img src="/logo.svg" alt="Logo" className="w-full h-full object-contain p-0.5" />
+                <Image src="/logo.svg" alt="Initiators Tools and Services Logo - Premium Digital Subscriptions" width={32} height={32} className="w-full h-full object-contain p-0.5" />
               </div>
               <span className="text-pink-400 font-semibold tracking-wide">INITIATORS TOOL AND SERVICES</span>
             </div>

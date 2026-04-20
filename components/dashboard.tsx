@@ -12,6 +12,7 @@ import { MatrixRain } from "./matrix-rain"
 import { WishlistModal } from "./wishlist-modal"
 import { AboutUs } from "./about-us"
 import { RecentSalesToast } from "./recent-sales-toast"
+import { FAQ } from "./faq"
 
 interface DashboardProps {
   email: string
@@ -52,7 +53,10 @@ export function Dashboard({ email, onLogout }: DashboardProps) {
 
         {/* About Us Section */}
         <AboutUs />
-        
+
+        {/* FAQ Section */}
+        <FAQ />
+
         {/* Footer */}
         <footer className="border-t border-white/5 mt-16 py-8 px-4 bg-transparent">
           <div className="max-w-7xl mx-auto text-center">
