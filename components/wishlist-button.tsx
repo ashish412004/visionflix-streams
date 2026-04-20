@@ -12,8 +12,8 @@ export function WishlistButton({ onClick }: WishlistButtonProps) {
   const { itemCount } = useWishlist()
 
   return (
-    /* Parent Div handles the screen blocking issue */
-    <div className="fixed inset-0 pointer-events-none z-40 flex items-end justify-end">
+    /* Z-Index ko 20 kar diya taaki ye Cart Drawer ke peeche chhup jaye */
+    <div className="fixed inset-0 pointer-events-none z-10 flex items-end justify-end">
       <motion.button
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
@@ -21,7 +21,7 @@ export function WishlistButton({ onClick }: WishlistButtonProps) {
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         onClick={onClick}
-        /* Added pointer-events-auto so only the button is clickable */
+        /* pointer-events-auto ensures button remains clickable */
         className="pointer-events-auto mb-24 mr-6 w-14 h-14 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full shadow-lg shadow-pink-500/30 flex items-center justify-center group"
       >
         <Heart className="w-6 h-6 text-white" />

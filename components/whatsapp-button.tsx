@@ -11,7 +11,8 @@ export function WhatsAppButton() {
 
   return (
     /* Parent Div handles the screen blocking issue */
-    <div className="fixed inset-0 pointer-events-none z-50 flex items-end justify-end">
+    /* z-20 ensures it stays behind the Cart Drawer when open */
+    <div className="fixed inset-0 pointer-events-none z-10 flex items-end justify-end">
       <motion.button
         initial={{ scale: 0, opacity: 0 }}
         animate={{ 
@@ -35,7 +36,7 @@ export function WhatsAppButton() {
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         onClick={handleClick}
-        /* Added pointer-events-auto so only the button is clickable */
+        /* pointer-events-auto so only the button circle is clickable */
         className="pointer-events-auto mb-6 mr-6 w-14 h-14 bg-[#25D366] hover:bg-[#128C7E] rounded-full flex items-center justify-center shadow-lg transition-colors"
         aria-label="Contact on WhatsApp"
       >

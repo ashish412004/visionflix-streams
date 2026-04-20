@@ -27,7 +27,7 @@ export function DashboardHeader({ email, onLogout }: DashboardHeaderProps) {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="relative z-40 backdrop-blur-xl bg-black/30 border-b border-white/10 mb-4"
+        className="relative z-9999 backdrop-blur-xl bg-black/30 border-b border-white/10 mb-4"
       >
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           {/* Logo Section */}
@@ -113,8 +113,8 @@ export function DashboardHeader({ email, onLogout }: DashboardHeaderProps) {
 
       <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
 
-      {/* 🚀 FLOATING CART BUTTON (Optimized Click Area) */}
-      <div className="fixed inset-0 pointer-events-none z-[999] md:hidden">
+      {/* 🚀 FIXED FLOATING CART BUTTON - AUTO HIDE & Z-INDEX FIX */}
+      <div className={`fixed inset-0 pointer-events-none flex items-end justify-end md:hidden ${isCartOpen ? 'hidden' : 'z-10'} transition-all duration-300`}>
         <button 
           onClick={() => setIsCartOpen(true)}
           className="pointer-events-auto absolute bottom-44 right-6 flex h-14 w-14 items-center justify-center rounded-full bg-pink-600 text-white shadow-[0_15px_30px_-5px_rgba(236,72,153,0.6)] border-2 border-white/20 transition-all hover:scale-110 active:scale-95"
