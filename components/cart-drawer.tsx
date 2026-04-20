@@ -81,9 +81,9 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 30, stiffness: 300 }}
-            className="fixed right-0 top-0 h-screen w-full max-w-sm bg-zinc-950/95 backdrop-blur-md z-[1000] flex flex-col shadow-2xl border-l border-white/10"
+            className="fixed right-0 top-0 h-screen w-full max-w-xs bg-zinc-950/95 backdrop-blur-md z-[1000] flex flex-col shadow-2xl border-l border-white/10"
           >
-            <div className="flex items-center justify-between p-6 border-b border-white/10 shrink-0 bg-zinc-950/80 backdrop-blur-md">
+            <div className="flex items-center justify-between p-4 border-b border-white/10 shrink-0 bg-zinc-950/80 backdrop-blur-md">
               <h2 className="text-xl font-bold text-white flex items-center gap-2">
                 <ShoppingCart className="text-purple-500" />
                 Your Cart
@@ -100,7 +100,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
             </div>
 
             <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide">
-              <div className="p-6 space-y-6 pb-40">
+              <div className="p-4 space-y-4 pb-28">
                 {items.length === 0 ? (
                   <div className="py-20 text-center">
                     <ShoppingCart className="w-16 h-16 mx-auto text-gray-600 mb-4" />
@@ -282,10 +282,10 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
               </div>
             </div>
 
-            <div className="absolute bottom-0 left-0 right-0 p-6 bg-zinc-950/95 backdrop-blur-md border-t border-white/10">
+            <div className="absolute bottom-0 left-0 right-0 px-4 py-3 bg-zinc-950/95 backdrop-blur-md border-t border-white/10">
               {items.length > 0 ? (
                 <>
-                  <div className="flex justify-between items-center mb-4">
+                  <div className="flex justify-between items-center mb-2">
                     <span className="text-gray-400 font-medium">Total Amount</span>
                     <div className="text-right">
                       {discount > 0 && (
@@ -294,17 +294,17 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                       <span className="text-2xl font-black text-white">₹{totalPrice}</span>
                     </div>
                   </div>
-                  <div className="flex gap-3">
+                  <div className="flex gap-2">
                     <button
                       onClick={onClose}
-                      className="flex-1 py-4 bg-zinc-800 hover:bg-zinc-700 text-white font-bold rounded-2xl flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                      className="flex-1 py-2.5 bg-zinc-800 hover:bg-zinc-700 text-white font-bold rounded-2xl flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-[0.98]"
                     >
                       <X size={20} />
                       Close
                     </button>
                     <button
                       onClick={handleWhatsAppCheckout}
-                      className="flex-1 py-4 bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-400 text-white font-bold rounded-2xl flex items-center justify-center gap-2 shadow-xl shadow-green-900/30 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                      className="flex-1 py-2.5 bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-400 text-white font-bold rounded-2xl flex items-center justify-center gap-2 shadow-xl shadow-green-900/30 transition-all hover:scale-[1.02] active:scale-[0.98]"
                     >
                       <MessageCircle size={20} />
                       Checkout
@@ -314,7 +314,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
               ) : (
                 <button
                   onClick={onClose}
-                  className="w-full py-4 bg-zinc-800 hover:bg-zinc-700 text-white font-bold rounded-2xl flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                  className="w-full py-2.5 bg-zinc-800 hover:bg-zinc-700 text-white font-bold rounded-2xl flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-[0.98]"
                 >
                   <X size={20} />
                   Close
