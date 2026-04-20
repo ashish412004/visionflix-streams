@@ -48,25 +48,25 @@ export function FlashSaleBanner() {
           initial={{ opacity: 0, y: -50 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -50 }}
-          className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 shadow-lg"
+          className="fixed top-0 left-0 right-0 z-40 bg-black/80 backdrop-blur-sm shadow-lg"
         >
           <div className="relative">
             <button
               onClick={() => setIsVisible(false)}
               className="absolute top-2 right-4 w-6 h-6 flex items-center justify-center rounded-full bg-black/20 hover:bg-black/30 transition-colors duration-200"
             >
-              <X className="w-3 h-3 text-black" />
+              <X className="w-3 h-3 text-white" />
             </button>
             
             <div className="px-6 py-3 text-center">
               <div className="flex items-center justify-center gap-3">
-                <span className="text-black font-bold text-sm">🔥 FLASH SALE:</span>
-                <span className="text-black font-bold">YouTube Premium @ ₹799/yr</span>
-                <span className="text-black font-semibold">for next</span>
-                <span className="bg-black/20 px-2 py-1 rounded font-mono font-bold text-black">
+                <span className="text-yellow-400 font-bold text-sm">🔥 FLASH SALE:</span>
+                <span className="text-white font-bold">YouTube Premium @ ₹799/yr</span>
+                <span className="text-white font-semibold">for next</span>
+                <span className="bg-white/20 px-2 py-1 rounded font-mono font-bold text-white">
                   {formatTime(timeLeft)}
                 </span>
-                <span className="text-black font-semibold">! Buy Now</span>
+                <span className="text-white font-semibold">! Buy Now</span>
               </div>
             </div>
           </div>

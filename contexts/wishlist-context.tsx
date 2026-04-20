@@ -28,13 +28,14 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
 
   // Load from localStorage on mount
   useEffect(() => {
-    const stored = localStorage.getItem("wishlist")
-    if (stored) {
-      try {
-        setItems(JSON.parse(stored))
-      } catch {
-        setItems([])
+    try {
+      const stored = localStorage.getItem("wishlist")
+      if (stored) {
+        const parsedItems = JSON.parse(stored)
+        setItems(parsedItems)
       }
+    } catch (error) {
+      console.error('Error loading wishlist from localStorage:', error)
     }
   }, [])
 

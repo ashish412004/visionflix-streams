@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Inter, Poppins } from 'next/font/google'
+import { Inter, Poppins, Orbitron } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 
@@ -14,6 +14,12 @@ const poppins = Poppins({
   variable: '--font-poppins'
 })
 
+const orbitron = Orbitron({ 
+  subsets: ["latin"],
+  weight: ['400', '700', '900'],
+  variable: '--font-orbitron'
+})
+
 export const metadata: Metadata = {
   title: 'INITIATORS SERVICES - OTT & Software Subscriptions',
   description: 'Get premium OTT subscriptions and software services at the best prices. Trusted by 3000+ customers.',
@@ -26,7 +32,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="bg-background">
-      <body className={`${inter.variable} ${poppins.variable} font-sans antialiased`}>
+      <body className={`${inter.variable} ${poppins.variable} ${orbitron.variable} font-sans antialiased`}>
         {children}
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>

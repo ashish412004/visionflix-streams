@@ -25,7 +25,7 @@ export function AboutUs() {
   return (
     <section 
       id="about-us" 
-      className="relative py-20 px-4 md:px-6"
+      className="relative py-24 px-4 md:px-6"
     >
       {/* Purple glow behind section */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">

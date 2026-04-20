@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Lock, FileText, Heart, Search, HelpCircle, Check, AlertCircle, QrCode, Gift, Users, Download, Share2, Zap } from "lucide-react"
+import { Lock, FileText, Heart, Search, HelpCircle, Check, AlertCircle, QrCode, Gift, Users, Download, Share2, Zap, ShoppingCart } from "lucide-react"
 import { useWishlist } from "@/contexts/wishlist-context"
+import { useCart } from "@/contexts/cart-context"
 import { WHATSAPP_URL } from "@/config/constants"
+import { useSound } from "@/contexts/sound-context"
 import { supabase, Referral } from "@/lib/supabase"
 
 type Category = "All" | "OTT" | "AI Plans" | "18+" | "Softwares" | "Instagram Services" | "Combo Packs"
@@ -66,12 +68,15 @@ const allSubscriptions: Subscription[] = [
 
 export function SubscriptionCards() {
   const { addItem, removeItem, isInWishlist } = useWishlist();
-  const [category, setCategory] = useState<Category>("OTT");
+  const { addItem: addToCart, isInCart } = useCart();
+  const { playHoverSound, playClickSound } = useSound();
+  const [category, setCategory] = useState<Category>("All");
   const [accessType, setAccessType] = useState<AccessType>("Shared");
   const [searchTerm, setSearchTerm] = useState("");
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [activeFilter, setActiveFilter] = useState("");
+  const [addedAnimation, setAddedAnimation] = useState<number | null>(null);
   
   // Refer & Earn State
   const [referralMobile, setReferralMobile] = useState("");
@@ -84,6 +89,7 @@ export function SubscriptionCards() {
     referralCount: 0
   });
   const [loadingReferral, setLoadingReferral] = useState(false);
+  const [copied, setCopied] = useState(false);
   
   // Generate suggestions based on search term
   useEffect(() => {
@@ -149,8 +155,9 @@ export function SubscriptionCards() {
   const generateReferralQR = async () => {
     console.log('Button Clicked!');
     
-    if (!referralMobile.trim() || referralMobile.length < 10) {
-      console.log('Validation failed: Invalid mobile number');
+    if (!referralMobile.trim() || !/^\d{10}$/.test(referralMobile)) {
+      console.log('Validation failed: Invalid mobile number (must be exactly 10 digits)');
+      alert('Please enter exactly 10 digits');
       return;
     }
     
@@ -213,11 +220,12 @@ export function SubscriptionCards() {
       }
 
       const qrCode = `QR:https://initiators-tools.com?ref=${referralMobile}`;
+      const referralUrl = `https://initiators.shop/ref?num=91${referralMobile}`;
       
       console.log('Setting referral data for card display');
       setReferralData({
         mobileNumber: referralData.mobile_number,
-        referralUrl: `https://initiators-tools.com?ref=${referralData.mobile_number}`,
+        referralUrl: referralUrl,
         qrCode: qrCode,
         points: 0, // Default 0 since points column doesn't exist
         referralCount: referralData.referral_count
@@ -226,15 +234,23 @@ export function SubscriptionCards() {
       console.log('Showing referral card');
       setShowReferralCard(true);
       
-      // Success message
-      alert('QR Card generated successfully!');
-      
     } catch (error) {
       console.error('Unexpected error in generateReferralQR:', error);
       alert('Unexpected error: ' + (error as Error).message);
     } finally {
       setLoadingReferral(false);
     }
+  };
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(referralData.referralUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1000);
+  };
+
+  const shareOnWhatsApp = () => {
+    const message = `Bhai, check out Initiators Services for premium OTT & Tools! Use my link to get deals and I get ₹30 cashback: ${referralData.referralUrl}`;
+    window.open(`${WHATSAPP_URL}?text=${encodeURIComponent(message)}`, '_blank');
   };
 
   const downloadReferralCard = () => {
@@ -554,11 +570,24 @@ export function SubscriptionCards() {
                   }
                 }}
                 whileHover={{ scale: 1.05 }}
-                className={`bg-white/5 ${sub.isVIP ? 'border-2 border-[#FFD700]' : sub.isCombo ? 'border-2 border-dashed border-purple-400/50' : 'border border-white/10'} p-5 rounded-2xl relative group ${sub.isVIP ? 'hover:border-[#FFD700] hover:shadow-[0_0_20px_rgba(255,215,0,0.3)]' : 'hover:border-purple-500/50'} transition-all h-full flex flex-col`}
+                className={`backdrop-blur-xl bg-white/5 ${sub.isVIP ? 'border-2 border-[#FFD700] shadow-[0_0_15px_rgba(255,215,0,0.3)]' : sub.isCombo ? 'border-2 border-dashed border-purple-400/50 shadow-[0_0_15px_rgba(168,85,247,0.3)]' : 'border border-white/10 shadow-[0_0_15px_rgba(236,72,153,0.2)]'} p-5 rounded-2xl relative group ${sub.isVIP ? 'hover:border-[#FFD700] hover:shadow-[0_0_30px_rgba(255,215,0,0.5)]' : sub.isCombo ? 'hover:border-purple-400 hover:shadow-[0_0_30px_rgba(168,85,247,0.5)]' : 'hover:border-pink-500/50 hover:shadow-[0_0_30px_rgba(236,72,153,0.5)]'} transition-all h-full flex flex-col`}
               >
+                {/* Heart/Wishlist Button - Top Right Corner */}
+                <button
+                  onClick={() => {
+                    playClickSound();
+                    isInWishlist(sub.id) ? removeItem(sub.id) : addItem(sub);
+                  }}
+                  onMouseEnter={playHoverSound}
+                  className="absolute top-4 right-4 p-2 rounded-full border transition-all duration-300 hover:scale-110 z-10 bg-black/30 backdrop-blur-sm"
+                  style={{ borderColor: isInWishlist(sub.id) ? 'rgba(236, 72, 153, 0.8)' : 'rgba(255, 255, 255, 0.1)' }}
+                >
+                  <Heart size={18} fill={isInWishlist(sub.id) ? "#ec4899" : "none"} className={isInWishlist(sub.id) ? "text-pink-500" : "text-gray-400 hover:text-pink-400"} />
+                </button>
+
                 {/* VIP Limited Seats Badge */}
                 {sub.isVIP && (
-                  <div className="absolute -top-3 right-4">
+                  <div className="absolute -top-3 left-4">
                     <span className="px-3 py-1 bg-red-500 text-white text-xs font-bold rounded-full shadow-lg animate-pulse">
                       Limited Seats
                     </span>
@@ -567,9 +596,18 @@ export function SubscriptionCards() {
 
                 {/* Combo Badge */}
                 {sub.isCombo && (
-                  <div className="absolute -top-3 right-4">
+                  <div className="absolute -top-3 left-4">
                     <span className="px-3 py-1 bg-gradient-to-r from-yellow-500 to-orange-500 text-black text-xs font-bold rounded-full shadow-lg">
                       Value Pack
+                    </span>
+                  </div>
+                )}
+
+                {/* Hot Deal Badge for regular cards */}
+                {!sub.isVIP && !sub.isCombo && (
+                  <div className="absolute -top-3 left-4">
+                    <span className="px-3 py-1 bg-gradient-to-r from-pink-500 to-purple-500 text-white text-xs font-bold rounded-full shadow-lg">
+                      Hot Deal
                     </span>
                   </div>
                 )}
@@ -589,48 +627,57 @@ export function SubscriptionCards() {
                   )}
                 </div>
 
-                {/* Combo Items Display */}
-                {sub.isCombo && sub.comboItems && (
-                  <div className="mb-4 p-3 bg-white/5 rounded-lg">
-                    <p className="text-gray-300 text-xs font-medium mb-2">Includes:</p>
-                    <div className="flex flex-wrap gap-2">
-                      {sub.comboItems.map((item, idx) => (
-                        <span key={idx} className="px-2 py-1 bg-purple-500/20 border border-purple-400/30 text-purple-300 text-xs rounded-full">
-                          {item}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                <div className="flex gap-2 mt-auto">
-                  <button 
-                    onClick={() => {
-                      const referralCode = localStorage.getItem('referralCode');
-                      const baseMessage = sub.isVIP 
-                        ? `Hi, I'm interested in VIP Membership. Please send payment details for 99 Yearly Pass!`
-                        : `I want to buy ${sub.name}`;
-                      const referralText = referralCode ? `\n\n Referred by: ${referralCode}` : '';
-                      window.open(`${WHATSAPP_URL}?text=${encodeURIComponent(baseMessage + referralText)}`);
-                    }}
-                    className={`flex-1 py-2 rounded-xl font-bold text-sm ${sub.isVIP 
-                      ? 'bg-gradient-to-r from-[#FFD700] to-yellow-600 text-black hover:from-yellow-600 hover:to-orange-600' 
-                      : 'bg-gradient-to-r from-pink-500 to-purple-600 text-white'
-                    }`}
-                  >
-                    Buy Now
-                  </button>
-                  <button 
-                    onClick={() => isInWishlist(sub.id) ? removeItem(sub.id) : addItem(sub)}
-                    className={`p-2 rounded-xl border ${isInWishlist(sub.id) ? "bg-pink-500 border-pink-500 text-white" : "border-white/10 text-gray-400"}`}
-                  >
-                    <Heart size={20} fill={isInWishlist(sub.id) ? "white" : "none"}/>
-                  </button>
-                </div>
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </motion.div>
+              <div className="flex gap-2 mt-auto">
+                <button 
+                  onClick={() => {
+                    playClickSound();
+                    const referralCode = localStorage.getItem('referralCode');
+                    const baseMessage = sub.isVIP 
+                      ? `Hi, I'm interested in VIP Membership. Please send payment details for 99 Yearly Pass!`
+                      : `I want to buy ${sub.name}`;
+                    const referralText = referralCode ? `\n\n Referred by: ${referralCode}` : '';
+                    window.open(`${WHATSAPP_URL}?text=${encodeURIComponent(baseMessage + referralText)}`);
+                  }}
+                  onMouseEnter={playHoverSound}
+                  className={`flex-1 py-2.5 rounded-xl font-bold text-sm ${sub.isVIP 
+                    ? 'bg-gradient-to-r from-[#FFD700] to-yellow-600 text-black hover:from-yellow-600 hover:to-orange-600 hover:shadow-[0_0_20px_rgba(255,215,0,0.5)]' 
+                    : 'bg-gradient-to-r from-pink-500 to-purple-600 text-white hover:from-pink-600 hover:to-purple-700 hover:shadow-[0_0_20px_rgba(236,72,153,0.5)]'
+                  } transition-all duration-300`}
+                >
+                  Buy Now
+                </button>
+                <button 
+                  onClick={() => {
+                    playClickSound();
+                    if (!isInCart(sub.id)) {
+                      addToCart({
+                        id: sub.id,
+                        name: sub.name,
+                        price: sub.price,
+                        period: sub.period,
+                        bgColor: sub.bgColor
+                      });
+                      setAddedAnimation(sub.id);
+                      setTimeout(() => setAddedAnimation(null), 1000);
+                    }
+                  }}
+                  onMouseEnter={playHoverSound}
+                  className={`px-3 py-2.5 rounded-xl font-bold text-sm border-2 transition-all duration-300 ${isInCart(sub.id) 
+                    ? 'bg-green-500 border-green-500 text-white' 
+                    : 'border-white/20 text-gray-400 hover:border-purple-400 hover:text-purple-400'
+                  } ${addedAnimation === sub.id ? 'scale-110' : ''}`}
+                >
+                  {addedAnimation === sub.id ? (
+                    <span className="text-green-400">Added!</span>
+                  ) : (
+                    <ShoppingCart size={18} />
+                  )}
+                </button>
+              </div>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </motion.div>
 
       {/* Refer & Earn Section */}
       <motion.div
@@ -721,7 +768,7 @@ export function SubscriptionCards() {
             </div>
             <button
               onClick={generateReferralQR}
-              disabled={!referralMobile.trim() || referralMobile.length < 10 || loadingReferral}
+              disabled={!referralMobile.trim() || !/^\d{10}$/.test(referralMobile) || loadingReferral}
               className="w-full py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold rounded-lg hover:from-purple-600 hover:to-pink-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 flex items-center justify-center gap-2"
             >
               {loadingReferral ? (
@@ -762,7 +809,7 @@ export function SubscriptionCards() {
                 {/* Card Content */}
                 <div className="relative z-10 flex flex-col h-full">
                   {/* Header */}
-                  <div className="text-center mb-8">
+                  <div className="text-center mb-6">
                     <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
                       <span className="text-white font-bold text-xl">IT</span>
                     </div>
@@ -770,6 +817,13 @@ export function SubscriptionCards() {
                       Initiators Tools
                     </h3>
                     <p className="text-gray-300 text-sm">Refer & Earn Program</p>
+                  </div>
+
+                  {/* Cashback Branding */}
+                  <div className="text-center mb-6">
+                    <p className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-500 leading-tight">
+                      Share this link & Get ₹30 Instant Cashback on every successful referral!
+                    </p>
                   </div>
 
                   {/* QR Code Area */}
@@ -786,8 +840,40 @@ export function SubscriptionCards() {
                     </div>
                   </div>
 
+                  {/* Stylish Neon Link Box */}
+                  <div className="mb-4">
+                    <div className="bg-black/40 backdrop-blur-sm border-2 border-green-400/50 rounded-xl p-4 relative overflow-hidden">
+                      <div className="absolute inset-0 bg-gradient-to-r from-green-400/10 to-emerald-500/10"></div>
+                      <div className="relative z-10">
+                        <p className="text-xs text-green-400 mb-1 font-semibold">Your Referral Link</p>
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm text-white break-all flex-1">{referralData.referralUrl}</p>
+                          <button
+                            onClick={copyToClipboard}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-300 flex items-center gap-1 ${
+                              copied 
+                                ? 'bg-green-500 text-white' 
+                                : 'bg-white/10 text-green-400 hover:bg-green-500 hover:text-white'
+                            }`}
+                          >
+                            {copied ? 'Copied!' : 'Copy'}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* WhatsApp Share Button */}
+                  <button
+                    onClick={shareOnWhatsApp}
+                    className="w-full py-3 bg-gradient-to-r from-green-500 to-green-600 text-white font-bold rounded-xl hover:from-green-600 hover:to-green-700 transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-green-500/30"
+                  >
+                    <Share2 className="w-5 h-5" />
+                    Share on WhatsApp
+                  </button>
+
                   {/* Footer */}
-                  <div className="text-center">
+                  <div className="text-center mt-4">
                     <div className="grid grid-cols-2 gap-4 mb-4">
                       <div className="bg-white/10 rounded-lg p-3">
                         <div className="flex items-center justify-center gap-2 text-green-400 mb-1">
@@ -804,7 +890,7 @@ export function SubscriptionCards() {
                         <p className="text-xl font-bold text-blue-400">{referralData.referralCount}</p>
                       </div>
                     </div>
-                    <p className="text-gray-400 text-xs">Share with friends & earn 50 cashback per referral</p>
+                    <p className="text-gray-400 text-xs">Share with friends & earn ₹30 cashback per referral</p>
                   </div>
                 </div>
               </div>
