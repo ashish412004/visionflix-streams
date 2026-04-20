@@ -30,14 +30,14 @@ export function DashboardHeader({ email, onLogout }: DashboardHeaderProps) {
         transition={{ duration: 0.5 }}
         className="relative z-9999 backdrop-blur-xl bg-black/30 border-b border-white/10 mb-4"
       >
-        <div className="max-w-7xl mx-auto px-3 py-2 md:px-4 md:py-4 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-3 py-3 md:px-4 md:py-4 flex items-center justify-between">
           {/* Logo Section */}
           <div className="flex items-center gap-2 md:gap-3">
             <div className="w-9 h-9 md:w-12 md:h-12 overflow-hidden border border-white/20 bg-white/5 backdrop-blur-sm rounded-lg">
               <img src="/logo.svg" alt="Logo" className="w-full h-full object-contain p-1" />
             </div>
             <div className="px-1 md:px-2">
-              <span className="font-bold tracking-wide text-[10px] md:text-sm lg:text-lg bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+              <span className="font-extrabold tracking-wide text-[11px] md:text-sm lg:text-lg bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
                 INITIATORS TOOLS AND SERVICES
               </span>
             </div>

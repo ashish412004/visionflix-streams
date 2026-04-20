@@ -70,7 +70,7 @@ const allSubscriptions: Subscription[] = [
 
 export function SubscriptionCards() {
   const { addItem, removeItem, isInWishlist } = useWishlist();
-  const { addItem: addToCart, isInCart } = useCart();
+  const { addItem: addToCart, removeItem: removeFromCart, isInCart } = useCart();
   const { playHoverSound, playClickSound } = useSound();
   const [category, setCategory] = useState<Category>("All");
   const [accessType, setAccessType] = useState<AccessType>("Shared");
@@ -671,7 +671,12 @@ export function SubscriptionCards() {
                 <motion.button 
                   onClick={() => {
                     playClickSound();
-                    if (!isInCart(sub.id)) {
+                    if (isInCart(sub.id)) {
+                      // Remove from cart
+                      removeFromCart(sub.id);
+                      showToast("Removed from cart");
+                    } else {
+                      // Add to cart
                       addToCart({
                         id: sub.id,
                         name: sub.name,
@@ -688,13 +693,15 @@ export function SubscriptionCards() {
                   onMouseEnter={playHoverSound}
                   whileTap={{ scale: 0.95 }}
                   transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                  className={`px-3 md:px-3 py-3 md:py-2.5 min-w-[48px] md:min-w-auto min-h-[48px] md:min-h-auto rounded-xl font-bold text-xs md:text-sm border-2 transition-all duration-300 ${isInCart(sub.id) 
-                    ? 'bg-red-500 border-red-500 text-white' 
+                  className={`px-3 md:px-3 py-3 md:py-2.5 min-w-[48px] md:min-w-auto min-h-[48px] md:min-h-auto rounded-xl font-bold text-xs md:text-sm border-2 transition-all duration-300 ${isInCart(sub.id)
+                    ? 'bg-red-500 border-red-500 text-white'
                     : 'border-white/20 text-gray-400 hover:border-purple-400 hover:text-purple-400'
                   } ${addedAnimation === sub.id ? 'scale-110' : ''}`}
                 >
                   {addedAnimation === sub.id ? (
                     <span className="text-red-400 text-[10px] md:text-xs">Added!</span>
+                  ) : isInCart(sub.id) ? (
+                    <span className="text-white text-[10px] md:text-xs">Remove</span>
                   ) : (
                     <ShoppingCart size={14} className="w-3.5 h-3.5 md:w-[18px] md:h-[18px]" />
                   )}

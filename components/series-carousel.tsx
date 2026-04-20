@@ -97,12 +97,12 @@ export function SeriesCarousel() {
     if (!scrollContainer) return
 
     let animationId: number
-    const scrollSpeed = 0.5
+    const scrollSpeed = window.innerWidth < 768 ? 1.5 : 0.5
 
     const autoScroll = () => {
       if (!isPaused && !isDragging && scrollContainer) {
         scrollContainer.scrollLeft += scrollSpeed
-        
+
         // Reset scroll position for infinite effect
         if (scrollContainer.scrollLeft >= scrollContainer.scrollWidth / 2) {
           scrollContainer.scrollLeft = 0
