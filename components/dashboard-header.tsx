@@ -72,7 +72,7 @@ export function DashboardHeader({ email, onLogout }: DashboardHeaderProps) {
             </button>
           </div>
 
-          {/* Mobile Right Icons (Instagram only, Cart is floating) */}
+          {/* Mobile Right Icons */}
           <div className="flex md:hidden items-center gap-4">
              <a href="https://www.instagram.com/initiators_tools_and_services" target="_blank">
                 <Instagram className="w-5 h-5 text-gray-400" />
@@ -113,18 +113,20 @@ export function DashboardHeader({ email, onLogout }: DashboardHeaderProps) {
 
       <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
 
-      {/* 🚀 FIXED FLOATING CART BUTTON (Positioned high to avoid hide) */}
-      <button 
-        onClick={() => setIsCartOpen(true)}
-        className="fixed bottom-44 right-6 z-[999] flex h-14 w-14 items-center justify-center rounded-full bg-pink-600 text-white shadow-[0_15px_30px_-5px_rgba(236,72,153,0.6)] border-2 border-white/20 transition-all hover:scale-110 active:scale-95 md:hidden"
-      >
-        <ShoppingBag className="h-7 w-7" />
-        {itemCount > 0 && (
-          <span className="absolute -top-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-white text-[12px] font-bold text-pink-600 shadow-md">
-            {itemCount}
-          </span>
-        )}
-      </button>
+      {/* 🚀 FLOATING CART BUTTON (Optimized Click Area) */}
+      <div className="fixed inset-0 pointer-events-none z-[999] md:hidden">
+        <button 
+          onClick={() => setIsCartOpen(true)}
+          className="pointer-events-auto absolute bottom-44 right-6 flex h-14 w-14 items-center justify-center rounded-full bg-pink-600 text-white shadow-[0_15px_30px_-5px_rgba(236,72,153,0.6)] border-2 border-white/20 transition-all hover:scale-110 active:scale-95"
+        >
+          <ShoppingBag className="h-7 w-7" />
+          {itemCount > 0 && (
+            <span className="absolute -top-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-white text-[12px] font-bold text-pink-600 shadow-md">
+              {itemCount}
+            </span>
+          )}
+        </button>
+      </div>
     </>
   )
 }

@@ -12,35 +12,39 @@ export function WishlistButton({ onClick }: WishlistButtonProps) {
   const { itemCount } = useWishlist()
 
   return (
-    <motion.button
-      initial={{ scale: 0, opacity: 0 }}
-      animate={{ scale: 1, opacity: 1 }}
-      transition={{ delay: 0.5, type: "spring" }}
-      whileHover={{ scale: 1.1 }}
-      whileTap={{ scale: 0.9 }}
-      onClick={onClick}
-      className="fixed bottom-24 right-6 z-40 w-14 h-14 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full shadow-lg shadow-pink-500/30 flex items-center justify-center group"
-    >
-      <Heart className="w-6 h-6 text-white" />
-      
-      {/* Badge */}
-      <AnimatePresence>
-        {itemCount > 0 && (
-          <motion.span
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            exit={{ scale: 0 }}
-            className="absolute -top-1 -right-1 w-6 h-6 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center shadow-lg"
-          >
-            {itemCount > 9 ? "9+" : itemCount}
-          </motion.span>
-        )}
-      </AnimatePresence>
+    /* Parent Div handles the screen blocking issue */
+    <div className="fixed inset-0 pointer-events-none z-40 flex items-end justify-end">
+      <motion.button
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ delay: 0.5, type: "spring" }}
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+        onClick={onClick}
+        /* Added pointer-events-auto so only the button is clickable */
+        className="pointer-events-auto mb-24 mr-6 w-14 h-14 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full shadow-lg shadow-pink-500/30 flex items-center justify-center group"
+      >
+        <Heart className="w-6 h-6 text-white" />
+        
+        {/* Badge */}
+        <AnimatePresence>
+          {itemCount > 0 && (
+            <motion.span
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0 }}
+              className="absolute -top-1 -right-1 w-6 h-6 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center shadow-lg"
+            >
+              {itemCount > 9 ? "9+" : itemCount}
+            </motion.span>
+          )}
+        </AnimatePresence>
 
-      {/* Tooltip */}
-      <span className="absolute right-full mr-3 px-3 py-1.5 bg-white/10 backdrop-blur-sm text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-        Wishlist
-      </span>
-    </motion.button>
+        {/* Tooltip */}
+        <span className="absolute right-full mr-3 px-3 py-1.5 bg-white/10 backdrop-blur-sm text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+          Wishlist
+        </span>
+      </motion.button>
+    </div>
   )
 }
