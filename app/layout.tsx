@@ -138,7 +138,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="bg-background">
       <head>
-        <meta name="google-site-verification" content="5cceb1f085b5de33" />
+        <meta name="google-site-verification" content="6i3ABerR-GRlPvODJWKFjkmrsHLrgiv-RCPVgtjxbFc" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
