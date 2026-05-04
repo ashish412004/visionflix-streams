@@ -32,6 +32,7 @@ interface Subscription {
   isCombo?: boolean;
   comboItems?: string[];
   isVIP?: boolean;
+  isOffer?: boolean;
 }
 
 // Deduplication function: Keep the latest/updated entry for each service name
@@ -55,20 +56,20 @@ const allSubscriptionsRaw: Subscription[] = [
   // OTT Shared
   { id: 1, name: "Netflix", logo: "N", logoSubtext: "Netflix", logoUrl: "https://cdn.worldvectorlogo.com/logos/netflix-3.svg", posterUrl: "https://image.tmdb.org/t/p/original/9w0WX3r2iY0oTqPQ1x5fGKrGWrZ.jpg", price: 199, period: "1 Month", description: "Premium streaming entertainment.", bgColor: "bg-red-600", borderColor: "border-red-500", popular: true, category: "OTT", accessType: "Shared" },
   { id: 2, name: "Prime Video", logo: "P", logoSubtext: "Prime", logoUrl: "https://cdn.worldvectorlogo.com/logos/amazon-prime-video-1.svg", posterUrl: "https://image.tmdb.org/t/p/original/mK0Q1jM8Z8L4l2N0x44p5l3s3x.jpg", price: 199, period: "1 Year", description: "Movies and originals.", bgColor: "bg-blue-600", borderColor: "border-blue-500", category: "OTT", accessType: "Shared" },
-  { id: 3, name: "Zee5", logo: "Z", logoSubtext: "Zee5", posterUrl: "https://image.tmdb.org/t/p/original/lFhxzPCzCMAZHK4oPj5v8Z8n.jpg", price: 249, period: "1 Year", description: "Premium content no ads.", bgColor: "bg-purple-700", borderColor: "border-purple-500", category: "OTT", accessType: "Shared" },
-  { id: 4, name: "Sony LIV", logo: "S", logoSubtext: "Sony LIV", posterUrl: "https://image.tmdb.org/t/p/original/9Wgn8Q3l3F2s4f8Z8J2vM3sK.jpg", price: 399, period: "1 Year", description: "Live sports entertainment.", bgColor: "bg-gray-700", borderColor: "border-blue-600", category: "OTT", accessType: "Shared" },
-  { id: 5, name: "Hotstar", logo: "D+", logoSubtext: "Hotstar", posterUrl: "https://image.tmdb.org/t/p/original/qJx4J8s2x8b5mM2v8N9pL3wR.jpg", price: 699, period: "1 Year", description: "Super Plan content.", bgColor: "bg-blue-800", borderColor: "border-blue-700", category: "OTT", accessType: "Shared" },
+  { id: 3, name: "Zee5", logo: "Z", logoSubtext: "Zee5", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/5/5a/Zee5_logo.svg", posterUrl: "https://image.tmdb.org/t/p/original/lFhxzPCzCMAZHK4oPj5v8Z8n.jpg", price: 249, period: "1 Year", description: "Premium content no ads.", bgColor: "bg-purple-700", borderColor: "border-purple-500", category: "OTT", accessType: "Shared" },
+  { id: 4, name: "Sony LIV", logo: "S", logoSubtext: "Sony LIV", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/SonyLIV_logo.svg/512px-SonyLIV_logo.svg.png", posterUrl: "https://image.tmdb.org/t/p/original/9Wgn8Q3l3F2s4f8Z8J2vM3sK.jpg", price: 399, period: "1 Year", description: "Live sports entertainment.", bgColor: "bg-gray-700", borderColor: "border-blue-600", category: "OTT", accessType: "Shared" },
+  { id: 5, name: "Hotstar", logo: "D+", logoSubtext: "Hotstar", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/f/fa/Disney%2B_Hotstar_logo.svg", posterUrl: "https://image.tmdb.org/t/p/original/qJx4J8s2x8b5mM2v8N9pL3wR.jpg", price: 699, period: "1 Year", description: "Super Plan content.", bgColor: "bg-blue-800", borderColor: "border-blue-700", category: "OTT", accessType: "Shared" },
   // OTT Personal
   { id: 6, name: "Prime Video", logo: "P", logoSubtext: "Prime", price: 499, period: "1 Year", description: "Personal Prime account.", bgColor: "bg-blue-600", borderColor: "border-blue-500", popular: true, category: "OTT", accessType: "Personal" },
-  { id: 7, name: "Sony LIV", logo: "S", logoSubtext: "Sony LIV", price: 499, period: "1 Year", description: "Personal Sony LIV.", bgColor: "bg-gray-700", borderColor: "border-blue-600", category: "OTT", accessType: "Personal" },
-  { id: 8, name: "Zee5", logo: "Z", logoSubtext: "Zee5", price: 499, period: "1 Year", description: "Personal Zee5 access.", bgColor: "bg-purple-700", borderColor: "border-purple-500", category: "OTT", accessType: "Personal" },
+  { id: 7, name: "Sony LIV", logo: "S", logoSubtext: "Sony LIV", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/SonyLIV_logo.svg/512px-SonyLIV_logo.svg.png", price: 499, period: "1 Year", description: "Personal Sony LIV.", bgColor: "bg-gray-700", borderColor: "border-blue-600", category: "OTT", accessType: "Personal" },
+  { id: 8, name: "Zee5", logo: "Z", logoSubtext: "Zee5", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/5/5a/Zee5_logo.svg", price: 499, period: "1 Year", description: "Personal Zee5 access.", bgColor: "bg-purple-700", borderColor: "border-purple-500", category: "OTT", accessType: "Personal" },
   { id: 9, name: "YouTube Premium", logo: "YT", logoSubtext: "YouTube", logoUrl: "https://cdn.worldvectorlogo.com/logos/youtube-icon.svg", price: 999, period: "1 Year", description: "Ad-free YouTube.", bgColor: "bg-red-600", borderColor: "border-red-500", category: "OTT", accessType: "Personal" },
   { id: 10, name: "Amazon Full Benefit", logo: "A", logoSubtext: "Amazon", price: 1099, period: "1 Year", description: "Complete benefits.", bgColor: "bg-orange-600", borderColor: "border-orange-500", popular: true, category: "OTT", accessType: "Personal" },
   // Softwares
   { id: 11, name: "Adobe CC", logo: "Ad", logoSubtext: "Adobe", logoUrl: "https://cdn.worldvectorlogo.com/logos/adobe-creative-cloud-2.svg", price: 999, period: "4 Months", description: "All Adobe apps.", bgColor: "bg-red-600", borderColor: "border-red-500", category: "Softwares", accessType: "Shared" },
   { id: 12, name: "Adobe CC", logo: "Ad", logoSubtext: "Adobe", logoUrl: "https://cdn.worldvectorlogo.com/logos/adobe-creative-cloud-2.svg", price: 5999, period: "1 Year", description: "Best Value Pack.", bgColor: "bg-red-700", borderColor: "border-red-600", popular: true, category: "Softwares", accessType: "Shared" },
   { id: 13, name: "LinkedIn Career", logo: "in", logoSubtext: "LinkedIn", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/c/ca/LinkedIn_logo_initials.png", price: 3499, period: "1 Year", description: "Professional journey.", bgColor: "bg-blue-700", borderColor: "border-blue-600", category: "Softwares", accessType: "Shared" },
-  { id: 14, name: "LinkedIn Sales", logo: "in", logoSubtext: "LinkedIn", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/c/ca/LinkedIn_logo_initials.png", price: 3499, period: "1 Month", description: "For sales pros.", bgColor: "bg-blue-800", borderColor: "border-blue-700", category: "Softwares", accessType: "Shared" },
+  { id: 14, name: "LinkedIn Sales Navigator", logo: "in", logoSubtext: "LinkedIn", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/c/ca/LinkedIn_logo_initials.png", price: 3499, period: "1 Month", description: "Lead generation & sales intelligence.", bgColor: "bg-blue-800", borderColor: "border-blue-700", category: "Softwares", accessType: "Shared" },
   { id: 15, name: "Microsoft 365", logo: "MS", logoSubtext: "MS", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg", price: 799, period: "1 Year", description: "Office + 1TB Cloud.", bgColor: "bg-blue-600", borderColor: "border-blue-500", popular: true, category: "Softwares", accessType: "Shared" },
   { id: 16, name: "Canva Pro", logo: "C", logoSubtext: "Canva", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/0/08/Canva_logo_2021.svg", price: 499, period: "1 Year", description: "Design pro style.", bgColor: "bg-cyan-600", borderColor: "border-cyan-500", category: "Softwares", accessType: "Shared" },
   // AI
@@ -90,9 +91,9 @@ const allSubscriptionsRaw: Subscription[] = [
   { id: 30, name: "Netflix 4K", logo: "N", logoSubtext: "Netflix", logoUrl: "https://cdn.worldvectorlogo.com/logos/netflix-3.svg", posterUrl: "https://image.tmdb.org/t/p/original/9w0WX3r2iY0oTqPQ1x5fGKrGWrZ.jpg", price: 199, period: "1 Month", description: "Premium 4K streaming.", bgColor: "bg-red-600", borderColor: "border-red-500", popular: true, category: "OTT", accessType: "Shared" },
   { id: 31, name: "Netflix 4K", logo: "N", logoSubtext: "Netflix", logoUrl: "https://cdn.worldvectorlogo.com/logos/netflix-3.svg", posterUrl: "https://image.tmdb.org/t/p/original/9w0WX3r2iY0oTqPQ1x5fGKrGWrZ.jpg", price: 1299, period: "1 Year", description: "Premium 4K streaming.", bgColor: "bg-red-700", borderColor: "border-red-600", category: "OTT", accessType: "Shared" },
   { id: 32, name: "Prime Video", logo: "P", logoSubtext: "Prime", logoUrl: "https://cdn.worldvectorlogo.com/logos/amazon-prime-video-1.svg", posterUrl: "https://image.tmdb.org/t/p/original/mK0Q1jM8Z8L4l2N0x44p5l3s3x.jpg", price: 299, period: "1 Year", description: "Movies and originals.", bgColor: "bg-blue-600", borderColor: "border-blue-500", category: "OTT", accessType: "Shared" },
-  { id: 33, name: "Hotstar Premium", logo: "D+", logoSubtext: "Hotstar", price: 599, period: "1 Year", description: "Premium content.", bgColor: "bg-blue-800", borderColor: "border-blue-700", category: "OTT", accessType: "Shared" },
-  { id: 34, name: "Sony LIV", logo: "S", logoSubtext: "Sony LIV", price: 399, period: "1 Year", description: "Live sports entertainment.", bgColor: "bg-gray-700", borderColor: "border-blue-600", category: "OTT", accessType: "Shared" },
-  { id: 35, name: "Sony LIV", logo: "S", logoSubtext: "Sony LIV", price: 699, period: "1 Year", description: "Premium sports pack.", bgColor: "bg-gray-800", borderColor: "border-blue-700", category: "OTT", accessType: "Shared" },
+  { id: 33, name: "Hotstar Premium", logo: "D+", logoSubtext: "Hotstar", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/f/fa/Disney%2B_Hotstar_logo.svg", price: 599, period: "1 Year", description: "Premium content.", bgColor: "bg-blue-800", borderColor: "border-blue-700", category: "OTT", accessType: "Shared" },
+  { id: 34, name: "Sony LIV", logo: "S", logoSubtext: "Sony LIV", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/SonyLIV_logo.svg/512px-SonyLIV_logo.svg.png", price: 399, period: "1 Year", description: "Live sports entertainment.", bgColor: "bg-gray-700", borderColor: "border-blue-600", category: "OTT", accessType: "Shared" },
+  { id: 35, name: "Sony LIV", logo: "S", logoSubtext: "Sony LIV", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/SonyLIV_logo.svg/512px-SonyLIV_logo.svg.png", price: 699, period: "1 Year", description: "Premium sports pack.", bgColor: "bg-gray-800", borderColor: "border-blue-700", category: "OTT", accessType: "Shared" },
   { id: 36, name: "Apple TV", logo: "AP", logoSubtext: "Apple", price: 799, period: "1 Year", description: "Apple streaming.", bgColor: "bg-gray-800", borderColor: "border-gray-700", category: "OTT", accessType: "Shared" },
   { id: 37, name: "Apple Music", logo: "AP", logoSubtext: "Apple", price: 499, period: "1 Year", description: "Music streaming.", bgColor: "bg-pink-700", borderColor: "border-pink-600", category: "OTT", accessType: "Shared" },
   { id: 38, name: "IPTV", logo: "IP", logoSubtext: "IPTV", price: 2999, period: "1 Year", description: "Live TV channels.", bgColor: "bg-purple-800", borderColor: "border-purple-700", category: "OTT", accessType: "Shared" },
@@ -105,11 +106,11 @@ const allSubscriptionsRaw: Subscription[] = [
   // VPN
   { id: 44, name: "Nord VPN", logo: "ND", logoSubtext: "Nord", price: 399, period: "1 Year", description: "Secure VPN.", bgColor: "bg-blue-800", borderColor: "border-blue-700", category: "VPN", accessType: "Shared" },
   // Food
-  { id: 45, name: "Zomato", logo: "ZO", logoSubtext: "Zomato", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/7/7c/Zomato_Logo.png", price: 0, period: "20% OFF", description: "Food discounts. On orders of ₹999+ only.", bgColor: "bg-red-600", borderColor: "border-red-500", category: "Food", accessType: "Shared" },
+  { id: 45, name: "Zomato", logo: "ZO", logoSubtext: "Zomato", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/7/7c/Zomato_Logo.png", price: 0, period: "20% OFF", description: "Enjoy delicious meals with exclusive VisionFlix savings. On all orders above ₹999/-.", bgColor: "bg-red-600", borderColor: "border-red-500", category: "Food", accessType: "Shared", isOffer: true },
   // Combo Packs
-  { id: 46, name: "Student Pack", logo: "SP", logoSubtext: "Student", price: 3999, originalPrice: 4497, period: "1 Year", description: "Perfect for students and creators.", bgColor: "bg-gradient-to-br from-purple-600 to-blue-600", borderColor: "border-purple-400", popular: true, category: "Combo Packs", accessType: "Shared", isCombo: true, comboItems: ["ChatGPT Plus", "Canva Pro", "LinkedIn Career"] },
-  { id: 47, name: "OTT Bonanza", logo: "OB", logoSubtext: "Bonanza", price: 949, originalPrice: 1097, period: "1 Year", description: "Ultimate entertainment bundle.", bgColor: "bg-gradient-to-br from-red-600 to-orange-600", borderColor: "border-orange-500", popular: true, category: "Combo Packs", accessType: "Shared", isCombo: true, comboItems: ["Netflix", "Hotstar", "Prime Video"] },
-  { id: 48, name: "AI Pro Pack", logo: "AI", logoSubtext: "Pro Pack", price: 2499, originalPrice: 2997, period: "1 Year", description: "Complete AI toolkit.", bgColor: "bg-gradient-to-br from-emerald-600 to-cyan-600", borderColor: "border-emerald-500", popular: true, category: "Combo Packs", accessType: "Shared", isCombo: true, comboItems: ["Gemini AI", "Perplexity AI", "ChatGPT Plus"] }
+  { id: 46, name: "Student Success Pack", logo: "SP", logoSubtext: "Career", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/8/87/Student_icon.svg", price: 5699, period: "1 Year", description: "Build your future with world-class professional tools.", bgColor: "bg-gradient-to-br from-purple-600 to-blue-600", borderColor: "border-purple-400", category: "Combo Packs", accessType: "Shared", isCombo: true, comboItems: ["LinkedIn Career (1 Year)", "Coursera Plus (Unlimited Access)", "Microsoft Office 365 (Full Suite)"] },
+  { id: 47, name: "OTT Bonanza", logo: "OB", logoSubtext: "Entertainment", logoUrl: "https://cdn.worldvectorlogo.com/logos/netflix-3.svg", price: 1999, period: "1 Year", description: "All-access pass to your favorite movies and series.", bgColor: "bg-gradient-to-br from-red-600 to-orange-600", borderColor: "border-orange-500", category: "Combo Packs", accessType: "Shared", isCombo: true, comboItems: ["Netflix 4K UHD (Premium)", "Amazon Prime Video", "Zee5 Premium", "Sony LIV Premium"] },
+  { id: 48, name: "AI Creator Pack", logo: "AI", logoSubtext: "Creator", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/0/04/ChatGPT_logo.svg", price: 5999, period: "1 Year", description: "The ultimate power-pack for creators and developers.", bgColor: "bg-gradient-to-br from-emerald-600 to-cyan-600", borderColor: "border-emerald-500", category: "Combo Packs", accessType: "Shared", isCombo: true, comboItems: ["Gemini AI Pro (Family Plan)", "Lovable Pro", "Gamma AI Plus"] }
 ];
 
 // Export deduplicated subscriptions - keeps latest entry for each service name
@@ -147,20 +148,102 @@ export function SubscriptionCards() {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [selectedSub, setSelectedSub] = useState<Subscription | null>(null);
 
-  // Helper function to get service background with reliable Unsplash URLs
+  // Helper function to get service background with specific show posters
   const getServiceBackground = (name: string, posterUrl?: string): string => {
-    // Reliable Unsplash URLs for OTT services (using specific IDs for consistency)
+    // Specific show posters for each OTT service (reliable Wikimedia/Unsplash URLs)
     const backgrounds: Record<string, string> = {
-      "Netflix": 'linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.95) 100%), url(https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?w=600&q=80) no-repeat center center / cover',
-      "Netflix 4K": 'linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.95) 100%), url(https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?w=600&q=80) no-repeat center center / cover',
-      "Prime Video": 'linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.95) 100%), url(https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=600&q=80) no-repeat center center / cover',
-      "Hotstar": 'linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.95) 100%), url(https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?w=600&q=80) no-repeat center center / cover',
-      "Hotstar Premium": 'linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.95) 100%), url(https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?w=600&q=80) no-repeat center center / cover',
-      "Sony LIV": 'linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.95) 100%), url(https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=600&q=80) no-repeat center center / cover',
-      "Zee5": 'linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.95) 100%), url(https://images.unsplash.com/photo-1594909122849-11daa4e4d2f2?w=600&q=80) no-repeat center center / cover'
+      // VIP Membership: Premium/Luxury theme (gold)
+      "VIP Membership": 'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.95) 85%), url(https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&q=85) no-repeat center center / cover',
+      
+      // Netflix: Squid Game (green tracksuit/playground theme)
+      "Netflix": 'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.95) 85%), url(https://images.unsplash.com/photo-1563089145-599997674d42?w=800&q=85) no-repeat center center / cover',
+      "Netflix 4K": 'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.95) 85%), url(https://images.unsplash.com/photo-1563089145-599997674d42?w=800&q=85) no-repeat center center / cover',
+      
+      // Prime Video: The Family Man (spy/action thriller - dark urban)
+      "Prime Video": 'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.95) 85%), url(https://images.unsplash.com/photo-1485846234645-a62644f84728?w=800&q=85) no-repeat center center / cover',
+      
+      // Hotstar: Cricket/Team India (sports stadium from Unsplash)
+      "Hotstar": 'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.95) 85%), url(https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=800&q=85) no-repeat center center / cover',
+      "Hotstar Premium": 'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.95) 85%), url(https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=800&q=85) no-repeat center center / cover',
+      
+      // SonyLIV: Family/Comedy show vibe (TMKOC - bright family comedy from Unsplash)
+      "Sony LIV": 'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.95) 85%), url(https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&q=85) no-repeat center center / cover',
+      
+      // Zee5: Bollywood/Indian cinema theme
+      "Zee5": 'linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.9) 80%), url(https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?w=800&q=80) no-repeat center center / cover',
+      
+      // Apple TV: Premium streaming (Ted Lasso - popular Apple TV+ show)
+      "Apple TV": 'linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.9) 80%), url(https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=800&q=80) no-repeat center center / cover',
+      
+      // Apple Music: Music/headphones theme
+      "Apple Music": 'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.95) 85%), url(https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800&q=85) no-repeat center center / cover',
+      
+      // IPTV: Live TV theme
+      "IPTV": 'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.95) 85%), url(https://images.unsplash.com/photo-1593784991095-a205069470b6?w=800&q=85) no-repeat center center / cover',
+      
+      // Coursera: Education/learning theme
+      "Coursera": 'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.95) 85%), url(https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&q=85) no-repeat center center / cover',
+      
+      // Duolingo: Language learning theme
+      "Duolingo": 'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.95) 85%), url(https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&q=85) no-repeat center center / cover',
+      
+      // CapCut Pro: Video editing theme
+      "CapCut Pro": 'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.95) 85%), url(https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=800&q=85) no-repeat center center / cover',
+      
+      // Google Storage: Cloud data theme
+      "Google Storage": 'linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.9) 80%), url(https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&q=80) no-repeat center center / cover',
+      
+      // Nord VPN: Cybersecurity theme
+      "Nord VPN": 'linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.9) 80%), url(https://images.unsplash.com/photo-1563986768609-322da13575f3?w=800&q=80) no-repeat center center / cover',
+      
+      // Zomato: Food delivery theme
+      "Zomato": 'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.95) 85%), url(https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&q=85) no-repeat center center / cover',
+      
+      // Canva Edu: Education design theme
+      "Canva Edu": 'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.95) 85%), url(https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800&q=85) no-repeat center center / cover',
+      
+      // MS Office 365: Office/productivity theme
+      "MS Office 365": 'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.95) 85%), url(https://images.unsplash.com/photo-1497215728101-856f4ea42174?w=800&q=85) no-repeat center center / cover',
+      
+      // Combo Packs: Special bundle themes
+      "Student Success Pack": 'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.95) 85%), url(https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&q=85) no-repeat center center / cover',
+      "OTT Bonanza": 'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.95) 85%), url(https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=800&q=85) no-repeat center center / cover',
+      "AI Creator Pack": 'linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.9) 85%), url(https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=800&q=85) no-repeat center center / cover',
+      
+      // YouTube Premium: YouTube logo/video player theme
+      "YouTube Premium": 'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.95) 85%), url(https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=800&q=85) no-repeat center center / cover',
+      
+      // Amazon: Shopping/delivery theme
+      "Amazon Full Benefit": 'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.95) 85%), url(https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=800&q=85) no-repeat center center / cover',
+      
+      // Adobe CC: Creative design theme
+      "Adobe CC": 'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.95) 85%), url(https://images.unsplash.com/photo-1561070791-2526d30994b5?w=800&q=85) no-repeat center center / cover',
+      
+      // LinkedIn: Professional business theme
+      "LinkedIn Career": 'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.95) 85%), url(https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&q=85) no-repeat center center / cover',
+      "LinkedIn Sales Navigator": 'linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.92) 85%), url(https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&q=85) no-repeat center center / cover',
+      
+      // Microsoft 365: Office/productivity theme
+      "Microsoft 365": 'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.95) 85%), url(https://images.unsplash.com/photo-1497215728101-856f4ea42174?w=800&q=85) no-repeat center center / cover',
+      
+      // Canva Pro: Design/creative theme
+      "Canva Pro": 'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.95) 85%), url(https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=800&q=85) no-repeat center center / cover',
+      
+      // ChatGPT Plus: AI/tech theme
+      "ChatGPT Plus": 'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.95) 85%), url(https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&q=85) no-repeat center center / cover',
+      
+      // AI Services: Tech/futuristic theme
+      "Rezi AI": 'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.95) 85%), url(https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=800&q=85) no-repeat center center / cover',
+      "Gemini AI": 'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.95) 85%), url(https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800&q=85) no-repeat center center / cover',
+      "Gemini AI Pro": 'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.95) 85%), url(https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800&q=85) no-repeat center center / cover',
+      "Perplexity AI": 'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.95) 85%), url(https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=800&q=85) no-repeat center center / cover',
+      "Gamma AI": 'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.95) 85%), url(https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=800&q=85) no-repeat center center / cover',
+      "Notion Business": 'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.95) 85%), url(https://images.unsplash.com/photo-1507925921958-8a62f3d1a50d?w=800&q=85) no-repeat center center / cover',
+      "Lovable Pro": 'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.95) 85%), url(https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&q=85) no-repeat center center / cover',
+      "Grammarly Pro": 'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.95) 85%), url(https://images.unsplash.com/photo-1455390582262-044cdead277a?w=800&q=85) no-repeat center center / cover'
     };
 
-    // Fallback gradients for each service
+    // Fallback gradients for each service (brand colors)
     const fallbackGradients: Record<string, string> = {
       "Netflix": 'linear-gradient(135deg, #e50914 0%, #000000 100%)',
       "Netflix 4K": 'linear-gradient(135deg, #e50914 0%, #000000 100%)',
@@ -168,7 +251,38 @@ export function SubscriptionCards() {
       "Hotstar": 'linear-gradient(135deg, #1e90ff 0%, #0f1419 100%)',
       "Hotstar Premium": 'linear-gradient(135deg, #1e90ff 0%, #0f1419 100%)',
       "Sony LIV": 'linear-gradient(135deg, #f5c518 0%, #1a1a2e 100%)',
-      "Zee5": 'linear-gradient(135deg, #7b1fa2 0%, #0f1419 100%)'
+      "Zee5": 'linear-gradient(135deg, #7b1fa2 0%, #0f1419 100%)',
+      "YouTube Premium": 'linear-gradient(135deg, #ff0000 0%, #000000 100%)',
+      "Amazon Full Benefit": 'linear-gradient(135deg, #ff9900 0%, #232f3e 100%)',
+      "Adobe CC": 'linear-gradient(135deg, #ff0000 0%, #000000 100%)',
+      "LinkedIn Career": 'linear-gradient(135deg, #0077b5 0%, #000000 100%)',
+      "LinkedIn Sales Navigator": 'linear-gradient(135deg, #0077b5 0%, #000000 100%)',
+      "Microsoft 365": 'linear-gradient(135deg, #0078d4 0%, #000000 100%)',
+      "Canva Pro": 'linear-gradient(135deg, #00c4cc 0%, #000000 100%)',
+      "ChatGPT Plus": 'linear-gradient(135deg, #10a37f 0%, #000000 100%)',
+      "Rezi AI": 'linear-gradient(135deg, #6366f1 0%, #000000 100%)',
+      "Gemini AI": 'linear-gradient(135deg, #4285f4 0%, #000000 100%)',
+      "Gemini AI Pro": 'linear-gradient(135deg, #4285f4 0%, #000000 100%)',
+      "Perplexity AI": 'linear-gradient(135deg, #9333ea 0%, #000000 100%)',
+      "Gamma AI": 'linear-gradient(135deg, #a855f7 0%, #000000 100%)',
+      "Notion Business": 'linear-gradient(135deg, #6b7280 0%, #000000 100%)',
+      "Lovable Pro": 'linear-gradient(135deg, #ec4899 0%, #000000 100%)',
+      "Grammarly Pro": 'linear-gradient(135deg, #15a34a 0%, #000000 100%)',
+      "VIP Membership": 'linear-gradient(135deg, #FFD700 0%, #000000 100%)',
+      "Apple TV": 'linear-gradient(135deg, #1a1a1a 0%, #000000 100%)',
+      "Apple Music": 'linear-gradient(135deg, #fa57c1 0%, #000000 100%)',
+      "IPTV": 'linear-gradient(135deg, #6b21a8 0%, #000000 100%)',
+      "Coursera": 'linear-gradient(135deg, #0056d2 0%, #000000 100%)',
+      "Duolingo": 'linear-gradient(135deg, #58cc02 0%, #000000 100%)',
+      "CapCut Pro": 'linear-gradient(135deg, #1a1a1a 0%, #000000 100%)',
+      "Google Storage": 'linear-gradient(135deg, #4285f4 0%, #000000 100%)',
+      "Nord VPN": 'linear-gradient(135deg, #4687ff 0%, #000000 100%)',
+      "Zomato": 'linear-gradient(135deg, #cb202d 0%, #000000 100%)',
+      "Canva Edu": 'linear-gradient(135deg, #00c4cc 0%, #000000 100%)',
+      "MS Office 365": 'linear-gradient(135deg, #d83b01 0%, #000000 100%)',
+      "Student Pack": 'linear-gradient(135deg, #7c3aed 0%, #000000 100%)',
+      "OTT Bonanza": 'linear-gradient(135deg, #ea580c 0%, #000000 100%)',
+      "AI Pro Pack": 'linear-gradient(135deg, #059669 0%, #000000 100%)'
     };
 
     if (backgrounds[name]) {
@@ -176,7 +290,7 @@ export function SubscriptionCards() {
     }
     
     if (posterUrl) {
-      return `linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.95) 100%), url(${posterUrl}) no-repeat center center / cover`;
+      return `linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.95) 85%), url(${posterUrl}) no-repeat center center / cover`;
     }
     
     return fallbackGradients[name] || 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)';
@@ -185,6 +299,7 @@ export function SubscriptionCards() {
   // Helper function to get service glow color
   const getServiceGlow = (name: string): string => {
     const glows: Record<string, string> = {
+      "VIP Membership": '0 4px 30px rgba(255,215,0,0.5), 0 0 25px rgba(255,215,0,0.4)',
       "Netflix": '0 4px 30px rgba(229,9,20,0.4), 0 0 25px rgba(229,9,20,0.3)',
       "Netflix 4K": '0 4px 30px rgba(229,9,20,0.4), 0 0 25px rgba(229,9,20,0.3)',
       "Prime Video": '0 4px 30px rgba(0,168,225,0.4), 0 0 25px rgba(0,168,225,0.3)',
@@ -415,12 +530,34 @@ export function SubscriptionCards() {
     
     playClickSound();
     const referralCode = localStorage.getItem('referralCode');
-    const baseMessage = selectedSub.isVIP 
-      ? `Hi, I'm interested in VIP Membership. Please send payment details for 99 Yearly Pass!`
-      : `I want to buy ${selectedSub.name}`;
-    const referralText = referralCode ? `\n\n Referred by: ${referralCode}` : '';
     
-    window.open(`${WHATSAPP_URL}?text=${encodeURIComponent(baseMessage + referralText)}`);
+    // Standardized WhatsApp messages for all services
+    let baseMessage = '';
+    
+    // Combo Pack Cards
+    if (selectedSub.name === 'OTT Bonanza') {
+      baseMessage = `Hello VisionFlix! I want to buy the OTT Bonanza Pack for ₹1999. (Includes: Netflix, Prime, Zee5, SonyLIV). Please share payment details.`;
+    } else if (selectedSub.name === 'AI Creator Pack') {
+      baseMessage = `Hello VisionFlix! I want to buy the AI Creator Pack for ₹5999. (Includes: Gemini Pro, Lovable Pro, Gamma AI). Please share payment details.`;
+    } else if (selectedSub.name === 'Student Success Pack') {
+      baseMessage = `Hello VisionFlix! I want to buy the Student Success Pack for ₹5699. (Includes: LinkedIn, Coursera, MS Office). Please share payment details.`;
+    }
+    // Offer Cards
+    else if (selectedSub.name === 'Zomato') {
+      baseMessage = `Hello VisionFlix! I am interested in the Zomato 20% OFF offer for orders above ₹999. How can I avail this?`;
+    }
+    // VIP Membership
+    else if (selectedSub.isVIP) {
+      baseMessage = `Hello VisionFlix! I want to buy VIP Membership for ₹99 (1 Year). Please share payment details.`;
+    }
+    // Individual AI & Software Cards - Standardized Format
+    else {
+      baseMessage = `Hello VisionFlix! I want to buy ${selectedSub.name} (${selectedSub.period}) for ₹${selectedSub.price}. Please share the payment details.`;
+    }
+    
+    const referralText = referralCode ? `\n\nReferred by: ${referralCode}` : '';
+    
+    window.open(`${WHATSAPP_URL}?text=${encodeURIComponent(baseMessage + referralText)}`, '_blank');
     closeConfirmModal();
   };
 
@@ -776,62 +913,83 @@ export function SubscriptionCards() {
 
                 {/* VIP Limited Seats Badge */}
                 {sub.isVIP && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 md:-top-3 z-20">
+                  <div className="absolute top-[10px] left-1/2 -translate-x-1/2 z-20">
                     <span className="px-1.5 py-0.5 md:px-2 md:py-0.5 bg-red-500 text-white text-[8px] md:text-[10px] font-bold rounded-full shadow-lg animate-pulse">
                       Limited Seats
                     </span>
                   </div>
                 )}
 
-                {/* Combo Badge */}
-                {sub.isCombo && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 md:-top-3 z-20">
-                    <span className="px-1.5 py-0.5 md:px-2 md:py-0.5 bg-gradient-to-r from-yellow-500 to-orange-500 text-black text-[8px] md:text-[10px] font-bold rounded-full shadow-lg">
-                      Value Pack
-                    </span>
-                  </div>
-                )}
-
-                {/* Hot Deal Badge for regular cards */}
-                {!sub.isVIP && !sub.isCombo && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 md:-top-3 z-20">
+                {/* Hot Deal Badge for regular cards (not combo packs, not offers) */}
+                {!sub.isVIP && !sub.isCombo && !sub.isOffer && (
+                  <div className="absolute top-[10px] left-1/2 -translate-x-1/2 z-20">
                     <span className="px-1.5 py-0.5 md:px-2 md:py-0.5 bg-gradient-to-r from-pink-500 to-purple-500 text-white text-[8px] md:text-[10px] font-bold rounded-full shadow-lg">
                       Hot Deal
                     </span>
                   </div>
                 )}
 
+                {/* Value Pack Badge for Offer cards like Zomato */}
+                {sub.isOffer && (
+                  <div className="absolute top-[10px] left-1/2 -translate-x-1/2 z-20">
+                    <span className="px-1.5 py-0.5 md:px-2 md:py-0.5 bg-gradient-to-r from-yellow-500 to-orange-500 text-black text-[8px] md:text-[10px] font-bold rounded-full shadow-lg">
+                      Value Pack
+                    </span>
+                  </div>
+                )}
+
+                {/* Service Logo - Top Left (Official brand logos only) */}
+                {sub.logoUrl && (
+                  <div className="absolute top-4 left-4 z-10">
+                    <img 
+                      src={sub.logoUrl} 
+                      alt={sub.name}
+                      loading="lazy"
+                      className="h-8 md:h-10 w-auto max-w-[120px] object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)] brightness-110"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  </div>
+                )}
+
                 {/* Content at Bottom */}
                 <div className="absolute inset-x-0 bottom-0 p-4 md:p-5 flex flex-col justify-end z-10">
-                  {/* Service Logo Icon */}
-                  <div className="mb-2">
-                    {sub.logoUrl ? (
-                      <img 
-                        src={sub.logoUrl} 
-                        alt={sub.name}
-                        loading="lazy"
-                        className="h-6 w-auto object-contain drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none';
-                        }}
-                      />
-                    ) : (
-                      <span className="text-xl font-bold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{sub.logo}</span>
-                    )}
-                  </div>
-
-                  {/* Service Name */}
+                  {/* Service Name - Always show */}
                   <h3 className="font-bold text-lg md:text-xl text-white mb-1 drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
                     {sub.name}
                   </h3>
 
-                  {/* Price and Period */}
-                  <div className="flex items-baseline gap-2 mb-3">
-                    <span className="text-2xl md:text-3xl font-bold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
-                      ₹{sub.price}
-                    </span>
-                    <span className="text-gray-300 text-sm drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">{sub.period}</span>
+                  {/* Price and Period - Show offer for isOffer cards, price for others */}
+                  <div className="flex items-baseline gap-2 mb-2">
+                    {sub.isOffer ? (
+                      <span className="text-2xl md:text-3xl font-bold text-red-400 drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
+                        {sub.period}
+                      </span>
+                    ) : (
+                      <>
+                        <span className="text-2xl md:text-3xl font-bold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
+                          ₹{sub.price}
+                        </span>
+                        <span className="text-gray-300 text-sm drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">{sub.period}</span>
+                      </>
+                    )}
                   </div>
+
+                  {/* Combo Pack Included Services */}
+                  {sub.isCombo && sub.comboItems && (
+                    <div className="mb-3">
+                      <p className="text-gray-400 text-xs mb-1.5 font-medium">Included Services:</p>
+                      <ul className="space-y-1">
+                        {sub.comboItems.map((item, idx) => (
+                          <li key={idx} className="flex items-start gap-2 text-white/90 text-xs">
+                            <span className="text-green-400 mt-0.5">•</span>
+                            <span className="drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
 
                   {/* Action Buttons */}
                   <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
@@ -851,7 +1009,7 @@ export function SubscriptionCards() {
                               : 'bg-gradient-to-r from-pink-500 to-purple-600 text-white shadow-[0_0_15px_rgba(236,72,153,0.5)]'
                       } transition-all duration-300`}
                     >
-                      Buy Now
+                      {sub.isOffer ? 'Get Offer' : 'Buy Now'}
                     </motion.button>
                     <motion.button 
                       onClick={(e) => {
