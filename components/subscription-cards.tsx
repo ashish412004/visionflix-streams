@@ -216,6 +216,17 @@ export function SubscriptionCards() {
     setLoadingReferral(true);
     
     try {
+      // Check if Supabase is configured
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+      
+      if (!supabaseUrl || !supabaseKey) {
+        console.warn('Supabase not configured - generating QR in offline mode');
+        // Generate QR without database (offline mode)
+        generateOfflineQR();
+        return;
+      }
+
       // Check if referral already exists
       console.log('Checking if referral exists for mobile:', referralMobile);
       const { data: existingReferral, error: fetchError } = await supabase
@@ -226,10 +237,17 @@ export function SubscriptionCards() {
 
       console.log('Fetch result:', { existingReferral, fetchError });
 
+      // Handle network/connection errors gracefully
+      if (fetchError && fetchError.message === 'Failed to fetch') {
+        console.warn('Network error - falling back to offline mode');
+        generateOfflineQR();
+        return;
+      }
+
       if (fetchError && fetchError.code !== 'PGRST116') {
         console.error('Database fetch error:', fetchError.message, fetchError.details);
-        alert('Error checking referral: ' + fetchError.message);
-        setLoadingReferral(false);
+        // Don't show error to user, just use offline mode
+        generateOfflineQR();
         return;
       }
 
@@ -242,8 +260,6 @@ export function SubscriptionCards() {
       } else {
         // Create new referral
         console.log('Creating new referral for mobile:', referralMobile);
-        console.log('Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL);
-        console.log('Supabase Key:', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'Key exists' : 'Key missing');
         
         const insertData = {
           mobile_number: referralMobile,
@@ -260,9 +276,9 @@ export function SubscriptionCards() {
           .single();
 
         if (insertError) {
-          console.error('Database insert error:', insertError.message, insertError.details);
-          alert('Error creating referral: ' + insertError.message);
-          setLoadingReferral(false);
+          console.error('Database insert error:', insertError.message);
+          // Fall back to offline mode instead of showing error
+          generateOfflineQR();
           return;
         }
 
@@ -278,7 +294,7 @@ export function SubscriptionCards() {
         mobileNumber: referralData.mobile_number,
         referralUrl: referralUrl,
         qrCode: qrCode,
-        points: 0, // Default 0 since points column doesn't exist
+        points: 0,
         referralCount: referralData.referral_count
       });
       
@@ -287,10 +303,30 @@ export function SubscriptionCards() {
       
     } catch (error) {
       console.error('Unexpected error in generateReferralQR:', error);
-      alert('Unexpected error: ' + (error as Error).message);
+      // Fall back to offline mode on any error
+      generateOfflineQR();
     } finally {
       setLoadingReferral(false);
     }
+  };
+
+  // Offline QR generation (when database is unavailable)
+  const generateOfflineQR = () => {
+    console.log('Generating QR in offline mode for:', referralMobile);
+    
+    const qrCode = `QR:https://initiators-tools.com?ref=${referralMobile}`;
+    const referralUrl = `https://initiators.shop/ref?num=91${referralMobile}`;
+    
+    setReferralData({
+      mobileNumber: referralMobile,
+      referralUrl: referralUrl,
+      qrCode: qrCode,
+      points: 0,
+      referralCount: 0
+    });
+    
+    setShowReferralCard(true);
+    setLoadingReferral(false);
   };
 
   const copyToClipboard = () => {
