@@ -889,7 +889,7 @@ export function SubscriptionCards() {
                       transform: 'rotateY(180deg)',
                       zIndex: 2,
                       background: sub.name === "Netflix" || sub.name === "Netflix 4K" 
-                        ? 'linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.2) 100%), url(/netflix-poster.jpg) no-repeat center center / cover'
+                        ? 'linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.2) 100%), url(https://image.tmdb.org/t/p/original/8YFL5QQVPy3AgrEQxNYVSgiPEbe.jpg) no-repeat center center / cover'
                         : sub.name === "Prime Video"
                         ? 'linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.2) 100%), url(https://images.alphacoders.com/605/605592.jpg) no-repeat center center / cover'
                         : sub.name === "Hotstar" || sub.name === "Hotstar Premium"
