@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Lock, FileText, Heart, Search, HelpCircle, Check, AlertCircle, QrCode, Gift, Users, Download, Share2, Zap, ShoppingCart, RotateCcw } from "lucide-react"
+import { Lock, FileText, Heart, Search, HelpCircle, Check, AlertCircle, QrCode, Gift, Users, Download, Share2, Zap, ShoppingCart } from "lucide-react"
 import { useWishlist } from "@/contexts/wishlist-context"
 import { useCart } from "@/contexts/cart-context"
 import { WHATSAPP_URL } from "@/config/constants"
@@ -146,9 +146,56 @@ export function SubscriptionCards() {
   // Buy Confirmation Modal State
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [selectedSub, setSelectedSub] = useState<Subscription | null>(null);
-  
-  // 3D Card Flip State
-  const [flippedCards, setFlippedCards] = useState<Set<number>>(new Set());
+
+  // Helper function to get service background with reliable Unsplash URLs
+  const getServiceBackground = (name: string, posterUrl?: string): string => {
+    // Reliable Unsplash URLs for OTT services (using specific IDs for consistency)
+    const backgrounds: Record<string, string> = {
+      "Netflix": 'linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.95) 100%), url(https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?w=600&q=80) no-repeat center center / cover',
+      "Netflix 4K": 'linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.95) 100%), url(https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?w=600&q=80) no-repeat center center / cover',
+      "Prime Video": 'linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.95) 100%), url(https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=600&q=80) no-repeat center center / cover',
+      "Hotstar": 'linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.95) 100%), url(https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?w=600&q=80) no-repeat center center / cover',
+      "Hotstar Premium": 'linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.95) 100%), url(https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?w=600&q=80) no-repeat center center / cover',
+      "Sony LIV": 'linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.95) 100%), url(https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=600&q=80) no-repeat center center / cover',
+      "Zee5": 'linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.95) 100%), url(https://images.unsplash.com/photo-1594909122849-11daa4e4d2f2?w=600&q=80) no-repeat center center / cover'
+    };
+
+    // Fallback gradients for each service
+    const fallbackGradients: Record<string, string> = {
+      "Netflix": 'linear-gradient(135deg, #e50914 0%, #000000 100%)',
+      "Netflix 4K": 'linear-gradient(135deg, #e50914 0%, #000000 100%)',
+      "Prime Video": 'linear-gradient(135deg, #00a8e1 0%, #000000 100%)',
+      "Hotstar": 'linear-gradient(135deg, #1e90ff 0%, #0f1419 100%)',
+      "Hotstar Premium": 'linear-gradient(135deg, #1e90ff 0%, #0f1419 100%)',
+      "Sony LIV": 'linear-gradient(135deg, #f5c518 0%, #1a1a2e 100%)',
+      "Zee5": 'linear-gradient(135deg, #7b1fa2 0%, #0f1419 100%)'
+    };
+
+    if (backgrounds[name]) {
+      return backgrounds[name];
+    }
+    
+    if (posterUrl) {
+      return `linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.95) 100%), url(${posterUrl}) no-repeat center center / cover`;
+    }
+    
+    return fallbackGradients[name] || 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)';
+  };
+
+  // Helper function to get service glow color
+  const getServiceGlow = (name: string): string => {
+    const glows: Record<string, string> = {
+      "Netflix": '0 4px 30px rgba(229,9,20,0.4), 0 0 25px rgba(229,9,20,0.3)',
+      "Netflix 4K": '0 4px 30px rgba(229,9,20,0.4), 0 0 25px rgba(229,9,20,0.3)',
+      "Prime Video": '0 4px 30px rgba(0,168,225,0.4), 0 0 25px rgba(0,168,225,0.3)',
+      "Hotstar": '0 4px 30px rgba(30,144,255,0.4), 0 0 25px rgba(30,144,255,0.3)',
+      "Hotstar Premium": '0 4px 30px rgba(30,144,255,0.4), 0 0 25px rgba(30,144,255,0.3)',
+      "Sony LIV": '0 4px 30px rgba(245,197,24,0.4), 0 0 25px rgba(245,197,24,0.3)',
+      "Zee5": '0 4px 30px rgba(123,31,162,0.4), 0 0 25px rgba(123,31,162,0.3)'
+    };
+    
+    return glows[name] || '0 4px 30px rgba(236,72,153,0.4), 0 0 25px rgba(236,72,153,0.3)';
+  };
   
   // Generate suggestions based on search term
   useEffect(() => {
@@ -362,21 +409,6 @@ export function SubscriptionCards() {
     setSelectedSub(null);
   };
 
-  // 3D Card Flip Functions
-  const toggleCardFlip = (cardId: number) => {
-    playClickSound();
-    setFlippedCards(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(cardId)) {
-        newSet.delete(cardId);
-      } else {
-        newSet.add(cardId);
-      }
-      return newSet;
-    });
-  };
-
-  const isCardFlipped = (cardId: number) => flippedCards.has(cardId);
 
   const confirmAndChat = () => {
     if (!selectedSub) return;
@@ -716,26 +748,8 @@ export function SubscriptionCards() {
                 whileHover={{ scale: 1.02, y: -5 }}
                 className="relative h-[280px] md:h-[320px] rounded-[20px] overflow-hidden group"
                 style={{
-                  background: sub.name === "Netflix" || sub.name === "Netflix 4K"
-                    ? 'linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.9) 80%), url(https://images.alphacoders.com/941/941595.jpg) no-repeat center center / cover'
-                    : sub.name === "Prime Video"
-                    ? 'linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.9) 80%), url(https://images.alphacoders.com/102/1029124.jpg) no-repeat center center / cover'
-                    : sub.name === "Hotstar" || sub.name === "Hotstar Premium"
-                    ? 'linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.9) 80%), url(https://images.alphacoders.com/110/1101168.jpg) no-repeat center center / cover'
-                    : sub.name === "Sony LIV"
-                    ? 'linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.9) 80%), url(https://wallpapercave.com/dwp1x/wp7858071.jpg) no-repeat center center / cover'
-                    : sub.name === "Zee5"
-                    ? 'linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.9) 80%), url(https://wallpapercave.com/dwp1x/wp10928285.jpg) no-repeat center center / cover'
-                    : sub.posterUrl
-                      ? `linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.9) 80%), url(${sub.posterUrl}) no-repeat center center / cover`
-                      : 'linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.9) 80%), linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
-                  boxShadow: sub.name === "Netflix" || sub.name === "Netflix 4K"
-                    ? '0 4px 30px rgba(229,9,20,0.3), 0 0 20px rgba(229,9,20,0.2)'
-                    : sub.name === "Prime Video"
-                    ? '0 4px 30px rgba(0,168,225,0.3), 0 0 20px rgba(0,168,225,0.2)'
-                    : sub.name === "Hotstar" || sub.name === "Hotstar Premium"
-                    ? '0 4px 30px rgba(30,144,255,0.3), 0 0 20px rgba(30,144,255,0.2)'
-                    : '0 4px 30px rgba(236,72,153,0.3), 0 0 20px rgba(236,72,153,0.2)'
+                  background: getServiceBackground(sub.name, sub.posterUrl),
+                  boxShadow: getServiceGlow(sub.name)
                 }}
               >
                 {/* Heart/Wishlist Button - Top Right Corner */}
@@ -795,7 +809,11 @@ export function SubscriptionCards() {
                       <img 
                         src={sub.logoUrl} 
                         alt={sub.name}
+                        loading="lazy"
                         className="h-6 w-auto object-contain drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                        }}
                       />
                     ) : (
                       <span className="text-xl font-bold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{sub.logo}</span>
