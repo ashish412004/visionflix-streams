@@ -690,304 +690,193 @@ export function SubscriptionCards() {
         >
           <AnimatePresence mode="wait">
             {filtered.map((sub, index) => (
-              <div 
+              <motion.div
                 key={sub.id}
-                className="relative h-[280px] md:h-[320px] perspective-1000 group"
-                style={{ perspective: '1000px' }}
+                layout
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ 
+                  opacity: 1, 
+                  y: 0,
+                  transition: {
+                    type: "spring",
+                    stiffness: 100,
+                    damping: 15,
+                    delay: index * 0.05
+                  }
+                }}
+                exit={{ 
+                  opacity: 0,
+                  y: -20,
+                  transition: {
+                    type: "spring",
+                    stiffness: 100,
+                    damping: 15
+                  }
+                }}
+                whileHover={{ scale: 1.02, y: -5 }}
+                className="relative h-[280px] md:h-[320px] rounded-[20px] overflow-hidden group"
+                style={{
+                  background: sub.name === "Netflix" || sub.name === "Netflix 4K"
+                    ? 'linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.9) 80%), url(https://images.alphacoders.com/941/941595.jpg) no-repeat center center / cover'
+                    : sub.name === "Prime Video"
+                    ? 'linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.9) 80%), url(https://images.alphacoders.com/102/1029124.jpg) no-repeat center center / cover'
+                    : sub.name === "Hotstar" || sub.name === "Hotstar Premium"
+                    ? 'linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.9) 80%), url(https://images.alphacoders.com/110/1101168.jpg) no-repeat center center / cover'
+                    : sub.name === "Sony LIV"
+                    ? 'linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.9) 80%), url(https://wallpapercave.com/dwp1x/wp7858071.jpg) no-repeat center center / cover'
+                    : sub.name === "Zee5"
+                    ? 'linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.9) 80%), url(https://wallpapercave.com/dwp1x/wp10928285.jpg) no-repeat center center / cover'
+                    : sub.posterUrl
+                      ? `linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.9) 80%), url(${sub.posterUrl}) no-repeat center center / cover`
+                      : 'linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.9) 80%), linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+                  boxShadow: sub.name === "Netflix" || sub.name === "Netflix 4K"
+                    ? '0 4px 30px rgba(229,9,20,0.3), 0 0 20px rgba(229,9,20,0.2)'
+                    : sub.name === "Prime Video"
+                    ? '0 4px 30px rgba(0,168,225,0.3), 0 0 20px rgba(0,168,225,0.2)'
+                    : sub.name === "Hotstar" || sub.name === "Hotstar Premium"
+                    ? '0 4px 30px rgba(30,144,255,0.3), 0 0 20px rgba(30,144,255,0.2)'
+                    : '0 4px 30px rgba(236,72,153,0.3), 0 0 20px rgba(236,72,153,0.2)'
+                }}
               >
-                <motion.div
-                  layout
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ 
-                    opacity: 1, 
-                    y: 0,
-                    rotateY: isCardFlipped(sub.id) ? 180 : 0,
-                    transition: {
-                      type: "spring",
-                      stiffness: 100,
-                      damping: 15,
-                      delay: index * 0.05
+                {/* Heart/Wishlist Button - Top Right Corner */}
+                <motion.button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    playClickSound();
+                    if (isInWishlist(sub.id)) {
+                      removeItem(sub.id);
+                      showToast("Removed from wishlist");
+                    } else {
+                      addItem(sub);
+                      showToast("Added to wishlist!");
                     }
                   }}
-                  exit={{ 
-                    opacity: 0,
-                    y: -20,
-                    transition: {
-                      type: "spring",
-                      stiffness: 100,
-                      damping: 15
-                    }
-                  }}
-                  whileHover={{ scale: 1.02 }}
-                  onClick={() => !isCardFlipped(sub.id) && toggleCardFlip(sub.id)}
-                  className="relative w-full h-full transition-all duration-500 cursor-pointer"
-                  style={{ transformStyle: 'preserve-3d' }}
+                  onMouseEnter={playHoverSound}
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                  className="absolute top-3 right-3 md:top-4 md:right-4 p-3 md:p-2 rounded-full border transition-all duration-300 hover:scale-110 z-20 bg-black/40 backdrop-blur-sm"
+                  style={{ borderColor: isInWishlist(sub.id) ? 'rgba(236, 72, 153, 0.8)' : 'rgba(255, 255, 255, 0.2)' }}
                 >
-                  {/* CARD FRONT */}
-                  <div 
-                    className={`absolute inset-0 backdrop-blur-xl bg-black/40 border border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.3)] hover:shadow-[0_8px_40px_rgba(0,0,0,0.4),0_0_20px_rgba(255,255,255,0.1)] ${sub.isVIP ? 'border-[#FFD700]/30 hover:border-[#FFD700]/50 shadow-[0_4px_30px_rgba(255,215,0,0.15)] hover:shadow-[0_8px_40px_rgba(255,215,0,0.25),0_0_30px_rgba(255,215,0,0.3)]' : sub.isCombo ? 'border-purple-400/30 hover:border-purple-400/50 shadow-[0_4px_30px_rgba(168,85,247,0.15)] hover:shadow-[0_8px_40px_rgba(168,85,247,0.25),0_0_30px_rgba(168,85,247,0.3)]' : `border-white/10 hover:border-pink-500/40 shadow-[0_4px_30px_rgba(0,0,0,0.3)] hover:shadow-[0_8px_40px_rgba(236,72,153,0.25),0_0_30px_rgba(236,72,153,0.3)]`} p-3 md:p-5 rounded-2xl flex flex-col w-full h-full`}
-                    style={{ 
-                      backfaceVisibility: 'hidden',
-                      WebkitBackfaceVisibility: 'hidden',
-                      zIndex: 1
-                    }}
-                  >
-                    {/* Heart/Wishlist Button - Top Right Corner */}
-                    <motion.button
+                  <Heart size={16} className={`w-4 h-4 md:w-[18px] md:h-[18px] ${isInWishlist(sub.id) ? 'fill-pink-500 text-pink-500' : 'text-white hover:text-pink-400'}`} />
+                </motion.button>
+
+                {/* VIP Limited Seats Badge */}
+                {sub.isVIP && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 md:-top-3 z-20">
+                    <span className="px-1.5 py-0.5 md:px-2 md:py-0.5 bg-red-500 text-white text-[8px] md:text-[10px] font-bold rounded-full shadow-lg animate-pulse">
+                      Limited Seats
+                    </span>
+                  </div>
+                )}
+
+                {/* Combo Badge */}
+                {sub.isCombo && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 md:-top-3 z-20">
+                    <span className="px-1.5 py-0.5 md:px-2 md:py-0.5 bg-gradient-to-r from-yellow-500 to-orange-500 text-black text-[8px] md:text-[10px] font-bold rounded-full shadow-lg">
+                      Value Pack
+                    </span>
+                  </div>
+                )}
+
+                {/* Hot Deal Badge for regular cards */}
+                {!sub.isVIP && !sub.isCombo && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 md:-top-3 z-20">
+                    <span className="px-1.5 py-0.5 md:px-2 md:py-0.5 bg-gradient-to-r from-pink-500 to-purple-500 text-white text-[8px] md:text-[10px] font-bold rounded-full shadow-lg">
+                      Hot Deal
+                    </span>
+                  </div>
+                )}
+
+                {/* Content at Bottom */}
+                <div className="absolute inset-x-0 bottom-0 p-4 md:p-5 flex flex-col justify-end z-10">
+                  {/* Service Logo Icon */}
+                  <div className="mb-2">
+                    {sub.logoUrl ? (
+                      <img 
+                        src={sub.logoUrl} 
+                        alt={sub.name}
+                        className="h-6 w-auto object-contain drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"
+                      />
+                    ) : (
+                      <span className="text-xl font-bold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{sub.logo}</span>
+                    )}
+                  </div>
+
+                  {/* Service Name */}
+                  <h3 className="font-bold text-lg md:text-xl text-white mb-1 drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
+                    {sub.name}
+                  </h3>
+
+                  {/* Price and Period */}
+                  <div className="flex items-baseline gap-2 mb-3">
+                    <span className="text-2xl md:text-3xl font-bold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
+                      ₹{sub.price}
+                    </span>
+                    <span className="text-gray-300 text-sm drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">{sub.period}</span>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
+                    <motion.button 
+                      onClick={() => openBuyConfirmation(sub)}
+                      onMouseEnter={playHoverSound}
+                      whileTap={{ scale: 0.95 }}
+                      transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                      className={`flex-1 py-2.5 md:py-3 rounded-xl font-bold text-xs md:text-sm ${sub.isVIP 
+                        ? 'bg-gradient-to-r from-[#FFD700] to-yellow-600 text-black shadow-[0_0_15px_rgba(255,215,0,0.4)]' 
+                        : sub.name === "Netflix" || sub.name === "Netflix 4K"
+                          ? 'bg-gradient-to-r from-red-600 to-red-700 text-white shadow-[0_0_15px_rgba(229,9,20,0.5)]'
+                          : sub.name === "Prime Video"
+                            ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-[0_0_15px_rgba(0,168,225,0.5)]'
+                            : sub.name === "Hotstar" || sub.name === "Hotstar Premium"
+                              ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-[0_0_15px_rgba(30,144,255,0.5)]'
+                              : 'bg-gradient-to-r from-pink-500 to-purple-600 text-white shadow-[0_0_15px_rgba(236,72,153,0.5)]'
+                      } transition-all duration-300`}
+                    >
+                      Buy Now
+                    </motion.button>
+                    <motion.button 
                       onClick={(e) => {
                         e.stopPropagation();
                         playClickSound();
-                        if (isInWishlist(sub.id)) {
-                          removeItem(sub.id);
-                          showToast("Removed from wishlist");
+                        if (isInCart(sub.id)) {
+                          removeFromCart(sub.id);
+                          showToast("Removed from cart");
                         } else {
-                          addItem(sub);
-                          showToast("Added to wishlist!");
+                          addToCart({
+                            id: sub.id,
+                            name: sub.name,
+                            price: sub.price,
+                            period: sub.period,
+                            bgColor: sub.bgColor
+                          });
+                          setAddedAnimation(sub.id);
+                          setTimeout(() => setAddedAnimation(null), 1000);
+                          setAddedProduct(sub);
+                          setMiniCartOpen(true);
                         }
                       }}
                       onMouseEnter={playHoverSound}
                       whileTap={{ scale: 0.95 }}
                       transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                      className="absolute top-3 right-3 md:top-4 md:right-4 p-3 md:p-2 rounded-full border transition-all duration-300 hover:scale-110 z-10 bg-black/30 backdrop-blur-sm"
-                      style={{ borderColor: isInWishlist(sub.id) ? 'rgba(236, 72, 153, 0.8)' : 'rgba(255, 255, 255, 0.1)' }}
+                      className={`px-3 md:px-3 py-2.5 md:py-3 min-w-[44px] md:min-w-auto rounded-xl font-bold text-xs md:text-sm border-2 transition-all duration-300 ${isInCart(sub.id)
+                        ? 'bg-red-500 border-red-500 text-white'
+                        : 'border-white/30 text-white hover:border-white hover:bg-white/10'
+                      } ${addedAnimation === sub.id ? 'scale-110' : ''}`}
                     >
-                      <Heart size={16} className={`w-4 h-4 md:w-[18px] md:h-[18px] ${isInWishlist(sub.id) ? 'fill-pink-500 text-pink-500' : 'text-gray-400 hover:text-pink-400'}`} />
-                    </motion.button>
-
-                    {/* VIP Limited Seats Badge */}
-                    {sub.isVIP && (
-                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 md:-top-3">
-                        <span className="px-1.5 py-0.5 md:px-2 md:py-0.5 bg-red-500 text-white text-[8px] md:text-[10px] font-bold rounded-full shadow-lg animate-pulse">
-                          Limited Seats
-                        </span>
-                      </div>
-                    )}
-
-                    {/* Combo Badge */}
-                    {sub.isCombo && (
-                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 md:-top-3">
-                        <span className="px-1.5 py-0.5 md:px-2 md:py-0.5 bg-gradient-to-r from-yellow-500 to-orange-500 text-black text-[8px] md:text-[10px] font-bold rounded-full shadow-lg">
-                          Value Pack
-                        </span>
-                      </div>
-                    )}
-
-                    {/* Hot Deal Badge for regular cards */}
-                    {!sub.isVIP && !sub.isCombo && (
-                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 md:-top-3">
-                        <span className="px-1.5 py-0.5 md:px-2 md:py-0.5 bg-gradient-to-r from-pink-500 to-purple-500 text-white text-[8px] md:text-[10px] font-bold rounded-full shadow-lg">
-                          Hot Deal
-                        </span>
-                      </div>
-                    )}
-
-                    <div className={`w-10 h-10 md:w-12 md:h-12 ${sub.bgColor} ${sub.isVIP ? 'border border-[#FFD700]' : 'border border-white/20'} rounded-xl mb-3 md:mb-4 flex flex-col items-center justify-center font-bold text-white overflow-hidden relative shadow-[inset_0_2px_4px_rgba(0,0,0,0.3)]`}>
-                      {/* Dark overlay for better contrast */}
-                      <div className="absolute inset-0 bg-black/20 pointer-events-none" />
-                      {sub.logoUrl ? (
-                        <img 
-                          src={sub.logoUrl} 
-                          alt={sub.name}
-                          className="w-full h-full object-contain p-1 relative z-10 drop-shadow-[0_0_6px_rgba(255,255,255,0.4)] brightness-110"
-                          onError={(e) => {
-                            const target = e.currentTarget;
-                            target.style.display = 'none';
-                            const parent = target.parentElement;
-                            if (parent) {
-                              const fallback = parent.querySelector('.image-fallback');
-                              if (fallback) fallback.classList.remove('hidden');
-                            }
-                          }}
-                        />
-                      ) : null}
-                      <div className={`fallback-logo flex flex-col items-center justify-center relative z-10 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] ${sub.logoUrl ? 'hidden' : ''}`}>
-                        <span className="text-base md:text-lg">{sub.logo}</span>
-                        <span className="text-[7px] md:text-[8px]">{sub.logoSubtext}</span>
-                      </div>
-                      <div className={`image-fallback hidden flex-col items-center justify-center relative z-10 text-center px-1`}>
-                        <span className="text-[9px] md:text-[10px] font-bold text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)] leading-tight">{sub.name}</span>
-                      </div>
-                    </div>
-
-                    <h3 className={`font-bold text-sm md:text-base mb-1 ${sub.isVIP ? 'text-[#FFD700]' : 'text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]'}`}>{sub.name}</h3>
-                    <p className="text-gray-400 text-[10px] md:text-xs mb-2 md:mb-3">{sub.period}</p>
-                    
-                    <div className="flex items-baseline gap-2 mb-3 md:mb-4">
-                      {sub.id === 45 ? (
-                        <span className={`text-xl md:text-2xl font-bold ${sub.isVIP ? 'text-[#FFD700]' : 'text-white'}`}>{sub.period}</span>
+                      {addedAnimation === sub.id ? (
+                        <span className="text-red-200 text-[10px] md:text-xs">Added!</span>
+                      ) : isInCart(sub.id) ? (
+                        <span className="text-white text-[10px] md:text-xs">Remove</span>
                       ) : (
-                        <>
-                          <span className={`text-xl md:text-2xl font-bold ${sub.isVIP ? 'text-[#FFD700]' : 'text-white drop-shadow-[0_0_8px_rgba(255,0,150,0.6)]'}`}>{sub.price}</span>
-                          {sub.originalPrice && (
-                            <span className="text-gray-500 text-xs md:text-sm line-through ml-2">{sub.originalPrice}</span>
-                          )}
-                        </>
+                        <ShoppingCart size={16} />
                       )}
-                    </div>
-
-                    <p className="text-gray-400 text-[9px] md:text-xs mb-3 md:mb-4 line-clamp-2">{sub.description}</p>
-
-                    <div className="flex gap-1.5 md:gap-2 mt-auto" onClick={(e) => e.stopPropagation()}>
-                      <motion.button 
-                        onClick={() => openBuyConfirmation(sub)}
-                        onMouseEnter={playHoverSound}
-                        whileTap={{ scale: 0.95 }}
-                        transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                        className={`flex-1 py-3 md:py-2.5 min-h-[48px] md:min-h-auto rounded-xl font-bold text-xs md:text-sm ${sub.isVIP 
-                          ? 'bg-gradient-to-r from-[#FFD700] to-yellow-600 text-black hover:from-yellow-600 hover:to-orange-600 hover:shadow-[0_0_20px_rgba(255,215,0,0.5)]' 
-                          : 'bg-gradient-to-r from-pink-500 to-purple-600 text-white hover:from-pink-600 hover:to-purple-700 hover:shadow-[0_0_20px_rgba(236,72,153,0.5)]'
-                        } transition-all duration-300`}
-                      >
-                        Buy Now
-                      </motion.button>
-                      <motion.button 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          playClickSound();
-                          if (isInCart(sub.id)) {
-                            removeFromCart(sub.id);
-                            showToast("Removed from cart");
-                          } else {
-                            addToCart({
-                              id: sub.id,
-                              name: sub.name,
-                              price: sub.price,
-                              period: sub.period,
-                              bgColor: sub.bgColor
-                            });
-                            setAddedAnimation(sub.id);
-                            setTimeout(() => setAddedAnimation(null), 1000);
-                            setAddedProduct(sub);
-                            setMiniCartOpen(true);
-                          }
-                        }}
-                        onMouseEnter={playHoverSound}
-                        whileTap={{ scale: 0.95 }}
-                        transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                        className={`px-3 md:px-3 py-3 md:py-2.5 min-w-[48px] md:min-w-auto min-h-[48px] md:min-h-auto rounded-xl font-bold text-xs md:text-sm border-2 transition-all duration-300 ${isInCart(sub.id)
-                          ? 'bg-red-500 border-red-500 text-white'
-                          : 'border-white/20 text-gray-400 hover:border-purple-400 hover:text-purple-400'
-                        } ${addedAnimation === sub.id ? 'scale-110' : ''}`}
-                      >
-                        {addedAnimation === sub.id ? (
-                          <span className="text-red-400 text-[10px] md:text-xs">Added!</span>
-                        ) : isInCart(sub.id) ? (
-                          <span className="text-white text-[10px] md:text-xs">Remove</span>
-                        ) : (
-                          <ShoppingCart size={14} className="w-3.5 h-3.5 md:w-[18px] md:h-[18px]" />
-                        )}
-                      </motion.button>
-                    </div>
-                  </div>
-
-                  {/* CARD BACK - Poster Side */}
-                  <div 
-                    className="absolute inset-0 rounded-2xl overflow-hidden shadow-[0_4px_30px_rgba(0,0,0,0.5)] flex w-full h-full"
-                    style={{ 
-                      backfaceVisibility: 'hidden',
-                      WebkitBackfaceVisibility: 'hidden',
-                      transform: 'rotateY(180deg)',
-                      zIndex: 2,
-                      background: sub.name === "Netflix" || sub.name === "Netflix 4K" 
-                        ? 'linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.2) 100%), url(https://image.tmdb.org/t/p/original/8YFL5QQVPy3AgrEQxNYVSgiPEbe.jpg) no-repeat center center / cover'
-                        : sub.name === "Prime Video"
-                        ? 'linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.2) 100%), url(https://images.alphacoders.com/605/605592.jpg) no-repeat center center / cover'
-                        : sub.name === "Hotstar" || sub.name === "Hotstar Premium"
-                        ? 'linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.2) 100%), url(https://images.alphacoders.com/131/1318023.jpg) no-repeat center center / cover'
-                        : sub.name === "Sony LIV"
-                        ? 'linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.2) 100%), url(https://images.alphacoders.com/119/1199976.jpg) no-repeat center center / cover'
-                        : sub.name === "Zee5"
-                        ? 'linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.2) 100%), url(https://images.alphacoders.com/119/1199977.jpg) no-repeat center center / cover'
-                        : sub.posterUrl 
-                          ? `linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.2) 100%), url(${sub.posterUrl}) no-repeat center center / cover`
-                          : 'linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.2) 100%)'
-                    }}
-                  >
-                    {/* Additional Dark Overlay for better text contrast */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-black/40 pointer-events-none" />
-                    
-                    {/* Close/Back Button */}
-                    <motion.button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleCardFlip(sub.id);
-                      }}
-                      whileTap={{ scale: 0.95 }}
-                      className="absolute top-3 right-3 p-2 rounded-full bg-black/50 backdrop-blur-sm border border-white/20 text-white hover:bg-black/70 transition-all duration-300 z-20"
-                    >
-                      <RotateCcw className="w-4 h-4" />
                     </motion.button>
-
-                    {/* Content Overlay */}
-                    <div className="absolute inset-0 p-4 md:p-5 flex flex-col justify-end">
-                      {/* Featured Content Label */}
-                      <div className="mb-2">
-                        <span className="px-2 py-1 bg-red-500/80 backdrop-blur-sm text-white text-[8px] md:text-[10px] font-bold rounded-full">
-                          Featured
-                        </span>
-                      </div>
-                      
-                      {/* Service Name */}
-                      <h3 className="text-white font-bold text-lg md:text-xl mb-1 drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
-                        {sub.name}
-                      </h3>
-                      
-                      {/* Show/Movie Title based on service */}
-                      <p className="text-gray-300 text-xs md:text-sm mb-3 drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]">
-                        {sub.name === "Netflix" || sub.name === "Netflix 4K" ? "Stranger Things" :
-                         sub.name === "Prime Video" ? "The Boys" :
-                         sub.name === "Hotstar" || sub.name === "Hotstar Premium" ? "Marvel Series" :
-                         sub.name === "Sony LIV" ? "Scam 1992" :
-                         sub.name === "Zee5" ? "RRR" : sub.period}
-                      </p>
-
-                      {/* Price */}
-                      <div className="mb-3">
-                        <span className="text-2xl md:text-3xl font-bold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
-                          ₹{sub.price}
-                        </span>
-                        <span className="text-gray-400 text-xs ml-2">{sub.period}</span>
-                      </div>
-
-                      {/* Action Buttons */}
-                      <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
-                        <motion.button 
-                          onClick={() => {
-                            openBuyConfirmation(sub);
-                            toggleCardFlip(sub.id);
-                          }}
-                          whileTap={{ scale: 0.95 }}
-                          className={`flex-1 py-2.5 md:py-3 rounded-xl font-bold text-xs md:text-sm ${sub.isVIP 
-                            ? 'bg-gradient-to-r from-[#FFD700] to-yellow-600 text-black' 
-                            : 'bg-gradient-to-r from-pink-500 to-purple-600 text-white shadow-[0_0_15px_rgba(236,72,153,0.5)]'
-                          } transition-all duration-300`}
-                        >
-                          Buy Now
-                        </motion.button>
-                        <motion.button 
-                          onClick={() => {
-                            const referralCode = localStorage.getItem('referralCode');
-                            const baseMessage = sub.isVIP 
-                              ? `Hi, I'm interested in VIP Membership. Please send payment details for 99 Yearly Pass!`
-                              : `I want to buy ${sub.name}`;
-                            const referralText = referralCode ? `\n\n Referred by: ${referralCode}` : '';
-                            window.open(`${WHATSAPP_URL}?text=${encodeURIComponent(baseMessage + referralText)}`);
-                          }}
-                          whileTap={{ scale: 0.95 }}
-                          className="flex-1 py-2.5 md:py-3 rounded-xl font-bold text-xs md:text-sm bg-gradient-to-r from-green-500 to-green-600 text-white shadow-[0_0_15px_rgba(37,211,102,0.4)] transition-all duration-300 flex items-center justify-center gap-1"
-                        >
-                          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M12 2C6.48 2 2 6.48 2 12c0 1.89.525 3.66 1.438 5.168L2 22l5.027-1.422A9.96 9.96 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm.3 14.5c-1.8.1-3.3-.4-4.4-1.4-1.1-1.1-1.6-2.6-1.4-4.4.1-1.2.6-2.3 1.4-3.1.8-.8 1.9-1.3 3.1-1.4 1.8-.1 3.3.4 4.4 1.4 1.1 1.1 1.6 2.6 1.4 4.4-.1 1.2-.6 2.3-1.4 3.1-.8.8-1.9 1.3-3.1 1.4z"/>
-                          </svg>
-                          WhatsApp
-                        </motion.button>
-                      </div>
-                    </div>
                   </div>
-                </motion.div>
-              </div>
-          ))}
-        </AnimatePresence>
+                </div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
       </motion.div>
 
       {/* Refer & Earn Section */}
