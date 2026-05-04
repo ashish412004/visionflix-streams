@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Lock, FileText, Heart, Search, HelpCircle, Check, AlertCircle, QrCode, Gift, Users, Download, Share2, Zap, ShoppingCart } from "lucide-react"
+import { Lock, FileText, Heart, Search, HelpCircle, Check, AlertCircle, QrCode, Gift, Users, Download, Share2, Zap, ShoppingCart, RotateCcw } from "lucide-react"
 import { useWishlist } from "@/contexts/wishlist-context"
 import { useCart } from "@/contexts/cart-context"
 import { WHATSAPP_URL } from "@/config/constants"
@@ -19,6 +19,7 @@ interface Subscription {
   logo: string;
   logoSubtext: string;
   logoUrl?: string;
+  posterUrl?: string;
   price: number;
   originalPrice?: number;
   period: string;
@@ -52,11 +53,11 @@ const allSubscriptionsRaw: Subscription[] = [
   // VIP Pass - Special Card
   { id: 0, name: "VIP Membership", logo: "VIP", logoSubtext: "PASS", price: 99, period: "1 Year", description: "Exclusive access to all premium services.", bgColor: "bg-black", borderColor: "border-[#FFD700]", popular: true, category: "All", accessType: "Shared", isVIP: true },
   // OTT Shared
-  { id: 1, name: "Netflix", logo: "N", logoSubtext: "Netflix", logoUrl: "https://cdn.worldvectorlogo.com/logos/netflix-3.svg", price: 199, period: "1 Month", description: "Premium streaming entertainment.", bgColor: "bg-red-600", borderColor: "border-red-500", popular: true, category: "OTT", accessType: "Shared" },
-  { id: 2, name: "Prime Video", logo: "P", logoSubtext: "Prime", logoUrl: "https://cdn.worldvectorlogo.com/logos/amazon-prime-video-1.svg", price: 199, period: "1 Year", description: "Movies and originals.", bgColor: "bg-blue-600", borderColor: "border-blue-500", category: "OTT", accessType: "Shared" },
-  { id: 3, name: "Zee5", logo: "Z", logoSubtext: "Zee5", price: 249, period: "1 Year", description: "Premium content no ads.", bgColor: "bg-purple-700", borderColor: "border-purple-500", category: "OTT", accessType: "Shared" },
-  { id: 4, name: "Sony LIV", logo: "S", logoSubtext: "Sony LIV", price: 399, period: "1 Year", description: "Live sports entertainment.", bgColor: "bg-gray-700", borderColor: "border-blue-600", category: "OTT", accessType: "Shared" },
-  { id: 5, name: "Hotstar", logo: "D+", logoSubtext: "Hotstar", price: 699, period: "1 Year", description: "Super Plan content.", bgColor: "bg-blue-800", borderColor: "border-blue-700", category: "OTT", accessType: "Shared" },
+  { id: 1, name: "Netflix", logo: "N", logoSubtext: "Netflix", logoUrl: "https://cdn.worldvectorlogo.com/logos/netflix-3.svg", posterUrl: "https://image.tmdb.org/t/p/original/9w0WX3r2iY0oTqPQ1x5fGKrGWrZ.jpg", price: 199, period: "1 Month", description: "Premium streaming entertainment.", bgColor: "bg-red-600", borderColor: "border-red-500", popular: true, category: "OTT", accessType: "Shared" },
+  { id: 2, name: "Prime Video", logo: "P", logoSubtext: "Prime", logoUrl: "https://cdn.worldvectorlogo.com/logos/amazon-prime-video-1.svg", posterUrl: "https://image.tmdb.org/t/p/original/mK0Q1jM8Z8L4l2N0x44p5l3s3x.jpg", price: 199, period: "1 Year", description: "Movies and originals.", bgColor: "bg-blue-600", borderColor: "border-blue-500", category: "OTT", accessType: "Shared" },
+  { id: 3, name: "Zee5", logo: "Z", logoSubtext: "Zee5", posterUrl: "https://image.tmdb.org/t/p/original/lFhxzPCzCMAZHK4oPj5v8Z8n.jpg", price: 249, period: "1 Year", description: "Premium content no ads.", bgColor: "bg-purple-700", borderColor: "border-purple-500", category: "OTT", accessType: "Shared" },
+  { id: 4, name: "Sony LIV", logo: "S", logoSubtext: "Sony LIV", posterUrl: "https://image.tmdb.org/t/p/original/9Wgn8Q3l3F2s4f8Z8J2vM3sK.jpg", price: 399, period: "1 Year", description: "Live sports entertainment.", bgColor: "bg-gray-700", borderColor: "border-blue-600", category: "OTT", accessType: "Shared" },
+  { id: 5, name: "Hotstar", logo: "D+", logoSubtext: "Hotstar", posterUrl: "https://image.tmdb.org/t/p/original/qJx4J8s2x8b5mM2v8N9pL3wR.jpg", price: 699, period: "1 Year", description: "Super Plan content.", bgColor: "bg-blue-800", borderColor: "border-blue-700", category: "OTT", accessType: "Shared" },
   // OTT Personal
   { id: 6, name: "Prime Video", logo: "P", logoSubtext: "Prime", price: 499, period: "1 Year", description: "Personal Prime account.", bgColor: "bg-blue-600", borderColor: "border-blue-500", popular: true, category: "OTT", accessType: "Personal" },
   { id: 7, name: "Sony LIV", logo: "S", logoSubtext: "Sony LIV", price: 499, period: "1 Year", description: "Personal Sony LIV.", bgColor: "bg-gray-700", borderColor: "border-blue-600", category: "OTT", accessType: "Personal" },
@@ -86,9 +87,9 @@ const allSubscriptionsRaw: Subscription[] = [
   { id: 28, name: "Adobe CC", logo: "Ad", logoSubtext: "Adobe", logoUrl: "https://cdn.worldvectorlogo.com/logos/adobe-creative-cloud-2.svg", price: 4999, period: "1 Year", description: "All Adobe apps.", bgColor: "bg-red-700", borderColor: "border-red-600", popular: true, category: "Softwares", accessType: "Shared" },
   { id: 29, name: "MS Office 365", logo: "MS", logoSubtext: "MS", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg", price: 999, period: "1 Year", description: "Office + 1TB Cloud.", bgColor: "bg-blue-600", borderColor: "border-blue-500", popular: true, category: "Softwares", accessType: "Shared" },
   // OTT - Updated
-  { id: 30, name: "Netflix 4K", logo: "N", logoSubtext: "Netflix", logoUrl: "https://cdn.worldvectorlogo.com/logos/netflix-3.svg", price: 199, period: "1 Month", description: "Premium 4K streaming.", bgColor: "bg-red-600", borderColor: "border-red-500", popular: true, category: "OTT", accessType: "Shared" },
-  { id: 31, name: "Netflix 4K", logo: "N", logoSubtext: "Netflix", logoUrl: "https://cdn.worldvectorlogo.com/logos/netflix-3.svg", price: 1299, period: "1 Year", description: "Premium 4K streaming.", bgColor: "bg-red-700", borderColor: "border-red-600", category: "OTT", accessType: "Shared" },
-  { id: 32, name: "Prime Video", logo: "P", logoSubtext: "Prime", logoUrl: "https://cdn.worldvectorlogo.com/logos/amazon-prime-video-1.svg", price: 299, period: "1 Year", description: "Movies and originals.", bgColor: "bg-blue-600", borderColor: "border-blue-500", category: "OTT", accessType: "Shared" },
+  { id: 30, name: "Netflix 4K", logo: "N", logoSubtext: "Netflix", logoUrl: "https://cdn.worldvectorlogo.com/logos/netflix-3.svg", posterUrl: "https://image.tmdb.org/t/p/original/9w0WX3r2iY0oTqPQ1x5fGKrGWrZ.jpg", price: 199, period: "1 Month", description: "Premium 4K streaming.", bgColor: "bg-red-600", borderColor: "border-red-500", popular: true, category: "OTT", accessType: "Shared" },
+  { id: 31, name: "Netflix 4K", logo: "N", logoSubtext: "Netflix", logoUrl: "https://cdn.worldvectorlogo.com/logos/netflix-3.svg", posterUrl: "https://image.tmdb.org/t/p/original/9w0WX3r2iY0oTqPQ1x5fGKrGWrZ.jpg", price: 1299, period: "1 Year", description: "Premium 4K streaming.", bgColor: "bg-red-700", borderColor: "border-red-600", category: "OTT", accessType: "Shared" },
+  { id: 32, name: "Prime Video", logo: "P", logoSubtext: "Prime", logoUrl: "https://cdn.worldvectorlogo.com/logos/amazon-prime-video-1.svg", posterUrl: "https://image.tmdb.org/t/p/original/mK0Q1jM8Z8L4l2N0x44p5l3s3x.jpg", price: 299, period: "1 Year", description: "Movies and originals.", bgColor: "bg-blue-600", borderColor: "border-blue-500", category: "OTT", accessType: "Shared" },
   { id: 33, name: "Hotstar Premium", logo: "D+", logoSubtext: "Hotstar", price: 599, period: "1 Year", description: "Premium content.", bgColor: "bg-blue-800", borderColor: "border-blue-700", category: "OTT", accessType: "Shared" },
   { id: 34, name: "Sony LIV", logo: "S", logoSubtext: "Sony LIV", price: 399, period: "1 Year", description: "Live sports entertainment.", bgColor: "bg-gray-700", borderColor: "border-blue-600", category: "OTT", accessType: "Shared" },
   { id: 35, name: "Sony LIV", logo: "S", logoSubtext: "Sony LIV", price: 699, period: "1 Year", description: "Premium sports pack.", bgColor: "bg-gray-800", borderColor: "border-blue-700", category: "OTT", accessType: "Shared" },
@@ -141,6 +142,13 @@ export function SubscriptionCards() {
   });
   const [loadingReferral, setLoadingReferral] = useState(false);
   const [copied, setCopied] = useState(false);
+  
+  // Buy Confirmation Modal State
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [selectedSub, setSelectedSub] = useState<Subscription | null>(null);
+  
+  // 3D Card Flip State
+  const [flippedCards, setFlippedCards] = useState<Set<number>>(new Set());
   
   // Generate suggestions based on search term
   useEffect(() => {
@@ -340,6 +348,48 @@ export function SubscriptionCards() {
     const message = `Bhai, check out Initiators Services for premium OTT & Tools! Use my link to get deals and I get ₹30 cashback: ${referralData.referralUrl}`;
     window.open(`${WHATSAPP_URL}?text=${encodeURIComponent(message)}`, '_blank');
     showToast("Shared on WhatsApp!");
+  };
+
+  // Buy Confirmation Modal Functions
+  const openBuyConfirmation = (sub: Subscription) => {
+    playClickSound();
+    setSelectedSub(sub);
+    setShowConfirmModal(true);
+  };
+
+  const closeConfirmModal = () => {
+    setShowConfirmModal(false);
+    setSelectedSub(null);
+  };
+
+  // 3D Card Flip Functions
+  const toggleCardFlip = (cardId: number) => {
+    playClickSound();
+    setFlippedCards(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(cardId)) {
+        newSet.delete(cardId);
+      } else {
+        newSet.add(cardId);
+      }
+      return newSet;
+    });
+  };
+
+  const isCardFlipped = (cardId: number) => flippedCards.has(cardId);
+
+  const confirmAndChat = () => {
+    if (!selectedSub) return;
+    
+    playClickSound();
+    const referralCode = localStorage.getItem('referralCode');
+    const baseMessage = selectedSub.isVIP 
+      ? `Hi, I'm interested in VIP Membership. Please send payment details for 99 Yearly Pass!`
+      : `I want to buy ${selectedSub.name}`;
+    const referralText = referralCode ? `\n\n Referred by: ${referralCode}` : '';
+    
+    window.open(`${WHATSAPP_URL}?text=${encodeURIComponent(baseMessage + referralText)}`);
+    closeConfirmModal();
   };
 
   const showToast = (message: string) => {
@@ -640,191 +690,294 @@ export function SubscriptionCards() {
         >
           <AnimatePresence mode="wait">
             {filtered.map((sub, index) => (
-              <motion.div
+              {/* 3D Flip Card Container */}
+              <div 
                 key={sub.id}
-                layout
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ 
-                  opacity: 1, 
-                  y: 0,
-                  transition: {
-                    type: "spring",
-                    stiffness: 100,
-                    damping: 15,
-                    delay: index * 0.05
-                  }
-                }}
-                exit={{ 
-                  opacity: 0,
-                  y: -20,
-                  transition: {
-                    type: "spring",
-                    stiffness: 100,
-                    damping: 15
-                  }
-                }}
-                whileHover={{ scale: 1.05, y: -5 }}
-                className={`backdrop-blur-xl bg-black/40 border border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.3)] hover:shadow-[0_8px_40px_rgba(0,0,0,0.4),0_0_20px_rgba(255,255,255,0.1)] ${sub.isVIP ? 'border-[#FFD700]/30 hover:border-[#FFD700]/50 shadow-[0_4px_30px_rgba(255,215,0,0.15)] hover:shadow-[0_8px_40px_rgba(255,215,0,0.25),0_0_30px_rgba(255,215,0,0.3)]' : sub.isCombo ? 'border-purple-400/30 hover:border-purple-400/50 shadow-[0_4px_30px_rgba(168,85,247,0.15)] hover:shadow-[0_8px_40px_rgba(168,85,247,0.25),0_0_30px_rgba(168,85,247,0.3)]' : `border-white/10 hover:border-pink-500/40 shadow-[0_4px_30px_rgba(0,0,0,0.3)] hover:shadow-[0_8px_40px_rgba(236,72,153,0.25),0_0_30px_rgba(236,72,153,0.3)]`} p-3 md:p-5 rounded-2xl relative group transition-all duration-300 h-full flex flex-col`}
+                className="relative h-[280px] md:h-[320px] perspective-1000 group"
+                style={{ perspective: '1000px' }}
               >
-                {/* Heart/Wishlist Button - Top Right Corner */}
-                <motion.button
-                  onClick={() => {
-                    playClickSound();
-                    if (isInWishlist(sub.id)) {
-                      removeItem(sub.id);
-                      showToast("Removed from wishlist");
-                    } else {
-                      addItem(sub);
-                      showToast("Added to wishlist!");
+                <motion.div
+                  layout
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ 
+                    opacity: 1, 
+                    y: 0,
+                    rotateY: isCardFlipped(sub.id) ? 180 : 0,
+                    transition: {
+                      type: "spring",
+                      stiffness: 100,
+                      damping: 15,
+                      delay: index * 0.05
                     }
                   }}
-                  onMouseEnter={playHoverSound}
-                  whileTap={{ scale: 0.95 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                  className="absolute top-3 right-3 md:top-4 md:right-4 p-3 md:p-2 rounded-full border transition-all duration-300 hover:scale-110 z-10 bg-black/30 backdrop-blur-sm"
-                  style={{ borderColor: isInWishlist(sub.id) ? 'rgba(236, 72, 153, 0.8)' : 'rgba(255, 255, 255, 0.1)' }}
+                  exit={{ 
+                    opacity: 0,
+                    y: -20,
+                    transition: {
+                      type: "spring",
+                      stiffness: 100,
+                      damping: 15
+                    }
+                  }}
+                  whileHover={{ scale: 1.02 }}
+                  onClick={() => !isCardFlipped(sub.id) && toggleCardFlip(sub.id)}
+                  className="relative w-full h-full transition-all duration-500 cursor-pointer"
+                  style={{ transformStyle: 'preserve-3d' }}
                 >
-                  <Heart size={16} className={`w-4 h-4 md:w-[18px] md:h-[18px] ${isInWishlist(sub.id) ? 'fill-pink-500 text-pink-500' : 'text-gray-400 hover:text-pink-400'}`} />
-                </motion.button>
-
-                {/* VIP Limited Seats Badge */}
-                {sub.isVIP && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 md:-top-3">
-                    <span className="px-1.5 py-0.5 md:px-2 md:py-0.5 bg-red-500 text-white text-[8px] md:text-[10px] font-bold rounded-full shadow-lg animate-pulse">
-                      Limited Seats
-                    </span>
-                  </div>
-                )}
-
-                {/* Combo Badge */}
-                {sub.isCombo && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 md:-top-3">
-                    <span className="px-1.5 py-0.5 md:px-2 md:py-0.5 bg-gradient-to-r from-yellow-500 to-orange-500 text-black text-[8px] md:text-[10px] font-bold rounded-full shadow-lg">
-                      Value Pack
-                    </span>
-                  </div>
-                )}
-
-                {/* Hot Deal Badge for regular cards */}
-                {!sub.isVIP && !sub.isCombo && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 md:-top-3">
-                    <span className="px-1.5 py-0.5 md:px-2 md:py-0.5 bg-gradient-to-r from-pink-500 to-purple-500 text-white text-[8px] md:text-[10px] font-bold rounded-full shadow-lg">
-                      Hot Deal
-                    </span>
-                  </div>
-                )}
-
-                <div className={`w-10 h-10 md:w-12 md:h-12 ${sub.bgColor} ${sub.isVIP ? 'border border-[#FFD700]' : 'border border-white/20'} rounded-xl mb-3 md:mb-4 flex flex-col items-center justify-center font-bold text-white overflow-hidden relative shadow-[inset_0_2px_4px_rgba(0,0,0,0.3)]`}>
-                  {/* Dark overlay for better contrast */}
-                  <div className="absolute inset-0 bg-black/20 pointer-events-none" />
-                  {sub.logoUrl ? (
-                    <img 
-                      src={sub.logoUrl} 
-                      alt={sub.name}
-                      className="w-full h-full object-contain p-1 relative z-10 drop-shadow-[0_0_6px_rgba(255,255,255,0.4)] brightness-110"
-                      onError={(e) => {
-                        const target = e.currentTarget;
-                        target.style.display = 'none';
-                        const parent = target.parentElement;
-                        if (parent) {
-                          // Show styled fallback text with service name
-                          const fallback = parent.querySelector('.image-fallback');
-                          if (fallback) fallback.classList.remove('hidden');
+                  {/* CARD FRONT */}
+                  <div 
+                    className={`absolute inset-0 backdrop-blur-xl bg-black/40 border border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.3)] hover:shadow-[0_8px_40px_rgba(0,0,0,0.4),0_0_20px_rgba(255,255,255,0.1)] ${sub.isVIP ? 'border-[#FFD700]/30 hover:border-[#FFD700]/50 shadow-[0_4px_30px_rgba(255,215,0,0.15)] hover:shadow-[0_8px_40px_rgba(255,215,0,0.25),0_0_30px_rgba(255,215,0,0.3)]' : sub.isCombo ? 'border-purple-400/30 hover:border-purple-400/50 shadow-[0_4px_30px_rgba(168,85,247,0.15)] hover:shadow-[0_8px_40px_rgba(168,85,247,0.25),0_0_30px_rgba(168,85,247,0.3)]' : `border-white/10 hover:border-pink-500/40 shadow-[0_4px_30px_rgba(0,0,0,0.3)] hover:shadow-[0_8px_40px_rgba(236,72,153,0.25),0_0_30px_rgba(236,72,153,0.3)]`} p-3 md:p-5 rounded-2xl flex flex-col`}
+                    style={{ backfaceVisibility: 'hidden' }}
+                  >
+                    {/* Heart/Wishlist Button - Top Right Corner */}
+                    <motion.button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        playClickSound();
+                        if (isInWishlist(sub.id)) {
+                          removeItem(sub.id);
+                          showToast("Removed from wishlist");
+                        } else {
+                          addItem(sub);
+                          showToast("Added to wishlist!");
                         }
                       }}
-                    />
-                  ) : null}
-                  {/* Logo Text Fallback (for cards without logoUrl) */}
-                  <div className={`fallback-logo flex flex-col items-center justify-center relative z-10 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] ${sub.logoUrl ? 'hidden' : ''}`}>
-                    <span className="text-base md:text-lg">{sub.logo}</span>
-                    <span className="text-[7px] md:text-[8px]">{sub.logoSubtext}</span>
-                  </div>
-                  {/* Image Error Fallback - Shows service name when image fails */}
-                  <div className={`image-fallback hidden flex-col items-center justify-center relative z-10 text-center px-1`}>
-                    <span className="text-[9px] md:text-[10px] font-bold text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)] leading-tight">{sub.name}</span>
-                  </div>
-                </div>
+                      onMouseEnter={playHoverSound}
+                      whileTap={{ scale: 0.95 }}
+                      transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                      className="absolute top-3 right-3 md:top-4 md:right-4 p-3 md:p-2 rounded-full border transition-all duration-300 hover:scale-110 z-10 bg-black/30 backdrop-blur-sm"
+                      style={{ borderColor: isInWishlist(sub.id) ? 'rgba(236, 72, 153, 0.8)' : 'rgba(255, 255, 255, 0.1)' }}
+                    >
+                      <Heart size={16} className={`w-4 h-4 md:w-[18px] md:h-[18px] ${isInWishlist(sub.id) ? 'fill-pink-500 text-pink-500' : 'text-gray-400 hover:text-pink-400'}`} />
+                    </motion.button>
 
-                <h3 className={`font-bold text-sm md:text-base mb-1 ${sub.isVIP ? 'text-[#FFD700]' : 'text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]'}`}>{sub.name}</h3>
-                <p className="text-gray-400 text-[10px] md:text-xs mb-2 md:mb-3">{sub.period}</p>
-                
-                {/* Price with Original Price for Combos */}
-                <div className="flex items-baseline gap-2 mb-3 md:mb-4">
-                  {sub.id === 45 ? (
-                    <span className={`text-xl md:text-2xl font-bold ${sub.isVIP ? 'text-[#FFD700]' : 'text-white'}`}>{sub.period}</span>
-                  ) : (
-                    <>
-                      <span className={`text-xl md:text-2xl font-bold ${sub.isVIP ? 'text-[#FFD700]' : 'text-white drop-shadow-[0_0_8px_rgba(255,0,150,0.6)]'}`}>{sub.price}</span>
-                      {sub.originalPrice && (
-                        <span className="text-gray-500 text-xs md:text-sm line-through ml-2">{sub.originalPrice}</span>
-                      )}
-                    </>
-                  )}
-                </div>
-
-                <p className="text-gray-400 text-[9px] md:text-xs mb-3 md:mb-4 line-clamp-2">{sub.description}</p>
-
-                <div className="flex gap-1.5 md:gap-2 mt-auto">
-                  <motion.button 
-                    onClick={() => {
-                      playClickSound();
-                      const referralCode = localStorage.getItem('referralCode');
-                      const baseMessage = sub.isVIP 
-                        ? `Hi, I'm interested in VIP Membership. Please send payment details for 99 Yearly Pass!`
-                        : `I want to buy ${sub.name}`;
-                      const referralText = referralCode ? `\n\n Referred by: ${referralCode}` : '';
-                      window.open(`${WHATSAPP_URL}?text=${encodeURIComponent(baseMessage + referralText)}`);
-                    }}
-                    onMouseEnter={playHoverSound}
-                    whileTap={{ scale: 0.95 }}
-                    transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                    className={`flex-1 py-3 md:py-2.5 min-h-[48px] md:min-h-auto rounded-xl font-bold text-xs md:text-sm ${sub.isVIP 
-                      ? 'bg-gradient-to-r from-[#FFD700] to-yellow-600 text-black hover:from-yellow-600 hover:to-orange-600 hover:shadow-[0_0_20px_rgba(255,215,0,0.5)]' 
-                      : 'bg-gradient-to-r from-pink-500 to-purple-600 text-white hover:from-pink-600 hover:to-purple-700 hover:shadow-[0_0_20px_rgba(236,72,153,0.5)]'
-                    } transition-all duration-300`}
-                  >
-                    Buy Now
-                  </motion.button>
-                  <motion.button 
-                    onClick={() => {
-                      playClickSound();
-                      if (isInCart(sub.id)) {
-                        // Remove from cart
-                        removeFromCart(sub.id);
-                        showToast("Removed from cart");
-                      } else {
-                        // Add to cart
-                        addToCart({
-                          id: sub.id,
-                          name: sub.name,
-                          price: sub.price,
-                          period: sub.period,
-                          bgColor: sub.bgColor
-                        });
-                        setAddedAnimation(sub.id);
-                        setTimeout(() => setAddedAnimation(null), 1000);
-                        setAddedProduct(sub);
-                        setMiniCartOpen(true);
-                      }
-                    }}
-                    onMouseEnter={playHoverSound}
-                    whileTap={{ scale: 0.95 }}
-                    transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                    className={`px-3 md:px-3 py-3 md:py-2.5 min-w-[48px] md:min-w-auto min-h-[48px] md:min-h-auto rounded-xl font-bold text-xs md:text-sm border-2 transition-all duration-300 ${isInCart(sub.id)
-                      ? 'bg-red-500 border-red-500 text-white'
-                      : 'border-white/20 text-gray-400 hover:border-purple-400 hover:text-purple-400'
-                    } ${addedAnimation === sub.id ? 'scale-110' : ''}`}
-                  >
-                    {addedAnimation === sub.id ? (
-                      <span className="text-red-400 text-[10px] md:text-xs">Added!</span>
-                    ) : isInCart(sub.id) ? (
-                      <span className="text-white text-[10px] md:text-xs">Remove</span>
-                    ) : (
-                      <ShoppingCart size={14} className="w-3.5 h-3.5 md:w-[18px] md:h-[18px]" />
+                    {/* VIP Limited Seats Badge */}
+                    {sub.isVIP && (
+                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 md:-top-3">
+                        <span className="px-1.5 py-0.5 md:px-2 md:py-0.5 bg-red-500 text-white text-[8px] md:text-[10px] font-bold rounded-full shadow-lg animate-pulse">
+                          Limited Seats
+                        </span>
+                      </div>
                     )}
-                </motion.button>
+
+                    {/* Combo Badge */}
+                    {sub.isCombo && (
+                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 md:-top-3">
+                        <span className="px-1.5 py-0.5 md:px-2 md:py-0.5 bg-gradient-to-r from-yellow-500 to-orange-500 text-black text-[8px] md:text-[10px] font-bold rounded-full shadow-lg">
+                          Value Pack
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Hot Deal Badge for regular cards */}
+                    {!sub.isVIP && !sub.isCombo && (
+                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 md:-top-3">
+                        <span className="px-1.5 py-0.5 md:px-2 md:py-0.5 bg-gradient-to-r from-pink-500 to-purple-500 text-white text-[8px] md:text-[10px] font-bold rounded-full shadow-lg">
+                          Hot Deal
+                        </span>
+                      </div>
+                    )}
+
+                    <div className={`w-10 h-10 md:w-12 md:h-12 ${sub.bgColor} ${sub.isVIP ? 'border border-[#FFD700]' : 'border border-white/20'} rounded-xl mb-3 md:mb-4 flex flex-col items-center justify-center font-bold text-white overflow-hidden relative shadow-[inset_0_2px_4px_rgba(0,0,0,0.3)]`}>
+                      {/* Dark overlay for better contrast */}
+                      <div className="absolute inset-0 bg-black/20 pointer-events-none" />
+                      {sub.logoUrl ? (
+                        <img 
+                          src={sub.logoUrl} 
+                          alt={sub.name}
+                          className="w-full h-full object-contain p-1 relative z-10 drop-shadow-[0_0_6px_rgba(255,255,255,0.4)] brightness-110"
+                          onError={(e) => {
+                            const target = e.currentTarget;
+                            target.style.display = 'none';
+                            const parent = target.parentElement;
+                            if (parent) {
+                              const fallback = parent.querySelector('.image-fallback');
+                              if (fallback) fallback.classList.remove('hidden');
+                            }
+                          }}
+                        />
+                      ) : null}
+                      <div className={`fallback-logo flex flex-col items-center justify-center relative z-10 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] ${sub.logoUrl ? 'hidden' : ''}`}>
+                        <span className="text-base md:text-lg">{sub.logo}</span>
+                        <span className="text-[7px] md:text-[8px]">{sub.logoSubtext}</span>
+                      </div>
+                      <div className={`image-fallback hidden flex-col items-center justify-center relative z-10 text-center px-1`}>
+                        <span className="text-[9px] md:text-[10px] font-bold text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)] leading-tight">{sub.name}</span>
+                      </div>
+                    </div>
+
+                    <h3 className={`font-bold text-sm md:text-base mb-1 ${sub.isVIP ? 'text-[#FFD700]' : 'text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]'}`}>{sub.name}</h3>
+                    <p className="text-gray-400 text-[10px] md:text-xs mb-2 md:mb-3">{sub.period}</p>
+                    
+                    <div className="flex items-baseline gap-2 mb-3 md:mb-4">
+                      {sub.id === 45 ? (
+                        <span className={`text-xl md:text-2xl font-bold ${sub.isVIP ? 'text-[#FFD700]' : 'text-white'}`}>{sub.period}</span>
+                      ) : (
+                        <>
+                          <span className={`text-xl md:text-2xl font-bold ${sub.isVIP ? 'text-[#FFD700]' : 'text-white drop-shadow-[0_0_8px_rgba(255,0,150,0.6)]'}`}>{sub.price}</span>
+                          {sub.originalPrice && (
+                            <span className="text-gray-500 text-xs md:text-sm line-through ml-2">{sub.originalPrice}</span>
+                          )}
+                        </>
+                      )}
+                    </div>
+
+                    <p className="text-gray-400 text-[9px] md:text-xs mb-3 md:mb-4 line-clamp-2">{sub.description}</p>
+
+                    <div className="flex gap-1.5 md:gap-2 mt-auto" onClick={(e) => e.stopPropagation()}>
+                      <motion.button 
+                        onClick={() => openBuyConfirmation(sub)}
+                        onMouseEnter={playHoverSound}
+                        whileTap={{ scale: 0.95 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                        className={`flex-1 py-3 md:py-2.5 min-h-[48px] md:min-h-auto rounded-xl font-bold text-xs md:text-sm ${sub.isVIP 
+                          ? 'bg-gradient-to-r from-[#FFD700] to-yellow-600 text-black hover:from-yellow-600 hover:to-orange-600 hover:shadow-[0_0_20px_rgba(255,215,0,0.5)]' 
+                          : 'bg-gradient-to-r from-pink-500 to-purple-600 text-white hover:from-pink-600 hover:to-purple-700 hover:shadow-[0_0_20px_rgba(236,72,153,0.5)]'
+                        } transition-all duration-300`}
+                      >
+                        Buy Now
+                      </motion.button>
+                      <motion.button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          playClickSound();
+                          if (isInCart(sub.id)) {
+                            removeFromCart(sub.id);
+                            showToast("Removed from cart");
+                          } else {
+                            addToCart({
+                              id: sub.id,
+                              name: sub.name,
+                              price: sub.price,
+                              period: sub.period,
+                              bgColor: sub.bgColor
+                            });
+                            setAddedAnimation(sub.id);
+                            setTimeout(() => setAddedAnimation(null), 1000);
+                            setAddedProduct(sub);
+                            setMiniCartOpen(true);
+                          }
+                        }}
+                        onMouseEnter={playHoverSound}
+                        whileTap={{ scale: 0.95 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                        className={`px-3 md:px-3 py-3 md:py-2.5 min-w-[48px] md:min-w-auto min-h-[48px] md:min-h-auto rounded-xl font-bold text-xs md:text-sm border-2 transition-all duration-300 ${isInCart(sub.id)
+                          ? 'bg-red-500 border-red-500 text-white'
+                          : 'border-white/20 text-gray-400 hover:border-purple-400 hover:text-purple-400'
+                        } ${addedAnimation === sub.id ? 'scale-110' : ''}`}
+                      >
+                        {addedAnimation === sub.id ? (
+                          <span className="text-red-400 text-[10px] md:text-xs">Added!</span>
+                        ) : isInCart(sub.id) ? (
+                          <span className="text-white text-[10px] md:text-xs">Remove</span>
+                        ) : (
+                          <ShoppingCart size={14} className="w-3.5 h-3.5 md:w-[18px] md:h-[18px]" />
+                        )}
+                      </motion.button>
+                    </div>
+                  </div>
+
+                  {/* CARD BACK - Poster Side */}
+                  <div 
+                    className="absolute inset-0 rounded-2xl overflow-hidden shadow-[0_4px_30px_rgba(0,0,0,0.5)]"
+                    style={{ 
+                      backfaceVisibility: 'hidden',
+                      transform: 'rotateY(180deg)'
+                    }}
+                  >
+                    {/* Poster Background */}
+                    <div 
+                      className="absolute inset-0 bg-cover bg-center"
+                      style={{ 
+                        backgroundImage: sub.posterUrl ? `url(${sub.posterUrl})` : 'none',
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center'
+                      }}
+                    />
+                    
+                    {/* Dark Overlay Gradient */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-black/40" />
+                    
+                    {/* Close/Back Button */}
+                    <motion.button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleCardFlip(sub.id);
+                      }}
+                      whileTap={{ scale: 0.95 }}
+                      className="absolute top-3 right-3 p-2 rounded-full bg-black/50 backdrop-blur-sm border border-white/20 text-white hover:bg-black/70 transition-all duration-300 z-20"
+                    >
+                      <RotateCcw className="w-4 h-4" />
+                    </motion.button>
+
+                    {/* Content Overlay */}
+                    <div className="absolute inset-0 p-4 md:p-5 flex flex-col justify-end">
+                      {/* Featured Content Label */}
+                      <div className="mb-2">
+                        <span className="px-2 py-1 bg-red-500/80 backdrop-blur-sm text-white text-[8px] md:text-[10px] font-bold rounded-full">
+                          Featured
+                        </span>
+                      </div>
+                      
+                      {/* Service Name */}
+                      <h3 className="text-white font-bold text-lg md:text-xl mb-1 drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
+                        {sub.name}
+                      </h3>
+                      
+                      {/* Show/Movie Title based on service */}
+                      <p className="text-gray-300 text-xs md:text-sm mb-3 drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]">
+                        {sub.name === "Netflix" || sub.name === "Netflix 4K" ? "Stranger Things" :
+                         sub.name === "Prime Video" ? "The Boys" :
+                         sub.name === "Hotstar" || sub.name === "Hotstar Premium" ? "Marvel Series" :
+                         sub.name === "Sony LIV" ? "Scam 1992" :
+                         sub.name === "Zee5" ? "RRR" : sub.period}
+                      </p>
+
+                      {/* Price */}
+                      <div className="mb-3">
+                        <span className="text-2xl md:text-3xl font-bold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
+                          ₹{sub.price}
+                        </span>
+                        <span className="text-gray-400 text-xs ml-2">{sub.period}</span>
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
+                        <motion.button 
+                          onClick={() => {
+                            openBuyConfirmation(sub);
+                            toggleCardFlip(sub.id);
+                          }}
+                          whileTap={{ scale: 0.95 }}
+                          className={`flex-1 py-2.5 md:py-3 rounded-xl font-bold text-xs md:text-sm ${sub.isVIP 
+                            ? 'bg-gradient-to-r from-[#FFD700] to-yellow-600 text-black' 
+                            : 'bg-gradient-to-r from-pink-500 to-purple-600 text-white shadow-[0_0_15px_rgba(236,72,153,0.5)]'
+                          } transition-all duration-300`}
+                        >
+                          Buy Now
+                        </motion.button>
+                        <motion.button 
+                          onClick={() => {
+                            const referralCode = localStorage.getItem('referralCode');
+                            const baseMessage = sub.isVIP 
+                              ? `Hi, I'm interested in VIP Membership. Please send payment details for 99 Yearly Pass!`
+                              : `I want to buy ${sub.name}`;
+                            const referralText = referralCode ? `\n\n Referred by: ${referralCode}` : '';
+                            window.open(`${WHATSAPP_URL}?text=${encodeURIComponent(baseMessage + referralText)}`);
+                          }}
+                          whileTap={{ scale: 0.95 }}
+                          className="flex-1 py-2.5 md:py-3 rounded-xl font-bold text-xs md:text-sm bg-gradient-to-r from-green-500 to-green-600 text-white shadow-[0_0_15px_rgba(37,211,102,0.4)] transition-all duration-300 flex items-center justify-center gap-1"
+                        >
+                          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2C6.48 2 2 6.48 2 12c0 1.89.525 3.66 1.438 5.168L2 22l5.027-1.422A9.96 9.96 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm.3 14.5c-1.8.1-3.3-.4-4.4-1.4-1.1-1.1-1.6-2.6-1.4-4.4.1-1.2.6-2.3 1.4-3.1.8-.8 1.9-1.3 3.1-1.4 1.8-.1 3.3.4 4.4 1.4 1.1 1.1 1.6 2.6 1.4 4.4-.1 1.2-.6 2.3-1.4 3.1-.8.8-1.9 1.3-3.1 1.4z"/>
+                          </svg>
+                          WhatsApp
+                        </motion.button>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
               </div>
-            </motion.div>
           ))}
         </AnimatePresence>
       </motion.div>
@@ -894,7 +1047,7 @@ export function SubscriptionCards() {
               <div className="text-xl md:text-2xl font-bold text-purple-400 mb-1 md:mb-2">Step 3</div>
               <h4 className="text-white font-semibold text-sm md:text-base mb-1 md:mb-2">Earn Cashback</h4>
               <p className="text-gray-400 text-xs md:text-sm">
-                When your friend buys using your QR, they get a discount, and you get <span className="text-green-400 font-bold">50 cashback</span> on your next order!
+                When your friend buys using your QR, they get a discount, and you get <span className="text-green-400 font-bold">30 cashback</span> on your next order!
               </p>
             </motion.div>
           </div>
@@ -1072,6 +1225,109 @@ export function SubscriptionCards() {
           </motion.div>
         )}
       </motion.div>
+
+      {/* Buy Confirmation Modal */}
+      <AnimatePresence>
+        {showConfirmModal && selectedSub && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          >
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={closeConfirmModal}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            />
+
+            {/* Modal Card with Glassmorphism & Neon Pink Glow */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.8, y: 20 }}
+              transition={{ type: "spring", stiffness: 300, damping: 25 }}
+              className="relative w-full max-w-sm bg-white/10 backdrop-blur-xl border border-pink-500/50 rounded-2xl p-6 md:p-8 shadow-[0_0_40px_rgba(236,72,153,0.4)]"
+            >
+              {/* Neon Pink Glow Effect */}
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-pink-500/20 via-purple-500/10 to-transparent pointer-events-none" />
+              <div className="absolute -inset-0.5 rounded-2xl bg-gradient-to-r from-pink-500/30 to-purple-500/30 blur-xl opacity-50 pointer-events-none" />
+
+              {/* Content */}
+              <div className="relative z-10">
+                {/* Header */}
+                <div className="text-center mb-6">
+                  <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-pink-500 to-purple-600 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(236,72,153,0.6)]">
+                    <ShoppingCart className="w-8 h-8 text-white" />
+                  </div>
+                  <h3 className="text-xl md:text-2xl font-bold text-white mb-2">Confirm Your Order</h3>
+                  <p className="text-gray-400 text-sm">Review your selection before proceeding</p>
+                </div>
+
+                {/* Service Details Card */}
+                <div className="bg-white/5 border border-white/10 rounded-xl p-4 mb-6">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className={`w-10 h-10 ${selectedSub.bgColor} rounded-lg flex items-center justify-center`}>
+                      <span className="text-white font-bold text-sm">{selectedSub.logo}</span>
+                    </div>
+                    <div>
+                      <h4 className="text-white font-semibold text-base">{selectedSub.name}</h4>
+                      <p className="text-gray-400 text-xs">{selectedSub.period}</p>
+                    </div>
+                  </div>
+                  <div className="border-t border-white/10 pt-3 mt-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-400 text-sm">Price</span>
+                      <span className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-400">
+                        ₹{selectedSub.price}
+                      </span>
+                    </div>
+                  </div>
+                  <p className="text-gray-500 text-xs mt-2 line-clamp-2">{selectedSub.description}</p>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-3">
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={closeConfirmModal}
+                    className="flex-1 py-3 px-4 bg-white/10 border border-white/20 rounded-xl text-white font-medium text-sm hover:bg-white/20 transition-all duration-300"
+                  >
+                    Cancel
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={confirmAndChat}
+                    className="flex-1 py-3 px-4 rounded-xl text-white font-semibold text-sm shadow-[0_4px_15px_rgba(37,211,102,0.5)] hover:shadow-[0_4px_20px_rgba(37,211,102,0.7)] transition-all duration-300 flex items-center justify-center gap-2"
+                    style={{ background: 'linear-gradient(135deg, #25D366 0%, #128C7E 100%)' }}
+                  >
+                    <span>Confirm & Chat</span>
+                    {/* Official WhatsApp Logo */}
+                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l5.027-1.422A9.96 9.96 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm5.238 14.3c-.234.657-1.284 1.214-1.79 1.294-.48.077-1.019.11-1.62-.12-.372-.148-1.42-.585-2.515-1.834-.754-.855-1.26-1.89-1.41-2.212-.15-.323-.015-.497.113-.657.116-.144.257-.15.345-.15.087 0 .174.004.25.008.083.003.192-.032.3.228.107.26.37.908.402.972.032.065.053.142.01.228-.044.086-.066.14-.13.214-.065.075-.136.156-.195.21-.065.06-.132.125-.058.247.074.121.34.558.728.903.5.445.92.583 1.148.648.086.025.163.02.223-.013.06-.032.287-.166.343-.2.056-.033.108-.022.155.01.047.034.298.34.374.455.075.115.15.097.225.058.074-.038.478-.225.56-.266.081-.04.14-.063.16-.098.02-.035.02-.084-.005-.133z" fill="white"/>
+                      <path d="M12 3.5a8.5 8.5 0 00-8.5 8.5c0 1.62.456 3.135 1.246 4.425L4.5 20l4.32-1.224A8.458 8.458 0 0012 20.5a8.5 8.5 0 008.5-8.5 8.5 8.5 0 00-8.5-8.5z" fill="#25D366"/>
+                      <path fillRule="evenodd" clipRule="evenodd" d="M8.36 6.76c.24-.54.552-.555.8-.565.065-.002.133-.005.2-.005.073 0 .155.027.227.075.26.17 1.01.743 1.36 1.116.358.38.62.747.53 1.038-.044.145-.19.264-.38.405-.078.057-.168.123-.24.19-.1.093-.177.184-.223.25-.046.066-.103.138-.037.257.066.118.28.495.568.803.388.42.763.625.998.73.062.026.113.049.151.071.06.034.112.063.155.11.043.048.082.107.055.19-.027.084-.12.337-.27.556-.15.22-.33.37-.545.42-.117.027-.237.037-.357.027-.18-.013-.365-.063-.52-.113-.47-.153-1.17-.507-1.77-1.156-.77-.84-1.24-1.83-1.4-2.14-.15-.303-.02-.468.115-.62z" fill="white"/>
+                    </svg>
+                  </motion.button>
+                </div>
+
+                {/* Trust Badge */}
+                <div className="mt-4 text-center">
+                  <p className="text-gray-500 text-xs flex items-center justify-center gap-1">
+                    <Check className="w-3 h-3 text-green-400" />
+                    Secure checkout via WhatsApp
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Mini Cart Confirmation Drawer */}
       {addedProduct && (
