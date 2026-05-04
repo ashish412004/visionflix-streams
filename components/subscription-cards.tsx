@@ -690,7 +690,6 @@ export function SubscriptionCards() {
         >
           <AnimatePresence mode="wait">
             {filtered.map((sub, index) => (
-              {/* 3D Flip Card Container */}
               <div 
                 key={sub.id}
                 className="relative h-[280px] md:h-[320px] perspective-1000 group"
