@@ -1,13 +1,11 @@
 "use client"
 
-import { useRef, useState, useEffect } from "react"
+import { useRef, useState } from "react"
 import { motion } from "framer-motion"
 import { DashboardHeader } from "./dashboard-header"
 import { SeriesCarousel } from "./series-carousel"
 import { SubscriptionCards } from "./subscription-cards"
-import { WhatsAppButton } from "./whatsapp-button"
-import { WishlistButton } from "./wishlist-button"
-import { SmartFAQChatbot } from "./smart-faq-chatbot"
+import { FloatingActions } from "./floating-actions"
 import { MatrixRain } from "./matrix-rain"
 import { WishlistModal } from "./wishlist-modal"
 import { AboutUs } from "./about-us"
@@ -43,8 +41,8 @@ export function Dashboard({ email, onLogout }: DashboardProps) {
       {/* Dark Overlay for Text Visibility */}
       <div className="fixed inset-0 -z-10 bg-black/60" />
 
-      {/* Content */}
-      <div className="relative z-10">
+      {/* Content - pt-16 for fixed header */}
+      <div className="relative z-10 pt-16 md:pt-20">
         <DashboardHeader email={email} onLogout={onLogout} />
         <SeriesCarousel />
         <div ref={subscriptionRef}>
@@ -70,10 +68,8 @@ export function Dashboard({ email, onLogout }: DashboardProps) {
         </footer>
       </div>
 
-      {/* Floating Buttons */}
-      <WishlistButton onClick={() => setIsWishlistOpen(true)} />
-      <WhatsAppButton />
-      <SmartFAQChatbot />
+      {/* Floating Buttons - Unified vertical stack */}
+      <FloatingActions onWishlistClick={() => setIsWishlistOpen(true)} />
 
       {/* Recent Sales Toast */}
       <RecentSalesToast />

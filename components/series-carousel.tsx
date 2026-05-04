@@ -321,7 +321,7 @@ export function SeriesCarousel() {
           {/* Carousel */}
           <div 
             ref={scrollRef}
-            className={`flex gap-4 px-14 overflow-x-scroll select-none touch-pan-x hide-scrollbar ${
+            className={`flex gap-4 px-14 py-4 overflow-x-scroll select-none touch-pan-x hide-scrollbar ${
               isDragging ? 'cursor-grabbing' : 'cursor-grab'
             }`}
             style={{ 
@@ -344,9 +344,9 @@ export function SeriesCarousel() {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.3, delay: index * 0.02 }}
                 onClick={handleCardClick}
-                className="relative flex-shrink-0 w-36 sm:w-44 md:w-48 aspect-[2/3] rounded-xl overflow-hidden group transition-all duration-300 hover:z-10 hover:shadow-[0_0_15px_3px_rgba(168,85,247,0.4)] hover:shadow-purple-500/20"
-                whileHover={{ scale: 1.05, zIndex: 10 }}
-                style={{ transform: 'translateZ(0)' }}
+                className="relative flex-shrink-0 w-36 sm:w-44 md:w-48 aspect-[2/3] rounded-xl overflow-visible group transition-all duration-300 hover:z-10 hover:shadow-[0_0_15px_3px_rgba(168,85,247,0.4)] hover:shadow-purple-500/20"
+                whileHover={{ scale: 1.08, zIndex: 10 }}
+                style={{ transformOrigin: 'center center', transform: 'translateZ(0)' }}
               >
                 {/* Image */}
                 <img

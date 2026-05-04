@@ -10,7 +10,7 @@ import { useSound } from "@/contexts/sound-context"
 import { supabase, Referral } from "@/lib/supabase"
 import { MiniCartConfirmation } from "./mini-cart-confirmation"
 
-type Category = "All" | "OTT" | "AI Plans" | "18+" | "Softwares" | "Instagram Services" | "Combo Packs"
+type Category = "All" | "OTT" | "AI" | "Softwares" | "Utility" | "VPN" | "Food" | "Combo Packs"
 type AccessType = "Shared" | "Personal"
 
 interface Subscription {
@@ -18,6 +18,7 @@ interface Subscription {
   name: string;
   logo: string;
   logoSubtext: string;
+  logoUrl?: string;
   price: number;
   originalPrice?: number;
   period: string;
@@ -32,12 +33,27 @@ interface Subscription {
   isVIP?: boolean;
 }
 
-const allSubscriptions: Subscription[] = [
+// Deduplication function: Keep the latest/updated entry for each service name
+function deduplicateSubscriptions(subs: Subscription[]): Subscription[] {
+  const uniqueMap = new Map<string, Subscription>();
+  
+  subs.forEach(sub => {
+    const existing = uniqueMap.get(sub.name);
+    // Keep the entry with higher ID (latest/updated) if duplicate exists
+    if (!existing || sub.id > existing.id) {
+      uniqueMap.set(sub.name, sub);
+    }
+  });
+  
+  return Array.from(uniqueMap.values()).sort((a, b) => a.id - b.id);
+}
+
+const allSubscriptionsRaw: Subscription[] = [
   // VIP Pass - Special Card
   { id: 0, name: "VIP Membership", logo: "VIP", logoSubtext: "PASS", price: 99, period: "1 Year", description: "Exclusive access to all premium services.", bgColor: "bg-black", borderColor: "border-[#FFD700]", popular: true, category: "All", accessType: "Shared", isVIP: true },
   // OTT Shared
-  { id: 1, name: "Netflix", logo: "N", logoSubtext: "Netflix", price: 199, period: "1 Month", description: "Premium streaming entertainment.", bgColor: "bg-red-600", borderColor: "border-red-500", popular: true, category: "OTT", accessType: "Shared" },
-  { id: 2, name: "Prime Video", logo: "P", logoSubtext: "Prime", price: 199, period: "1 Year", description: "Movies and originals.", bgColor: "bg-blue-600", borderColor: "border-blue-500", category: "OTT", accessType: "Shared" },
+  { id: 1, name: "Netflix", logo: "N", logoSubtext: "Netflix", logoUrl: "https://cdn.worldvectorlogo.com/logos/netflix-3.svg", price: 199, period: "1 Month", description: "Premium streaming entertainment.", bgColor: "bg-red-600", borderColor: "border-red-500", popular: true, category: "OTT", accessType: "Shared" },
+  { id: 2, name: "Prime Video", logo: "P", logoSubtext: "Prime", logoUrl: "https://cdn.worldvectorlogo.com/logos/amazon-prime-video-1.svg", price: 199, period: "1 Year", description: "Movies and originals.", bgColor: "bg-blue-600", borderColor: "border-blue-500", category: "OTT", accessType: "Shared" },
   { id: 3, name: "Zee5", logo: "Z", logoSubtext: "Zee5", price: 249, period: "1 Year", description: "Premium content no ads.", bgColor: "bg-purple-700", borderColor: "border-purple-500", category: "OTT", accessType: "Shared" },
   { id: 4, name: "Sony LIV", logo: "S", logoSubtext: "Sony LIV", price: 399, period: "1 Year", description: "Live sports entertainment.", bgColor: "bg-gray-700", borderColor: "border-blue-600", category: "OTT", accessType: "Shared" },
   { id: 5, name: "Hotstar", logo: "D+", logoSubtext: "Hotstar", price: 699, period: "1 Year", description: "Super Plan content.", bgColor: "bg-blue-800", borderColor: "border-blue-700", category: "OTT", accessType: "Shared" },
@@ -45,28 +61,58 @@ const allSubscriptions: Subscription[] = [
   { id: 6, name: "Prime Video", logo: "P", logoSubtext: "Prime", price: 499, period: "1 Year", description: "Personal Prime account.", bgColor: "bg-blue-600", borderColor: "border-blue-500", popular: true, category: "OTT", accessType: "Personal" },
   { id: 7, name: "Sony LIV", logo: "S", logoSubtext: "Sony LIV", price: 499, period: "1 Year", description: "Personal Sony LIV.", bgColor: "bg-gray-700", borderColor: "border-blue-600", category: "OTT", accessType: "Personal" },
   { id: 8, name: "Zee5", logo: "Z", logoSubtext: "Zee5", price: 499, period: "1 Year", description: "Personal Zee5 access.", bgColor: "bg-purple-700", borderColor: "border-purple-500", category: "OTT", accessType: "Personal" },
-  { id: 9, name: "YouTube Premium", logo: "YT", logoSubtext: "YouTube", price: 999, period: "1 Year", description: "Ad-free YouTube.", bgColor: "bg-red-600", borderColor: "border-red-500", category: "OTT", accessType: "Personal" },
+  { id: 9, name: "YouTube Premium", logo: "YT", logoSubtext: "YouTube", logoUrl: "https://cdn.worldvectorlogo.com/logos/youtube-icon.svg", price: 999, period: "1 Year", description: "Ad-free YouTube.", bgColor: "bg-red-600", borderColor: "border-red-500", category: "OTT", accessType: "Personal" },
   { id: 10, name: "Amazon Full Benefit", logo: "A", logoSubtext: "Amazon", price: 1099, period: "1 Year", description: "Complete benefits.", bgColor: "bg-orange-600", borderColor: "border-orange-500", popular: true, category: "OTT", accessType: "Personal" },
   // Softwares
-  { id: 11, name: "Adobe CC", logo: "Ad", logoSubtext: "Adobe", price: 999, period: "4 Months", description: "All Adobe apps.", bgColor: "bg-red-600", borderColor: "border-red-500", category: "Softwares", accessType: "Shared" },
-  { id: 12, name: "Adobe CC", logo: "Ad", logoSubtext: "Adobe", price: 5999, period: "1 Year", description: "Best Value Pack.", bgColor: "bg-red-700", borderColor: "border-red-600", popular: true, category: "Softwares", accessType: "Shared" },
-  { id: 13, name: "LinkedIn Career", logo: "in", logoSubtext: "LinkedIn", price: 3499, period: "1 Year", description: "Professional journey.", bgColor: "bg-blue-700", borderColor: "border-blue-600", category: "Softwares", accessType: "Shared" },
-  { id: 14, name: "LinkedIn Sales", logo: "in", logoSubtext: "LinkedIn", price: 3499, period: "1 Month", description: "For sales pros.", bgColor: "bg-blue-800", borderColor: "border-blue-700", category: "Softwares", accessType: "Shared" },
-  { id: 15, name: "Microsoft 365", logo: "MS", logoSubtext: "MS", price: 799, period: "1 Year", description: "Office + 1TB Cloud.", bgColor: "bg-blue-600", borderColor: "border-blue-500", popular: true, category: "Softwares", accessType: "Shared" },
-  { id: 16, name: "Canva Pro", logo: "C", logoSubtext: "Canva", price: 499, period: "1 Year", description: "Design pro style.", bgColor: "bg-cyan-600", borderColor: "border-cyan-500", category: "Softwares", accessType: "Shared" },
-  // AI Plans
-  { id: 17, name: "ChatGPT Plus", logo: "GPT", logoSubtext: "OpenAI", price: 499, period: "1 Month", description: "Advanced AI.", bgColor: "bg-emerald-600", borderColor: "border-emerald-500", popular: true, category: "AI Plans", accessType: "Shared" },
-  { id: 18, name: "Rezi AI", logo: "RZ", logoSubtext: "Rezi", price: 1299, period: "1 Year", description: "AI Resume builder.", bgColor: "bg-indigo-600", borderColor: "border-indigo-500", category: "AI Plans", accessType: "Shared" },
-  { id: 19, name: "Gemini AI", logo: "GM", logoSubtext: "Google", price: 499, period: "1 Year", description: "Advanced Assistant.", bgColor: "bg-blue-500", borderColor: "border-blue-400", category: "AI Plans", accessType: "Shared" },
-  { id: 20, name: "Perplexity AI", logo: "PX", logoSubtext: "AI", price: 1999, period: "1 Year", description: "Search AI.", bgColor: "bg-purple-600", borderColor: "border-purple-500", popular: true, category: "AI Plans", accessType: "Shared" },
-  // Instagram
-  { id: 21, name: "1K Followers", logo: "IG", logoSubtext: "Insta", price: 249, period: "Lifetime", description: "High Quality.", bgColor: "bg-pink-600", borderColor: "border-pink-500", category: "Instagram Services", accessType: "Shared" },
-  { id: 22, name: "1K Likes", logo: "IG", logoSubtext: "Insta", price: 149, period: "Fast", description: "Real accounts.", bgColor: "bg-red-500", borderColor: "border-red-400", category: "Instagram Services", accessType: "Shared" },
+  { id: 11, name: "Adobe CC", logo: "Ad", logoSubtext: "Adobe", logoUrl: "https://cdn.worldvectorlogo.com/logos/adobe-creative-cloud-2.svg", price: 999, period: "4 Months", description: "All Adobe apps.", bgColor: "bg-red-600", borderColor: "border-red-500", category: "Softwares", accessType: "Shared" },
+  { id: 12, name: "Adobe CC", logo: "Ad", logoSubtext: "Adobe", logoUrl: "https://cdn.worldvectorlogo.com/logos/adobe-creative-cloud-2.svg", price: 5999, period: "1 Year", description: "Best Value Pack.", bgColor: "bg-red-700", borderColor: "border-red-600", popular: true, category: "Softwares", accessType: "Shared" },
+  { id: 13, name: "LinkedIn Career", logo: "in", logoSubtext: "LinkedIn", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/c/ca/LinkedIn_logo_initials.png", price: 3499, period: "1 Year", description: "Professional journey.", bgColor: "bg-blue-700", borderColor: "border-blue-600", category: "Softwares", accessType: "Shared" },
+  { id: 14, name: "LinkedIn Sales", logo: "in", logoSubtext: "LinkedIn", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/c/ca/LinkedIn_logo_initials.png", price: 3499, period: "1 Month", description: "For sales pros.", bgColor: "bg-blue-800", borderColor: "border-blue-700", category: "Softwares", accessType: "Shared" },
+  { id: 15, name: "Microsoft 365", logo: "MS", logoSubtext: "MS", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg", price: 799, period: "1 Year", description: "Office + 1TB Cloud.", bgColor: "bg-blue-600", borderColor: "border-blue-500", popular: true, category: "Softwares", accessType: "Shared" },
+  { id: 16, name: "Canva Pro", logo: "C", logoSubtext: "Canva", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/0/08/Canva_logo_2021.svg", price: 499, period: "1 Year", description: "Design pro style.", bgColor: "bg-cyan-600", borderColor: "border-cyan-500", category: "Softwares", accessType: "Shared" },
+  // AI
+  { id: 17, name: "ChatGPT Plus", logo: "GPT", logoSubtext: "OpenAI", price: 499, period: "1 Month", description: "Advanced AI.", bgColor: "bg-emerald-600", borderColor: "border-emerald-500", popular: true, category: "AI", accessType: "Shared" },
+  { id: 18, name: "Rezi AI", logo: "RZ", logoSubtext: "Rezi", price: 1299, period: "1 Year", description: "AI Resume builder.", bgColor: "bg-indigo-600", borderColor: "border-indigo-500", category: "AI", accessType: "Shared" },
+  { id: 19, name: "Gemini AI", logo: "GM", logoSubtext: "Google", price: 499, period: "1 Year", description: "Advanced Assistant.", bgColor: "bg-blue-500", borderColor: "border-blue-400", category: "AI", accessType: "Shared" },
+  { id: 20, name: "Perplexity AI", logo: "PX", logoSubtext: "AI", price: 1999, period: "1 Year", description: "Search AI.", bgColor: "bg-purple-600", borderColor: "border-purple-500", popular: true, category: "AI", accessType: "Shared" },
+  { id: 21, name: "Gemini AI Pro", logo: "GM", logoSubtext: "Google", price: 1399, period: "1 Year", description: "Advanced AI assistant.", bgColor: "bg-blue-500", borderColor: "border-blue-400", category: "AI", accessType: "Shared" },
+  { id: 22, name: "Gamma AI", logo: "GM", logoSubtext: "Gamma", price: 4999, period: "1 Year", description: "AI presentation builder.", bgColor: "bg-purple-600", borderColor: "border-purple-500", category: "AI", accessType: "Shared" },
+  { id: 23, name: "Notion Business", logo: "NT", logoSubtext: "Notion", price: 499, period: "1 Year", description: "Productivity workspace.", bgColor: "bg-gray-700", borderColor: "border-gray-600", category: "AI", accessType: "Shared" },
+  { id: 24, name: "Lovable Pro", logo: "LV", logoSubtext: "Lovable", price: 199, period: "1 Year", description: "AI development tool.", bgColor: "bg-pink-600", borderColor: "border-pink-500", category: "AI", accessType: "Shared" },
+  { id: 25, name: "Grammarly Pro", logo: "GR", logoSubtext: "Grammarly", price: 2199, period: "1 Year", description: "AI writing assistant.", bgColor: "bg-green-600", borderColor: "border-green-500", category: "AI", accessType: "Shared" },
+  // Professional - Updated
+  { id: 26, name: "Canva Pro", logo: "C", logoSubtext: "Canva", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/0/08/Canva_logo_2021.svg", price: 1599, period: "1 Year", description: "Design pro style.", bgColor: "bg-cyan-600", borderColor: "border-cyan-500", category: "Softwares", accessType: "Shared" },
+  { id: 27, name: "Canva Edu", logo: "C", logoSubtext: "Canva", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/0/08/Canva_logo_2021.svg", price: 499, period: "1 Year", description: "Education edition.", bgColor: "bg-cyan-500", borderColor: "border-cyan-400", category: "Softwares", accessType: "Shared" },
+  { id: 28, name: "Adobe CC", logo: "Ad", logoSubtext: "Adobe", logoUrl: "https://cdn.worldvectorlogo.com/logos/adobe-creative-cloud-2.svg", price: 4999, period: "1 Year", description: "All Adobe apps.", bgColor: "bg-red-700", borderColor: "border-red-600", popular: true, category: "Softwares", accessType: "Shared" },
+  { id: 29, name: "MS Office 365", logo: "MS", logoSubtext: "MS", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg", price: 999, period: "1 Year", description: "Office + 1TB Cloud.", bgColor: "bg-blue-600", borderColor: "border-blue-500", popular: true, category: "Softwares", accessType: "Shared" },
+  // OTT - Updated
+  { id: 30, name: "Netflix 4K", logo: "N", logoSubtext: "Netflix", logoUrl: "https://cdn.worldvectorlogo.com/logos/netflix-3.svg", price: 199, period: "1 Month", description: "Premium 4K streaming.", bgColor: "bg-red-600", borderColor: "border-red-500", popular: true, category: "OTT", accessType: "Shared" },
+  { id: 31, name: "Netflix 4K", logo: "N", logoSubtext: "Netflix", logoUrl: "https://cdn.worldvectorlogo.com/logos/netflix-3.svg", price: 1299, period: "1 Year", description: "Premium 4K streaming.", bgColor: "bg-red-700", borderColor: "border-red-600", category: "OTT", accessType: "Shared" },
+  { id: 32, name: "Prime Video", logo: "P", logoSubtext: "Prime", logoUrl: "https://cdn.worldvectorlogo.com/logos/amazon-prime-video-1.svg", price: 299, period: "1 Year", description: "Movies and originals.", bgColor: "bg-blue-600", borderColor: "border-blue-500", category: "OTT", accessType: "Shared" },
+  { id: 33, name: "Hotstar Premium", logo: "D+", logoSubtext: "Hotstar", price: 599, period: "1 Year", description: "Premium content.", bgColor: "bg-blue-800", borderColor: "border-blue-700", category: "OTT", accessType: "Shared" },
+  { id: 34, name: "Sony LIV", logo: "S", logoSubtext: "Sony LIV", price: 399, period: "1 Year", description: "Live sports entertainment.", bgColor: "bg-gray-700", borderColor: "border-blue-600", category: "OTT", accessType: "Shared" },
+  { id: 35, name: "Sony LIV", logo: "S", logoSubtext: "Sony LIV", price: 699, period: "1 Year", description: "Premium sports pack.", bgColor: "bg-gray-800", borderColor: "border-blue-700", category: "OTT", accessType: "Shared" },
+  { id: 36, name: "Apple TV", logo: "AP", logoSubtext: "Apple", price: 799, period: "1 Year", description: "Apple streaming.", bgColor: "bg-gray-800", borderColor: "border-gray-700", category: "OTT", accessType: "Shared" },
+  { id: 37, name: "Apple Music", logo: "AP", logoSubtext: "Apple", price: 499, period: "1 Year", description: "Music streaming.", bgColor: "bg-pink-700", borderColor: "border-pink-600", category: "OTT", accessType: "Shared" },
+  { id: 38, name: "IPTV", logo: "IP", logoSubtext: "IPTV", price: 2999, period: "1 Year", description: "Live TV channels.", bgColor: "bg-purple-800", borderColor: "border-purple-700", category: "OTT", accessType: "Shared" },
+  // Utility/Learning
+  { id: 39, name: "Coursera", logo: "CO", logoSubtext: "Coursera", price: 1899, period: "1 Year", description: "Online courses.", bgColor: "bg-blue-700", borderColor: "border-blue-600", category: "Utility", accessType: "Shared" },
+  { id: 40, name: "Duolingo", logo: "DU", logoSubtext: "Duolingo", price: 1199, period: "1 Year", description: "Language learning.", bgColor: "bg-green-600", borderColor: "border-green-500", category: "Utility", accessType: "Shared" },
+  { id: 41, name: "CapCut Pro", logo: "CC", logoSubtext: "CapCut", price: 499, period: "1 Month", description: "Video editing.", bgColor: "bg-black", borderColor: "border-gray-600", category: "Utility", accessType: "Shared" },
+  { id: 42, name: "CapCut Pro", logo: "CC", logoSubtext: "CapCut", price: 2999, period: "1 Year", description: "Video editing pro.", bgColor: "bg-black", borderColor: "border-gray-700", category: "Utility", accessType: "Shared" },
+  { id: 43, name: "Google Storage", logo: "GS", logoSubtext: "Google", price: 399, period: "1 Year", description: "Cloud storage.", bgColor: "bg-blue-500", borderColor: "border-blue-400", category: "Utility", accessType: "Shared" },
+  // VPN
+  { id: 44, name: "Nord VPN", logo: "ND", logoSubtext: "Nord", price: 399, period: "1 Year", description: "Secure VPN.", bgColor: "bg-blue-800", borderColor: "border-blue-700", category: "VPN", accessType: "Shared" },
+  // Food
+  { id: 45, name: "Zomato", logo: "ZO", logoSubtext: "Zomato", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/7/7c/Zomato_Logo.png", price: 0, period: "20% OFF", description: "Food discounts. On orders of ₹999+ only.", bgColor: "bg-red-600", borderColor: "border-red-500", category: "Food", accessType: "Shared" },
   // Combo Packs
-  { id: 23, name: "Student Pack", logo: "SP", logoSubtext: "Student", price: 3999, originalPrice: 4497, period: "1 Year", description: "Perfect for students and creators.", bgColor: "bg-gradient-to-br from-purple-600 to-blue-600", borderColor: "border-purple-400", popular: true, category: "Combo Packs", accessType: "Shared", isCombo: true, comboItems: ["ChatGPT Plus", "Canva Pro", "LinkedIn Career"] },
-  { id: 24, name: "OTT Bonanza", logo: "OB", logoSubtext: "Bonanza", price: 949, originalPrice: 1097, period: "1 Year", description: "Ultimate entertainment bundle.", bgColor: "bg-gradient-to-br from-red-600 to-orange-600", borderColor: "border-orange-500", popular: true, category: "Combo Packs", accessType: "Shared", isCombo: true, comboItems: ["Netflix", "Hotstar", "Prime Video"] },
-  { id: 25, name: "AI Pro Pack", logo: "AI", logoSubtext: "Pro Pack", price: 2499, originalPrice: 2997, period: "1 Year", description: "Complete AI toolkit.", bgColor: "bg-gradient-to-br from-emerald-600 to-cyan-600", borderColor: "border-emerald-500", popular: true, category: "Combo Packs", accessType: "Shared", isCombo: true, comboItems: ["Gemini AI", "Perplexity AI", "ChatGPT Plus"] }
+  { id: 46, name: "Student Pack", logo: "SP", logoSubtext: "Student", price: 3999, originalPrice: 4497, period: "1 Year", description: "Perfect for students and creators.", bgColor: "bg-gradient-to-br from-purple-600 to-blue-600", borderColor: "border-purple-400", popular: true, category: "Combo Packs", accessType: "Shared", isCombo: true, comboItems: ["ChatGPT Plus", "Canva Pro", "LinkedIn Career"] },
+  { id: 47, name: "OTT Bonanza", logo: "OB", logoSubtext: "Bonanza", price: 949, originalPrice: 1097, period: "1 Year", description: "Ultimate entertainment bundle.", bgColor: "bg-gradient-to-br from-red-600 to-orange-600", borderColor: "border-orange-500", popular: true, category: "Combo Packs", accessType: "Shared", isCombo: true, comboItems: ["Netflix", "Hotstar", "Prime Video"] },
+  { id: 48, name: "AI Pro Pack", logo: "AI", logoSubtext: "Pro Pack", price: 2499, originalPrice: 2997, period: "1 Year", description: "Complete AI toolkit.", bgColor: "bg-gradient-to-br from-emerald-600 to-cyan-600", borderColor: "border-emerald-500", popular: true, category: "Combo Packs", accessType: "Shared", isCombo: true, comboItems: ["Gemini AI", "Perplexity AI", "ChatGPT Plus"] }
 ];
+
+// Export deduplicated subscriptions - keeps latest entry for each service name
+const allSubscriptions = deduplicateSubscriptions(allSubscriptionsRaw);
 
 export function SubscriptionCards() {
   const { addItem, removeItem, isInWishlist } = useWishlist();
@@ -383,7 +429,7 @@ export function SubscriptionCards() {
       </div>
 
       <div className="flex flex-wrap justify-center gap-1.5 md:gap-2 mb-6 md:mb-8 relative">
-        {["All", "OTT", "Softwares", "AI Plans", "Instagram Services", "18+", "Combo Packs"].map((cat) => (
+        {["All", "OTT", "Softwares", "AI", "Utility", "VPN", "Food", "Combo Packs"].map((cat) => (
           <motion.button
             key={cat}
             onClick={() => {
@@ -581,8 +627,8 @@ export function SubscriptionCards() {
                     damping: 15
                   }
                 }}
-                whileHover={{ scale: 1.05 }}
-                className={`backdrop-blur-xl bg-white/5 ${sub.isVIP ? 'border-2 border-[#FFD700] shadow-[0_0_15px_rgba(255,215,0,0.3)]' : sub.isCombo ? 'border-2 border-dashed border-purple-400/50 shadow-[0_0_15px_rgba(168,85,247,0.3)]' : `border-2 ${sub.borderColor || 'border-white/10'} shadow-[0_0_15px_rgba(236,72,153,0.2)]`} p-3 md:p-5 rounded-2xl relative group ${sub.isVIP ? 'hover:border-[#FFD700] hover:shadow-[0_0_30px_rgba(255,215,0,0.5)]' : sub.isCombo ? 'hover:border-purple-400 hover:shadow-[0_0_30px_rgba(168,85,247,0.5)]' : `hover:${sub.borderColor || 'hover:border-pink-500/50'} hover:shadow-[0_0_30px_rgba(236,72,153,0.5)]`} transition-all h-full flex flex-col`}
+                whileHover={{ scale: 1.05, y: -5 }}
+                className={`backdrop-blur-xl bg-black/40 border border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.3)] hover:shadow-[0_8px_40px_rgba(0,0,0,0.4),0_0_20px_rgba(255,255,255,0.1)] ${sub.isVIP ? 'border-[#FFD700]/30 hover:border-[#FFD700]/50 shadow-[0_4px_30px_rgba(255,215,0,0.15)] hover:shadow-[0_8px_40px_rgba(255,215,0,0.25),0_0_30px_rgba(255,215,0,0.3)]' : sub.isCombo ? 'border-purple-400/30 hover:border-purple-400/50 shadow-[0_4px_30px_rgba(168,85,247,0.15)] hover:shadow-[0_8px_40px_rgba(168,85,247,0.25),0_0_30px_rgba(168,85,247,0.3)]' : `border-white/10 hover:border-pink-500/40 shadow-[0_4px_30px_rgba(0,0,0,0.3)] hover:shadow-[0_8px_40px_rgba(236,72,153,0.25),0_0_30px_rgba(236,72,153,0.3)]`} p-3 md:p-5 rounded-2xl relative group transition-all duration-300 h-full flex flex-col`}
               >
                 {/* Heart/Wishlist Button - Top Right Corner */}
                 <motion.button
@@ -632,79 +678,114 @@ export function SubscriptionCards() {
                   </div>
                 )}
 
-                <div className={`w-10 h-10 md:w-12 md:h-12 ${sub.bgColor} ${sub.isVIP ? 'border border-[#FFD700]' : ''} rounded-xl mb-3 md:mb-4 flex flex-col items-center justify-center font-bold text-white`}>
-                  <span className="text-base md:text-lg">{sub.logo}</span>
-                  <span className="text-[7px] md:text-[8px]">{sub.logoSubtext}</span>
+                <div className={`w-10 h-10 md:w-12 md:h-12 ${sub.bgColor} ${sub.isVIP ? 'border border-[#FFD700]' : 'border border-white/20'} rounded-xl mb-3 md:mb-4 flex flex-col items-center justify-center font-bold text-white overflow-hidden relative shadow-[inset_0_2px_4px_rgba(0,0,0,0.3)]`}>
+                  {/* Dark overlay for better contrast */}
+                  <div className="absolute inset-0 bg-black/20 pointer-events-none" />
+                  {sub.logoUrl ? (
+                    <img 
+                      src={sub.logoUrl} 
+                      alt={sub.name}
+                      className="w-full h-full object-contain p-1 relative z-10 drop-shadow-[0_0_6px_rgba(255,255,255,0.4)] brightness-110"
+                      onError={(e) => {
+                        const target = e.currentTarget;
+                        target.style.display = 'none';
+                        const parent = target.parentElement;
+                        if (parent) {
+                          // Show styled fallback text with service name
+                          const fallback = parent.querySelector('.image-fallback');
+                          if (fallback) fallback.classList.remove('hidden');
+                        }
+                      }}
+                    />
+                  ) : null}
+                  {/* Logo Text Fallback (for cards without logoUrl) */}
+                  <div className={`fallback-logo flex flex-col items-center justify-center relative z-10 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] ${sub.logoUrl ? 'hidden' : ''}`}>
+                    <span className="text-base md:text-lg">{sub.logo}</span>
+                    <span className="text-[7px] md:text-[8px]">{sub.logoSubtext}</span>
+                  </div>
+                  {/* Image Error Fallback - Shows service name when image fails */}
+                  <div className={`image-fallback hidden flex-col items-center justify-center relative z-10 text-center px-1`}>
+                    <span className="text-[9px] md:text-[10px] font-bold text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)] leading-tight">{sub.name}</span>
+                  </div>
                 </div>
-                <h3 className={`font-bold text-sm md:text-base mb-1 ${sub.isVIP ? 'text-[#FFD700]' : 'text-white'}`}>{sub.name}</h3>
+
+                <h3 className={`font-bold text-sm md:text-base mb-1 ${sub.isVIP ? 'text-[#FFD700]' : 'text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]'}`}>{sub.name}</h3>
                 <p className="text-gray-400 text-[10px] md:text-xs mb-2 md:mb-3">{sub.period}</p>
                 
                 {/* Price with Original Price for Combos */}
                 <div className="flex items-baseline gap-2 mb-3 md:mb-4">
-                  <span className={`text-xl md:text-2xl font-bold ${sub.isVIP ? 'text-[#FFD700]' : 'text-white'}`}>₹{sub.price}</span>
-                  {sub.originalPrice && (
-                    <span className="text-gray-500 text-xs md:text-sm line-through ml-2">₹{sub.originalPrice}</span>
+                  {sub.id === 45 ? (
+                    <span className={`text-xl md:text-2xl font-bold ${sub.isVIP ? 'text-[#FFD700]' : 'text-white'}`}>{sub.period}</span>
+                  ) : (
+                    <>
+                      <span className={`text-xl md:text-2xl font-bold ${sub.isVIP ? 'text-[#FFD700]' : 'text-white drop-shadow-[0_0_8px_rgba(255,0,150,0.6)]'}`}>{sub.price}</span>
+                      {sub.originalPrice && (
+                        <span className="text-gray-500 text-xs md:text-sm line-through ml-2">{sub.originalPrice}</span>
+                      )}
+                    </>
                   )}
                 </div>
 
-              <div className="flex gap-1.5 md:gap-2 mt-auto">
-                <motion.button 
-                  onClick={() => {
-                    playClickSound();
-                    const referralCode = localStorage.getItem('referralCode');
-                    const baseMessage = sub.isVIP 
-                      ? `Hi, I'm interested in VIP Membership. Please send payment details for 99 Yearly Pass!`
-                      : `I want to buy ${sub.name}`;
-                    const referralText = referralCode ? `\n\n Referred by: ${referralCode}` : '';
-                    window.open(`${WHATSAPP_URL}?text=${encodeURIComponent(baseMessage + referralText)}`);
-                  }}
-                  onMouseEnter={playHoverSound}
-                  whileTap={{ scale: 0.95 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                  className={`flex-1 py-3 md:py-2.5 min-h-[48px] md:min-h-auto rounded-xl font-bold text-xs md:text-sm ${sub.isVIP 
-                    ? 'bg-gradient-to-r from-[#FFD700] to-yellow-600 text-black hover:from-yellow-600 hover:to-orange-600 hover:shadow-[0_0_20px_rgba(255,215,0,0.5)]' 
-                    : 'bg-gradient-to-r from-pink-500 to-purple-600 text-white hover:from-pink-600 hover:to-purple-700 hover:shadow-[0_0_20px_rgba(236,72,153,0.5)]'
-                  } transition-all duration-300`}
-                >
-                  Buy Now
-                </motion.button>
-                <motion.button 
-                  onClick={() => {
-                    playClickSound();
-                    if (isInCart(sub.id)) {
-                      // Remove from cart
-                      removeFromCart(sub.id);
-                      showToast("Removed from cart");
-                    } else {
-                      // Add to cart
-                      addToCart({
-                        id: sub.id,
-                        name: sub.name,
-                        price: sub.price,
-                        period: sub.period,
-                        bgColor: sub.bgColor
-                      });
-                      setAddedAnimation(sub.id);
-                      setTimeout(() => setAddedAnimation(null), 1000);
-                      setAddedProduct(sub);
-                      setMiniCartOpen(true);
-                    }
-                  }}
-                  onMouseEnter={playHoverSound}
-                  whileTap={{ scale: 0.95 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                  className={`px-3 md:px-3 py-3 md:py-2.5 min-w-[48px] md:min-w-auto min-h-[48px] md:min-h-auto rounded-xl font-bold text-xs md:text-sm border-2 transition-all duration-300 ${isInCart(sub.id)
-                    ? 'bg-red-500 border-red-500 text-white'
-                    : 'border-white/20 text-gray-400 hover:border-purple-400 hover:text-purple-400'
-                  } ${addedAnimation === sub.id ? 'scale-110' : ''}`}
-                >
-                  {addedAnimation === sub.id ? (
-                    <span className="text-red-400 text-[10px] md:text-xs">Added!</span>
-                  ) : isInCart(sub.id) ? (
-                    <span className="text-white text-[10px] md:text-xs">Remove</span>
-                  ) : (
-                    <ShoppingCart size={14} className="w-3.5 h-3.5 md:w-[18px] md:h-[18px]" />
-                  )}
+                <p className="text-gray-400 text-[9px] md:text-xs mb-3 md:mb-4 line-clamp-2">{sub.description}</p>
+
+                <div className="flex gap-1.5 md:gap-2 mt-auto">
+                  <motion.button 
+                    onClick={() => {
+                      playClickSound();
+                      const referralCode = localStorage.getItem('referralCode');
+                      const baseMessage = sub.isVIP 
+                        ? `Hi, I'm interested in VIP Membership. Please send payment details for 99 Yearly Pass!`
+                        : `I want to buy ${sub.name}`;
+                      const referralText = referralCode ? `\n\n Referred by: ${referralCode}` : '';
+                      window.open(`${WHATSAPP_URL}?text=${encodeURIComponent(baseMessage + referralText)}`);
+                    }}
+                    onMouseEnter={playHoverSound}
+                    whileTap={{ scale: 0.95 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                    className={`flex-1 py-3 md:py-2.5 min-h-[48px] md:min-h-auto rounded-xl font-bold text-xs md:text-sm ${sub.isVIP 
+                      ? 'bg-gradient-to-r from-[#FFD700] to-yellow-600 text-black hover:from-yellow-600 hover:to-orange-600 hover:shadow-[0_0_20px_rgba(255,215,0,0.5)]' 
+                      : 'bg-gradient-to-r from-pink-500 to-purple-600 text-white hover:from-pink-600 hover:to-purple-700 hover:shadow-[0_0_20px_rgba(236,72,153,0.5)]'
+                    } transition-all duration-300`}
+                  >
+                    Buy Now
+                  </motion.button>
+                  <motion.button 
+                    onClick={() => {
+                      playClickSound();
+                      if (isInCart(sub.id)) {
+                        // Remove from cart
+                        removeFromCart(sub.id);
+                        showToast("Removed from cart");
+                      } else {
+                        // Add to cart
+                        addToCart({
+                          id: sub.id,
+                          name: sub.name,
+                          price: sub.price,
+                          period: sub.period,
+                          bgColor: sub.bgColor
+                        });
+                        setAddedAnimation(sub.id);
+                        setTimeout(() => setAddedAnimation(null), 1000);
+                        setAddedProduct(sub);
+                        setMiniCartOpen(true);
+                      }
+                    }}
+                    onMouseEnter={playHoverSound}
+                    whileTap={{ scale: 0.95 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                    className={`px-3 md:px-3 py-3 md:py-2.5 min-w-[48px] md:min-w-auto min-h-[48px] md:min-h-auto rounded-xl font-bold text-xs md:text-sm border-2 transition-all duration-300 ${isInCart(sub.id)
+                      ? 'bg-red-500 border-red-500 text-white'
+                      : 'border-white/20 text-gray-400 hover:border-purple-400 hover:text-purple-400'
+                    } ${addedAnimation === sub.id ? 'scale-110' : ''}`}
+                  >
+                    {addedAnimation === sub.id ? (
+                      <span className="text-red-400 text-[10px] md:text-xs">Added!</span>
+                    ) : isInCart(sub.id) ? (
+                      <span className="text-white text-[10px] md:text-xs">Remove</span>
+                    ) : (
+                      <ShoppingCart size={14} className="w-3.5 h-3.5 md:w-[18px] md:h-[18px]" />
+                    )}
                 </motion.button>
               </div>
             </motion.div>
@@ -973,3 +1054,7 @@ export function SubscriptionCards() {
     </section>
   );
 }
+
+
+
+

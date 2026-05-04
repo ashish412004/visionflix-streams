@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { MessageCircle, X, Send, Bot } from "lucide-react"
 
@@ -20,6 +20,12 @@ export function SmartFAQChatbot() {
     }
   ])
   const [inputValue, setInputValue] = useState("")
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+
+  // Auto-scroll to bottom when new messages are added
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages])
 
   const quickActions = [
     {
@@ -70,31 +76,33 @@ export function SmartFAQChatbot() {
 
   return (
     <>
-      {/* Chat Button */}
-      <motion.button
-        initial={{ scale: 0, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ delay: 1.2, type: "spring", stiffness: 200 }}
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
-        onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-22 left-6 z-50 w-12 h-12 md:w-14 md:h-14 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 rounded-full flex items-center justify-center shadow-lg shadow-purple-500/30 transition-colors"
-        aria-label="Open FAQ Chatbot"
-      >
-        {isOpen ? <X className="w-4 h-4 md:w-5 md:h-5 text-white" /> : <Bot className="w-4 h-4 md:w-5 md:h-5 text-white" />}
-      </motion.button>
+      {/* Parent Container - Fixed position for both button and window */}
+      <div className="fixed bottom-[100px] right-5 z-[10000]">
+        {/* Chat Button - Same size as WhatsApp button */}
+        <motion.button
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 1.2, type: "spring", stiffness: 200 }}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={() => setIsOpen(!isOpen)}
+          className="w-14 h-14 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 rounded-full flex items-center justify-center shadow-lg shadow-purple-500/30 transition-colors relative z-10"
+          aria-label="Open FAQ Chatbot"
+        >
+          {isOpen ? <X className="w-6 h-6 text-white" /> : <Bot className="w-6 h-6 text-white" />}
+        </motion.button>
 
-      {/* Chat Window */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.8, y: 20 }}
-            transition={{ duration: 0.3 }}
-            className="fixed bottom-36 left-6 z-50 w-[300px] md:w-[350px] max-w-[calc(100vw-2rem)]"
-          >
-            <div className="backdrop-blur-xl bg-black/80 border border-white/20 rounded-2xl shadow-2xl overflow-hidden">
+        {/* Chat Window - Absolute position relative to parent */}
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.8, y: 20 }}
+              transition={{ duration: 0.3 }}
+              className="absolute bottom-[70px] right-0 w-[320px] h-[450px] sm:w-[90vw] sm:max-w-[320px] max-h-[calc(100vh-180px)]"
+            >
+            <div className="backdrop-blur-xl bg-black/80 border border-white/20 rounded-2xl shadow-2xl overflow-hidden flex flex-col w-full h-full">
               {/* Header */}
               <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-3 md:p-4 relative">
                 <button
@@ -115,7 +123,7 @@ export function SmartFAQChatbot() {
               </div>
 
               {/* Messages */}
-              <div className="h-[200px] md:h-[300px] overflow-y-auto p-3 md:p-4 space-y-2 md:space-y-3">
+              <div className="flex-1 overflow-y-auto p-3 md:p-4 space-y-2 md:space-y-3 flex flex-col">
                 {messages.map((message, index) => (
                   <motion.div
                     key={index}
@@ -138,6 +146,8 @@ export function SmartFAQChatbot() {
                     </div>
                   </motion.div>
                 ))}
+                {/* Auto-scroll anchor */}
+                <div ref={messagesEndRef} />
               </div>
 
               {/* Quick Actions */}
@@ -162,6 +172,7 @@ export function SmartFAQChatbot() {
           </motion.div>
         )}
       </AnimatePresence>
+      </div>
     </>
   )
 }

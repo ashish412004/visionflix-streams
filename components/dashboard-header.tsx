@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Shield, LogOut, X, MessageCircle, Zap, ShieldCheck, Headphones, DollarSign, Sun, Moon, Instagram, Volume2, VolumeX, ShoppingCart, ShoppingBag, Menu } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { CartDrawer } from "./cart-drawer"
@@ -19,7 +19,17 @@ interface DashboardHeaderProps {
 export function DashboardHeader({ email, onLogout }: DashboardHeaderProps) {
   const [showAboutModal, setShowAboutModal] = useState(false)
   const [showMobileMenu, setShowMobileMenu] = useState(false)
+  const [isShrunk, setIsShrunk] = useState(false)
   const { isMuted, toggleMute } = useSound()
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsShrunk(window.scrollY > 50)
+    }
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
   const { itemCount, isCartOpen, setIsCartOpen } = useCart()
   const { isWishlistOpen, setIsWishlistOpen } = useWishlist()
 
@@ -29,16 +39,19 @@ export function DashboardHeader({ email, onLogout }: DashboardHeaderProps) {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="relative z-9999 backdrop-blur-xl bg-black/30 border-b border-white/10 mb-4"
+        className={`fixed top-0 left-0 right-0 z-[100] backdrop-blur-xl bg-black/30 border-b border-white/10 transition-all duration-300 ease ${isShrunk ? 'py-2' : 'py-3 md:py-4'}`}
       >
-        <div className="max-w-7xl mx-auto px-3 py-3 md:px-4 md:py-4 flex items-center justify-between">
-          {/* Logo Section */}
-          <div className="flex items-center gap-2 md:gap-3">
-            <div className="w-9 h-9 md:w-12 md:h-12 overflow-hidden border border-white/20 bg-white/5 backdrop-blur-sm rounded-lg">
+        <div className="max-w-7xl mx-auto px-3 md:px-4 flex items-center justify-between">
+          {/* Logo Section - Clickable to scroll to top */}
+          <div 
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            className="flex items-center gap-2 md:gap-3 cursor-pointer select-none"
+          >
+            <div className={`overflow-hidden border border-white/20 bg-white/5 backdrop-blur-sm rounded-lg transition-all duration-300 ${isShrunk ? 'w-8 h-8 md:w-10 md:h-10' : 'w-9 h-9 md:w-12 md:h-12'}`}>
               <Image src="/logo.svg" alt="Initiators Tools and Services Logo - Premium Digital Subscriptions" width={48} height={48} className="w-full h-full object-contain p-1" priority />
             </div>
             <div className="px-1 md:px-2">
-              <span className="font-extrabold tracking-wide text-[11px] md:text-sm lg:text-lg bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+              <span className={`font-bold tracking-tight bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent transition-all duration-300 ${isShrunk ? 'text-[10px] md:text-xs lg:text-sm' : 'text-[11px] md:text-sm lg:text-lg'}`} style={{ fontFamily: "'Helvetica LT Std', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif", letterSpacing: '-0.02em' }}>
                 INITIATORS TOOLS AND SERVICES
               </span>
             </div>
@@ -113,7 +126,7 @@ export function DashboardHeader({ email, onLogout }: DashboardHeaderProps) {
         {showAboutModal && (
           <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md"
+            className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md"
           >
             <motion.div 
               initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }}

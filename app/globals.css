@@ -1,6 +1,19 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 
+/* Helvetica LT Std Font Face - Primary font with fallbacks */
+@font-face {
+  font-family: 'Helvetica LT Std';
+  src: local('Helvetica LT Std Bold'),
+       local('HelveticaLTStd-Bold'),
+       local('Helvetica Neue'),
+       local('Helvetica'),
+       local('Arial');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 :root {
