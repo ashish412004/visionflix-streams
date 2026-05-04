@@ -725,8 +725,12 @@ export function SubscriptionCards() {
                 >
                   {/* CARD FRONT */}
                   <div 
-                    className={`absolute inset-0 backdrop-blur-xl bg-black/40 border border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.3)] hover:shadow-[0_8px_40px_rgba(0,0,0,0.4),0_0_20px_rgba(255,255,255,0.1)] ${sub.isVIP ? 'border-[#FFD700]/30 hover:border-[#FFD700]/50 shadow-[0_4px_30px_rgba(255,215,0,0.15)] hover:shadow-[0_8px_40px_rgba(255,215,0,0.25),0_0_30px_rgba(255,215,0,0.3)]' : sub.isCombo ? 'border-purple-400/30 hover:border-purple-400/50 shadow-[0_4px_30px_rgba(168,85,247,0.15)] hover:shadow-[0_8px_40px_rgba(168,85,247,0.25),0_0_30px_rgba(168,85,247,0.3)]' : `border-white/10 hover:border-pink-500/40 shadow-[0_4px_30px_rgba(0,0,0,0.3)] hover:shadow-[0_8px_40px_rgba(236,72,153,0.25),0_0_30px_rgba(236,72,153,0.3)]`} p-3 md:p-5 rounded-2xl flex flex-col`}
-                    style={{ backfaceVisibility: 'hidden' }}
+                    className={`absolute inset-0 backdrop-blur-xl bg-black/40 border border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.3)] hover:shadow-[0_8px_40px_rgba(0,0,0,0.4),0_0_20px_rgba(255,255,255,0.1)] ${sub.isVIP ? 'border-[#FFD700]/30 hover:border-[#FFD700]/50 shadow-[0_4px_30px_rgba(255,215,0,0.15)] hover:shadow-[0_8px_40px_rgba(255,215,0,0.25),0_0_30px_rgba(255,215,0,0.3)]' : sub.isCombo ? 'border-purple-400/30 hover:border-purple-400/50 shadow-[0_4px_30px_rgba(168,85,247,0.15)] hover:shadow-[0_8px_40px_rgba(168,85,247,0.25),0_0_30px_rgba(168,85,247,0.3)]' : `border-white/10 hover:border-pink-500/40 shadow-[0_4px_30px_rgba(0,0,0,0.3)] hover:shadow-[0_8px_40px_rgba(236,72,153,0.25),0_0_30px_rgba(236,72,153,0.3)]`} p-3 md:p-5 rounded-2xl flex flex-col w-full h-full`}
+                    style={{ 
+                      backfaceVisibility: 'hidden',
+                      WebkitBackfaceVisibility: 'hidden',
+                      zIndex: 1
+                    }}
                   >
                     {/* Heart/Wishlist Button - Top Right Corner */}
                     <motion.button
@@ -878,24 +882,29 @@ export function SubscriptionCards() {
 
                   {/* CARD BACK - Poster Side */}
                   <div 
-                    className="absolute inset-0 rounded-2xl overflow-hidden shadow-[0_4px_30px_rgba(0,0,0,0.5)]"
+                    className="absolute inset-0 rounded-2xl overflow-hidden shadow-[0_4px_30px_rgba(0,0,0,0.5)] flex w-full h-full"
                     style={{ 
                       backfaceVisibility: 'hidden',
-                      transform: 'rotateY(180deg)'
+                      WebkitBackfaceVisibility: 'hidden',
+                      transform: 'rotateY(180deg)',
+                      zIndex: 2,
+                      background: sub.name === "Netflix" || sub.name === "Netflix 4K" 
+                        ? 'linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.2) 100%), url(https://images.alphacoders.com/941/941595.jpg) no-repeat center center / cover'
+                        : sub.name === "Prime Video"
+                        ? 'linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.2) 100%), url(https://images.alphacoders.com/605/605592.jpg) no-repeat center center / cover'
+                        : sub.name === "Hotstar" || sub.name === "Hotstar Premium"
+                        ? 'linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.2) 100%), url(https://images.alphacoders.com/131/1318023.jpg) no-repeat center center / cover'
+                        : sub.name === "Sony LIV"
+                        ? 'linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.2) 100%), url(https://images.alphacoders.com/119/1199976.jpg) no-repeat center center / cover'
+                        : sub.name === "Zee5"
+                        ? 'linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.2) 100%), url(https://images.alphacoders.com/119/1199977.jpg) no-repeat center center / cover'
+                        : sub.posterUrl 
+                          ? `linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.2) 100%), url(${sub.posterUrl}) no-repeat center center / cover`
+                          : 'linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.2) 100%)'
                     }}
                   >
-                    {/* Poster Background */}
-                    <div 
-                      className="absolute inset-0 bg-cover bg-center"
-                      style={{ 
-                        backgroundImage: sub.posterUrl ? `url(${sub.posterUrl})` : 'none',
-                        backgroundSize: 'cover',
-                        backgroundPosition: 'center'
-                      }}
-                    />
-                    
-                    {/* Dark Overlay Gradient */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-black/40" />
+                    {/* Additional Dark Overlay for better text contrast */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-black/40 pointer-events-none" />
                     
                     {/* Close/Back Button */}
                     <motion.button
