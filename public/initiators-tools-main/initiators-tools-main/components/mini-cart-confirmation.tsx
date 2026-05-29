@@ -92,7 +92,7 @@ export function MiniCartConfirmation({ isOpen, onClose, product }: MiniCartConfi
               <div className="space-y-2">
                 <button
                   onClick={handleViewCart}
-                  className="w-full py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold rounded-xl flex items-center justify-center gap-2 hover:from-purple-600 hover:to-pink-600 transition-all text-sm"
+                  className="w-full py-3 bg-gradient-to-r from-purple-500 to-red-600 text-white font-bold rounded-xl flex items-center justify-center gap-2 hover:from-purple-600 hover:to-red-700 transition-all text-sm"
                 >
                   View Cart & Checkout
                   <ArrowRight className="w-4 h-4" />

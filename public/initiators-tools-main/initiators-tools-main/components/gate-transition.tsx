@@ -43,7 +43,7 @@ export function GateTransition() {
           {[...Array(10)].map((_, i) => (
             <div 
               key={i}
-              className="absolute left-4 w-1 bg-gradient-to-b from-transparent via-pink-500 to-transparent"
+              className="absolute left-4 w-1 bg-gradient-to-b from-transparent via-red-500 to-transparent"
               style={{ 
                 top: `${i * 10}%`, 
                 height: '8%',

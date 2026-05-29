@@ -90,7 +90,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
       {/* Animated background gradients */}
       <div className="absolute inset-0 bg-[#0a0a1a]">
         <div className="absolute top-0 left-0 w-96 h-96 bg-purple-600/20 rounded-full blur-[120px] animate-pulse" />
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-pink-600/20 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '1s' }} />
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-red-600/20 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '1s' }} />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-purple-900/10 rounded-full blur-[150px]" />
       </div>
 
@@ -150,7 +150,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                 }}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
                   !isRegister 
-                    ? "bg-gradient-to-r from-pink-500 to-purple-500 text-white" 
+                    ? "bg-gradient-to-r from-red-500 to-purple-500 text-white" 
                     : "text-gray-400 hover:text-white"
                 }`}
               >
@@ -164,7 +164,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                 }}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
                   isRegister 
-                    ? "bg-gradient-to-r from-pink-500 to-purple-500 text-white" 
+                    ? "bg-gradient-to-r from-red-500 to-purple-500 text-white" 
                     : "text-gray-400 hover:text-white"
                 }`}
               >

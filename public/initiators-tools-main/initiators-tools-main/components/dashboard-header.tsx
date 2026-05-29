@@ -59,13 +59,13 @@ export function DashboardHeader({ email, onLogout }: DashboardHeaderProps) {
             </div>
             <div className="px-1 md:px-2">
               <div className={`flex items-baseline gap-0.5 transition-all duration-300 ${isShrunk ? 'text-[10px] md:text-xs lg:text-sm' : 'text-[11px] md:text-sm lg:text-lg'}`} style={{ fontFamily: "'Inter', 'Poppins', 'Montserrat', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif" }}>
-                <span className="font-extrabold tracking-[0.15em] text-neutral-100 uppercase">
+                <span className="font-extrabold tracking-[0.15em] text-white uppercase">
                   VISION
                 </span>
                 <span className="font-extrabold tracking-[0.15em] text-red-600 uppercase">
                   FLIX
                 </span>
-                <span className="font-extrabold tracking-[0.15em] text-neutral-400 uppercase">
+                <span className="font-extrabold tracking-[0.15em] text-gray-400 uppercase">
                   STREAMS
                 </span>
               </div>
