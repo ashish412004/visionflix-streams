@@ -9,8 +9,9 @@ import { WHATSAPP_URL } from "@/config/constants"
 import { useSound } from "@/contexts/sound-context"
 import { supabase, Referral } from "@/lib/supabase"
 import { MiniCartConfirmation } from "./mini-cart-confirmation"
+import { ProductDetailModal } from "./product-detail-modal"
 
-type Category = "All" | "OTT" | "AI" | "Softwares" | "Utility" | "VPN" | "Food" | "Combo Packs" | "Instagram Services"
+type Category = "All" | "OTT" | "AI" | "Softwares" | "Utility" | "VPN" | "Food" | "Combo Packs"
 type AccessType = "Shared" | "Personal"
 
 interface Subscription {
@@ -24,6 +25,7 @@ interface Subscription {
   originalPrice?: number;
   period: string;
   description: string;
+  features: string[];
   bgColor: string;
   borderColor?: string;
   popular?: boolean;
@@ -52,70 +54,65 @@ function deduplicateSubscriptions(subs: Subscription[]): Subscription[] {
 
 const allSubscriptionsRaw: Subscription[] = [
   // VIP Pass - Special Card
-  { id: 0, name: "VIP Membership", logo: "VIP", logoSubtext: "PASS", price: 99, period: "1 Year", description: "Exclusive access to all premium services.", bgColor: "bg-black", borderColor: "border-[#FFD700]", popular: true, category: "All", accessType: "Shared", isVIP: true },
+  { id: 0, name: "VIP Membership", logo: "VIP", logoSubtext: "PASS", price: 99, period: "1 Year", description: "Exclusive access to all premium services.", features: ["Instant Delivery", "Full Warranty", "Priority Support", "Exclusive Deals"], bgColor: "bg-black", borderColor: "border-[#FFD700]", popular: true, category: "All", accessType: "Shared", isVIP: true },
   // OTT Shared
-  { id: 1, name: "Netflix", logo: "N", logoSubtext: "Netflix", logoUrl: "https://cdn.worldvectorlogo.com/logos/netflix-3.svg", posterUrl: "https://image.tmdb.org/t/p/original/9w0WX3r2iY0oTqPQ1x5fGKrGWrZ.jpg", price: 199, period: "1 Month", description: "Premium streaming entertainment.", bgColor: "bg-red-600", borderColor: "border-red-500", popular: true, category: "OTT", accessType: "Shared" },
-  { id: 2, name: "Prime Video", logo: "P", logoSubtext: "Prime", logoUrl: "https://cdn.worldvectorlogo.com/logos/amazon-prime-video-1.svg", posterUrl: "https://image.tmdb.org/t/p/original/mK0Q1jM8Z8L4l2N0x44p5l3s3x.jpg", price: 199, period: "1 Year", description: "Movies and originals.", bgColor: "bg-blue-600", borderColor: "border-blue-500", category: "OTT", accessType: "Shared" },
-  { id: 3, name: "Zee5", logo: "Z", logoSubtext: "Zee5", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/5/5a/Zee5_logo.svg", posterUrl: "https://image.tmdb.org/t/p/original/lFhxzPCzCMAZHK4oPj5v8Z8n.jpg", price: 249, period: "1 Year", description: "Premium content no ads.", bgColor: "bg-purple-700", borderColor: "border-purple-500", category: "OTT", accessType: "Shared" },
-  { id: 4, name: "Sony LIV", logo: "S", logoSubtext: "Sony LIV", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/SonyLIV_logo.svg/512px-SonyLIV_logo.svg.png", posterUrl: "https://image.tmdb.org/t/p/original/9Wgn8Q3l3F2s4f8Z8J2vM3sK.jpg", price: 399, period: "1 Year", description: "Live sports entertainment.", bgColor: "bg-gray-700", borderColor: "border-blue-600", category: "OTT", accessType: "Shared" },
-  { id: 5, name: "Hotstar", logo: "D+", logoSubtext: "Hotstar", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/f/fa/Disney%2B_Hotstar_logo.svg", posterUrl: "https://image.tmdb.org/t/p/original/qJx4J8s2x8b5mM2v8N9pL3wR.jpg", price: 699, period: "1 Year", description: "Super Plan content.", bgColor: "bg-blue-800", borderColor: "border-blue-700", category: "OTT", accessType: "Shared" },
+  { id: 1, name: "Netflix", logo: "N", logoSubtext: "Netflix", logoUrl: "https://cdn.worldvectorlogo.com/logos/netflix-3.svg", posterUrl: "https://image.tmdb.org/t/p/original/9w0WX3r2iY0oTqPQ1x5fGKrGWrZ.jpg", price: 199, period: "1 Month", description: "Premium streaming entertainment.", features: ["4K Ultra HD Quality", "Multiple Screens", "Instant Delivery", "Full Warranty"], bgColor: "bg-red-600", borderColor: "border-red-500", popular: true, category: "OTT", accessType: "Shared" },
+  { id: 2, name: "Prime Video", logo: "P", logoSubtext: "Prime", logoUrl: "https://cdn.worldvectorlogo.com/logos/amazon-prime-video-1.svg", posterUrl: "https://image.tmdb.org/t/p/original/mK0Q1jM8Z8L4l2N0x44p5l3s3x.jpg", price: 199, period: "1 Year", description: "Movies and originals.", features: ["Prime Video + Music", "Ad-free Streaming", "Instant Delivery", "Full Warranty"], bgColor: "bg-blue-600", borderColor: "border-blue-500", category: "OTT", accessType: "Shared" },
+  { id: 3, name: "Zee5", logo: "Z", logoSubtext: "Zee5", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/5/5a/Zee5_logo.svg", posterUrl: "https://image.tmdb.org/t/p/original/lFhxzPCzCMAZHK4oPj5v8Z8n.jpg", price: 249, period: "1 Year", description: "Premium content no ads.", features: ["Ad-free Experience", "Zee5 Originals", "Instant Delivery", "Full Warranty"], bgColor: "bg-purple-700", borderColor: "border-purple-500", category: "OTT", accessType: "Shared" },
+  { id: 4, name: "Sony LIV", logo: "S", logoSubtext: "Sony LIV", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/SonyLIV_logo.svg/512px-SonyLIV_logo.svg.png", posterUrl: "https://image.tmdb.org/t/p/original/9Wgn8Q3l3F2s4f8Z8J2vM3sK.jpg", price: 399, period: "1 Year", description: "Live sports entertainment.", features: ["Live Sports", "Sony Originals", "Instant Delivery", "Full Warranty"], bgColor: "bg-gray-700", borderColor: "border-blue-600", category: "OTT", accessType: "Shared" },
+  { id: 5, name: "Hotstar", logo: "D+", logoSubtext: "Hotstar", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/f/fa/Disney%2B_Hotstar_logo.svg", posterUrl: "https://image.tmdb.org/t/p/original/qJx4J8s2x8b5mM2v8N9pL3wR.jpg", price: 699, period: "1 Year", description: "Super Plan content.", features: ["Disney+ Content", "Live Cricket", "Instant Delivery", "Full Warranty"], bgColor: "bg-blue-800", borderColor: "border-blue-700", category: "OTT", accessType: "Shared" },
   // OTT Personal
-  { id: 6, name: "Prime Video", logo: "P", logoSubtext: "Prime", price: 499, period: "1 Year", description: "Personal Prime account.", bgColor: "bg-blue-600", borderColor: "border-blue-500", popular: true, category: "OTT", accessType: "Personal" },
-  { id: 7, name: "Sony LIV", logo: "S", logoSubtext: "Sony LIV", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/SonyLIV_logo.svg/512px-SonyLIV_logo.svg.png", price: 499, period: "1 Year", description: "Personal Sony LIV.", bgColor: "bg-gray-700", borderColor: "border-blue-600", category: "OTT", accessType: "Personal" },
-  { id: 8, name: "Zee5", logo: "Z", logoSubtext: "Zee5", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/5/5a/Zee5_logo.svg", price: 499, period: "1 Year", description: "Personal Zee5 access.", bgColor: "bg-purple-700", borderColor: "border-purple-500", category: "OTT", accessType: "Personal" },
-  { id: 9, name: "YouTube Premium", logo: "YT", logoSubtext: "YouTube", logoUrl: "https://cdn.worldvectorlogo.com/logos/youtube-icon.svg", price: 999, period: "1 Year", description: "Ad-free YouTube.", bgColor: "bg-red-600", borderColor: "border-red-500", category: "OTT", accessType: "Personal" },
-  { id: 10, name: "Amazon Full Benefit", logo: "A", logoSubtext: "Amazon", price: 1099, period: "1 Year", description: "Complete benefits.", bgColor: "bg-orange-600", borderColor: "border-orange-500", popular: true, category: "OTT", accessType: "Personal" },
+  { id: 6, name: "Prime Video", logo: "P", logoSubtext: "Prime", price: 499, period: "1 Year", description: "Personal Prime account.", features: ["Private Account", "Password Change", "Multiple Devices", "Instant Delivery"], bgColor: "bg-blue-600", borderColor: "border-blue-500", popular: true, category: "OTT", accessType: "Personal" },
+  { id: 7, name: "Sony LIV", logo: "S", logoSubtext: "Sony LIV", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/SonyLIV_logo.svg/512px-SonyLIV_logo.svg.png", price: 499, period: "1 Year", description: "Personal Sony LIV.", features: ["Private Account", "Profile Lock", "Instant Delivery", "Full Warranty"], bgColor: "bg-gray-700", borderColor: "border-blue-600", category: "OTT", accessType: "Personal" },
+  { id: 8, name: "Zee5", logo: "Z", logoSubtext: "Zee5", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/5/5a/Zee5_logo.svg", price: 499, period: "1 Year", description: "Personal Zee5 access.", features: ["Private Account", "Ad-free", "Instant Delivery", "Full Warranty"], bgColor: "bg-purple-700", borderColor: "border-purple-500", category: "OTT", accessType: "Personal" },
+  { id: 9, name: "YouTube Premium", logo: "YT", logoSubtext: "YouTube", logoUrl: "https://cdn.worldvectorlogo.com/logos/youtube-icon.svg", price: 999, period: "1 Year", description: "Ad-free YouTube.", features: ["Ad-free Videos", "YouTube Music", "Background Play", "Instant Delivery"], bgColor: "bg-red-600", borderColor: "border-red-500", category: "OTT", accessType: "Personal" },
+  { id: 10, name: "Amazon Full Benefit", logo: "A", logoSubtext: "Amazon", price: 1099, period: "1 Year", description: "Complete benefits.", features: ["Prime Video", "Prime Music", "Free Delivery", "Instant Delivery"], bgColor: "bg-orange-600", borderColor: "border-orange-500", popular: true, category: "OTT", accessType: "Personal" },
   // Softwares
-  { id: 11, name: "Adobe CC", logo: "Ad", logoSubtext: "Adobe", logoUrl: "https://cdn.worldvectorlogo.com/logos/adobe-creative-cloud-2.svg", price: 999, period: "4 Months", description: "All Adobe apps.", bgColor: "bg-red-600", borderColor: "border-red-500", category: "Softwares", accessType: "Shared" },
-  { id: 12, name: "Adobe CC", logo: "Ad", logoSubtext: "Adobe", logoUrl: "https://cdn.worldvectorlogo.com/logos/adobe-creative-cloud-2.svg", price: 5999, period: "1 Year", description: "Best Value Pack.", bgColor: "bg-red-700", borderColor: "border-red-600", popular: true, category: "Softwares", accessType: "Shared" },
-  { id: 13, name: "LinkedIn Career", logo: "in", logoSubtext: "LinkedIn", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/c/ca/LinkedIn_logo_initials.png", price: 3499, period: "1 Year", description: "Professional journey.", bgColor: "bg-blue-700", borderColor: "border-blue-600", category: "Softwares", accessType: "Shared" },
-  { id: 14, name: "LinkedIn Sales Navigator", logo: "in", logoSubtext: "LinkedIn", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/c/ca/LinkedIn_logo_initials.png", price: 3499, period: "1 Month", description: "Lead generation & sales intelligence.", bgColor: "bg-blue-800", borderColor: "border-blue-700", category: "Softwares", accessType: "Shared" },
-  { id: 15, name: "Microsoft 365", logo: "MS", logoSubtext: "MS", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg", price: 799, period: "1 Year", description: "Office + 1TB Cloud.", bgColor: "bg-blue-600", borderColor: "border-blue-500", popular: true, category: "Softwares", accessType: "Shared" },
-  { id: 16, name: "Canva Pro", logo: "C", logoSubtext: "Canva", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/0/08/Canva_logo_2021.svg", price: 499, period: "1 Year", description: "Design pro style.", bgColor: "bg-cyan-600", borderColor: "border-cyan-500", category: "Softwares", accessType: "Shared" },
+  { id: 11, name: "Adobe CC", logo: "Ad", logoSubtext: "Adobe", logoUrl: "https://cdn.worldvectorlogo.com/logos/adobe-creative-cloud-2.svg", price: 999, period: "4 Months", description: "All Adobe apps.", features: ["Photoshop", "Illustrator", "Premiere Pro", "Instant Delivery"], bgColor: "bg-red-600", borderColor: "border-red-500", category: "Softwares", accessType: "Shared" },
+  { id: 12, name: "Adobe CC", logo: "Ad", logoSubtext: "Adobe", logoUrl: "https://cdn.worldvectorlogo.com/logos/adobe-creative-cloud-2.svg", price: 5999, period: "1 Year", description: "Best Value Pack.", features: ["All 20+ Apps", "Cloud Storage", "Full Warranty", "Instant Delivery"], bgColor: "bg-red-700", borderColor: "border-red-600", popular: true, category: "Softwares", accessType: "Shared" },
+  { id: 13, name: "LinkedIn Career", logo: "in", logoSubtext: "LinkedIn", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/c/ca/LinkedIn_logo_initials.png", price: 3499, period: "1 Year", description: "Professional journey.", features: ["Learning Courses", "Certifications", "Job Insights", "Instant Delivery"], bgColor: "bg-blue-700", borderColor: "border-blue-600", category: "Softwares", accessType: "Shared" },
+  { id: 14, name: "LinkedIn Sales Navigator", logo: "in", logoSubtext: "LinkedIn", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/c/ca/LinkedIn_logo_initials.png", price: 3499, period: "1 Month", description: "Lead generation & sales intelligence.", features: ["Lead Generation", "Advanced Search", "InMail Credits", "Instant Delivery"], bgColor: "bg-blue-800", borderColor: "border-blue-700", category: "Softwares", accessType: "Shared" },
+  { id: 15, name: "Microsoft 365", logo: "MS", logoSubtext: "MS", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg", price: 799, period: "1 Year", description: "Office + 1TB Cloud.", features: ["Word, Excel, PPT", "1TB OneDrive", "Teams Access", "Instant Delivery"], bgColor: "bg-blue-600", borderColor: "border-blue-500", popular: true, category: "Softwares", accessType: "Shared" },
+  { id: 16, name: "Canva Pro", logo: "C", logoSubtext: "Canva", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/0/08/Canva_logo_2021.svg", price: 499, period: "1 Year", description: "Design pro style.", features: ["Premium Templates", "Brand Kit", "Background Remover", "Instant Delivery"], bgColor: "bg-cyan-600", borderColor: "border-cyan-500", category: "Softwares", accessType: "Shared" },
   // AI
-  { id: 17, name: "ChatGPT Plus", logo: "GPT", logoSubtext: "OpenAI", price: 499, period: "1 Month", description: "Advanced AI.", bgColor: "bg-emerald-600", borderColor: "border-emerald-500", popular: true, category: "AI", accessType: "Shared" },
-  { id: 18, name: "Rezi AI", logo: "RZ", logoSubtext: "Rezi", price: 1299, period: "1 Year", description: "AI Resume builder.", bgColor: "bg-indigo-600", borderColor: "border-indigo-500", category: "AI", accessType: "Shared" },
-  { id: 19, name: "Gemini AI", logo: "GM", logoSubtext: "Google", price: 499, period: "1 Year", description: "Advanced Assistant.", bgColor: "bg-blue-500", borderColor: "border-blue-400", category: "AI", accessType: "Shared" },
-  { id: 20, name: "Perplexity AI", logo: "PX", logoSubtext: "AI", price: 1999, period: "1 Year", description: "Search AI.", bgColor: "bg-purple-600", borderColor: "border-purple-500", popular: true, category: "AI", accessType: "Shared" },
-  { id: 21, name: "Gemini AI Pro", logo: "GM", logoSubtext: "Google", price: 1399, period: "1 Year", description: "Advanced AI assistant.", bgColor: "bg-blue-500", borderColor: "border-blue-400", category: "AI", accessType: "Shared" },
-  { id: 22, name: "Gamma AI", logo: "GM", logoSubtext: "Gamma", price: 4999, period: "1 Year", description: "AI presentation builder.", bgColor: "bg-purple-600", borderColor: "border-purple-500", category: "AI", accessType: "Shared" },
-  { id: 23, name: "Notion Business", logo: "NT", logoSubtext: "Notion", price: 499, period: "1 Year", description: "Productivity workspace.", bgColor: "bg-gray-700", borderColor: "border-gray-600", category: "AI", accessType: "Shared" },
-  { id: 24, name: "Lovable Pro", logo: "LV", logoSubtext: "Lovable", price: 199, period: "1 Year", description: "AI development tool.", bgColor: "bg-pink-600", borderColor: "border-pink-500", category: "AI", accessType: "Shared" },
-  { id: 25, name: "Grammarly Pro", logo: "GR", logoSubtext: "Grammarly", price: 2199, period: "1 Year", description: "AI writing assistant.", bgColor: "bg-green-600", borderColor: "border-green-500", category: "AI", accessType: "Shared" },
+  { id: 17, name: "ChatGPT Plus", logo: "GPT", logoSubtext: "OpenAI", price: 499, period: "1 Month", description: "Advanced AI.", features: ["GPT-4 Access", "Faster Response", "Image Generation", "Instant Delivery"], bgColor: "bg-emerald-600", borderColor: "border-emerald-500", popular: true, category: "AI", accessType: "Shared" },
+  { id: 18, name: "Rezi AI", logo: "RZ", logoSubtext: "Rezi", price: 1299, period: "1 Year", description: "AI Resume builder.", features: ["AI Resume Writer", "ATS Optimization", "Cover Letter", "Instant Delivery"], bgColor: "bg-indigo-600", borderColor: "border-indigo-500", category: "AI", accessType: "Shared" },
+  { id: 19, name: "Gemini AI", logo: "GM", logoSubtext: "Google", price: 499, period: "1 Year", description: "Advanced Assistant.", features: ["Multimodal AI", "Code Generation", "Image Analysis", "Instant Delivery"], bgColor: "bg-blue-500", borderColor: "border-blue-400", category: "AI", accessType: "Shared" },
+  { id: 20, name: "Perplexity AI", logo: "PX", logoSubtext: "AI", price: 1999, period: "1 Year", description: "Search AI.", features: ["AI Search Engine", "Real-time Info", "Source Citations", "Instant Delivery"], bgColor: "bg-purple-600", borderColor: "border-purple-500", popular: true, category: "AI", accessType: "Shared" },
+  { id: 21, name: "Gemini AI Pro", logo: "GM", logoSubtext: "Google", price: 1399, period: "1 Year", description: "Advanced AI assistant.", features: ["Advanced AI", "2TB Storage", "Priority Support", "Instant Delivery"], bgColor: "bg-blue-500", borderColor: "border-blue-400", category: "AI", accessType: "Shared" },
+  { id: 22, name: "Gamma AI", logo: "GM", logoSubtext: "Gamma", price: 4999, period: "1 Year", description: "AI presentation builder.", features: ["AI Slides", "Auto Formatting", "Team Collaboration", "Instant Delivery"], bgColor: "bg-purple-600", borderColor: "border-purple-500", category: "AI", accessType: "Shared" },
+  { id: 23, name: "Notion Business", logo: "NT", logoSubtext: "Notion", price: 499, period: "1 Year", description: "Productivity workspace.", features: ["Unlimited Blocks", "Team Features", "Version History", "Instant Delivery"], bgColor: "bg-gray-700", borderColor: "border-gray-600", category: "AI", accessType: "Shared" },
+  { id: 24, name: "Lovable Pro", logo: "LV", logoSubtext: "Lovable", price: 199, period: "1 Year", description: "AI development tool.", features: ["AI Code Gen", "Auto Deploy", "Git Integration", "Instant Delivery"], bgColor: "bg-pink-600", borderColor: "border-pink-500", category: "AI", accessType: "Shared" },
+  { id: 25, name: "Grammarly Pro", logo: "GR", logoSubtext: "Grammarly", price: 2199, period: "1 Year", description: "AI writing assistant.", features: ["Grammar Check", "Plagiarism Detector", "Style Suggestions", "Instant Delivery"], bgColor: "bg-green-600", borderColor: "border-green-500", category: "AI", accessType: "Shared" },
   // Professional - Updated
-  { id: 26, name: "Canva Pro", logo: "C", logoSubtext: "Canva", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/0/08/Canva_logo_2021.svg", price: 1599, period: "1 Year", description: "Design pro style.", bgColor: "bg-cyan-600", borderColor: "border-cyan-500", category: "Softwares", accessType: "Shared" },
-  { id: 27, name: "Canva Edu", logo: "C", logoSubtext: "Canva", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/0/08/Canva_logo_2021.svg", price: 499, period: "1 Year", description: "Education edition.", bgColor: "bg-cyan-500", borderColor: "border-cyan-400", category: "Softwares", accessType: "Shared" },
-  { id: 28, name: "Adobe CC", logo: "Ad", logoSubtext: "Adobe", logoUrl: "https://cdn.worldvectorlogo.com/logos/adobe-creative-cloud-2.svg", price: 4999, period: "1 Year", description: "All Adobe apps.", bgColor: "bg-red-700", borderColor: "border-red-600", popular: true, category: "Softwares", accessType: "Shared" },
-  { id: 29, name: "MS Office 365", logo: "MS", logoSubtext: "MS", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg", price: 999, period: "1 Year", description: "Office + 1TB Cloud.", bgColor: "bg-blue-600", borderColor: "border-blue-500", popular: true, category: "Softwares", accessType: "Shared" },
+  { id: 26, name: "Canva Pro", logo: "C", logoSubtext: "Canva", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/0/08/Canva_logo_2021.svg", price: 1599, period: "1 Year", description: "Design pro style.", features: ["All Pro Features", "Brand Kit", "100GB Storage", "Instant Delivery"], bgColor: "bg-cyan-600", borderColor: "border-cyan-500", category: "Softwares", accessType: "Shared" },
+  { id: 27, name: "Canva Edu", logo: "C", logoSubtext: "Canva", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/0/08/Canva_logo_2021.svg", price: 499, period: "1 Year", description: "Education edition.", features: ["Education Templates", "Classroom Features", "Teacher Resources", "Instant Delivery"], bgColor: "bg-cyan-500", borderColor: "border-cyan-400", category: "Softwares", accessType: "Shared" },
+  { id: 28, name: "Adobe CC", logo: "Ad", logoSubtext: "Adobe", logoUrl: "https://cdn.worldvectorlogo.com/logos/adobe-creative-cloud-2.svg", price: 4999, period: "1 Year", description: "All Adobe apps.", features: ["Complete Creative Suite", "100GB Cloud", "Adobe Fonts", "Instant Delivery"], bgColor: "bg-red-700", borderColor: "border-red-600", popular: true, category: "Softwares", accessType: "Shared" },
+  { id: 29, name: "MS Office 365", logo: "MS", logoSubtext: "MS", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg", price: 999, period: "1 Year", description: "Office + 1TB Cloud.", features: ["Full Office Suite", "1TB OneDrive", "Outlook Email", "Instant Delivery"], bgColor: "bg-blue-600", borderColor: "border-blue-500", popular: true, category: "Softwares", accessType: "Shared" },
   // OTT - Updated
-  { id: 30, name: "Netflix 4K", logo: "N", logoSubtext: "Netflix", logoUrl: "https://cdn.worldvectorlogo.com/logos/netflix-3.svg", posterUrl: "https://image.tmdb.org/t/p/original/9w0WX3r2iY0oTqPQ1x5fGKrGWrZ.jpg", price: 199, period: "1 Month", description: "Premium 4K streaming.", bgColor: "bg-red-600", borderColor: "border-red-500", popular: true, category: "OTT", accessType: "Shared" },
-  { id: 31, name: "Netflix 4K", logo: "N", logoSubtext: "Netflix", logoUrl: "https://cdn.worldvectorlogo.com/logos/netflix-3.svg", posterUrl: "https://image.tmdb.org/t/p/original/9w0WX3r2iY0oTqPQ1x5fGKrGWrZ.jpg", price: 1299, period: "1 Year", description: "Premium 4K streaming.", bgColor: "bg-red-700", borderColor: "border-red-600", category: "OTT", accessType: "Shared" },
-  { id: 32, name: "Prime Video", logo: "P", logoSubtext: "Prime", logoUrl: "https://cdn.worldvectorlogo.com/logos/amazon-prime-video-1.svg", posterUrl: "https://image.tmdb.org/t/p/original/mK0Q1jM8Z8L4l2N0x44p5l3s3x.jpg", price: 299, period: "1 Year", description: "Movies and originals.", bgColor: "bg-blue-600", borderColor: "border-blue-500", category: "OTT", accessType: "Shared" },
-  { id: 33, name: "Hotstar Premium", logo: "D+", logoSubtext: "Hotstar", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/f/fa/Disney%2B_Hotstar_logo.svg", price: 599, period: "1 Year", description: "Premium content.", bgColor: "bg-blue-800", borderColor: "border-blue-700", category: "OTT", accessType: "Shared" },
-  { id: 34, name: "Sony LIV", logo: "S", logoSubtext: "Sony LIV", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/SonyLIV_logo.svg/512px-SonyLIV_logo.svg.png", price: 399, period: "1 Year", description: "Live sports entertainment.", bgColor: "bg-gray-700", borderColor: "border-blue-600", category: "OTT", accessType: "Shared" },
-  { id: 35, name: "Sony LIV", logo: "S", logoSubtext: "Sony LIV", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/SonyLIV_logo.svg/512px-SonyLIV_logo.svg.png", price: 699, period: "1 Year", description: "Premium sports pack.", bgColor: "bg-gray-800", borderColor: "border-blue-700", category: "OTT", accessType: "Shared" },
-  { id: 36, name: "Apple TV", logo: "AP", logoSubtext: "Apple", price: 799, period: "1 Year", description: "Apple streaming.", bgColor: "bg-gray-800", borderColor: "border-gray-700", category: "OTT", accessType: "Shared" },
-  { id: 37, name: "Apple Music", logo: "AP", logoSubtext: "Apple", price: 499, period: "1 Year", description: "Music streaming.", bgColor: "bg-pink-700", borderColor: "border-pink-600", category: "OTT", accessType: "Shared" },
-  { id: 38, name: "IPTV", logo: "IP", logoSubtext: "IPTV", price: 2999, period: "1 Year", description: "Live TV channels.", bgColor: "bg-purple-800", borderColor: "border-purple-700", category: "OTT", accessType: "Shared" },
+  { id: 30, name: "Netflix 4K", logo: "N", logoSubtext: "Netflix", logoUrl: "https://cdn.worldvectorlogo.com/logos/netflix-3.svg", posterUrl: "https://image.tmdb.org/t/p/original/9w0WX3r2iY0oTqPQ1x5fGKrGWrZ.jpg", price: 199, period: "1 Month", description: "Premium 4K streaming.", features: ["4K Ultra HD", "Dolby Atmos", "Multiple Profiles", "Instant Delivery"], bgColor: "bg-red-600", borderColor: "border-red-500", popular: true, category: "OTT", accessType: "Shared" },
+  { id: 31, name: "Netflix 4K", logo: "N", logoSubtext: "Netflix", logoUrl: "https://cdn.worldvectorlogo.com/logos/netflix-3.svg", posterUrl: "https://image.tmdb.org/t/p/original/9w0WX3r2iY0oTqPQ1x5fGKrGWrZ.jpg", price: 1299, period: "1 Year", description: "Premium 4K streaming.", features: ["4K Ultra HD", "1 Year Validity", "Full Warranty", "Instant Delivery"], bgColor: "bg-red-700", borderColor: "border-red-600", category: "OTT", accessType: "Shared" },
+  { id: 32, name: "Prime Video", logo: "P", logoSubtext: "Prime", logoUrl: "https://cdn.worldvectorlogo.com/logos/amazon-prime-video-1.svg", posterUrl: "https://image.tmdb.org/t/p/original/mK0Q1jM8Z8L4l2N0x44p5l3s3x.jpg", price: 299, period: "1 Year", description: "Movies and originals.", features: ["Prime Originals", "X-Ray Feature", "Downloads", "Instant Delivery"], bgColor: "bg-blue-600", borderColor: "border-blue-500", category: "OTT", accessType: "Shared" },
+  { id: 33, name: "Hotstar Premium", logo: "D+", logoSubtext: "Hotstar", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/f/fa/Disney%2B_Hotstar_logo.svg", price: 599, period: "1 Year", description: "Premium content.", features: ["Disney+ Hotstar", "Live Sports", "Multi-language", "Instant Delivery"], bgColor: "bg-blue-800", borderColor: "border-blue-700", category: "OTT", accessType: "Shared" },
+  { id: 34, name: "Sony LIV", logo: "S", logoSubtext: "Sony LIV", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/SonyLIV_logo.svg/512px-SonyLIV_logo.svg.png", price: 399, period: "1 Year", description: "Live sports entertainment.", features: ["Live Cricket", "Sony Originals", "Movies", "Instant Delivery"], bgColor: "bg-gray-700", borderColor: "border-blue-600", category: "OTT", accessType: "Shared" },
+  { id: 35, name: "Sony LIV", logo: "S", logoSubtext: "Sony LIV", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/SonyLIV_logo.svg/512px-SonyLIV_logo.svg.png", price: 699, period: "1 Year", description: "Premium sports pack.", features: ["Premium Sports", "Ad-free", "Multi-device", "Instant Delivery"], bgColor: "bg-gray-800", borderColor: "border-blue-700", category: "OTT", accessType: "Shared" },
+  { id: 36, name: "Apple TV", logo: "AP", logoSubtext: "Apple", price: 799, period: "1 Year", description: "Apple streaming.", features: ["Apple Originals", "4K HDR", "Family Sharing", "Instant Delivery"], bgColor: "bg-gray-800", borderColor: "border-gray-700", category: "OTT", accessType: "Shared" },
+  { id: 37, name: "Apple Music", logo: "AP", logoSubtext: "Apple", price: 499, period: "1 Year", description: "Music streaming.", features: ["Lossless Audio", "Spatial Audio", "Offline Mode", "Instant Delivery"], bgColor: "bg-pink-700", borderColor: "border-pink-600", category: "OTT", accessType: "Shared" },
+  { id: 38, name: "IPTV", logo: "IP", logoSubtext: "IPTV", price: 2999, period: "1 Year", description: "Live TV channels.", features: ["10000+ Channels", "VOD Library", "24/7 Support", "Instant Delivery"], bgColor: "bg-purple-800", borderColor: "border-purple-700", category: "OTT", accessType: "Shared" },
   // Utility/Learning
-  { id: 39, name: "Coursera", logo: "CO", logoSubtext: "Coursera", price: 1899, period: "1 Year", description: "Online courses.", bgColor: "bg-blue-700", borderColor: "border-blue-600", category: "Utility", accessType: "Shared" },
-  { id: 40, name: "Duolingo", logo: "DU", logoSubtext: "Duolingo", price: 1199, period: "1 Year", description: "Language learning.", bgColor: "bg-green-600", borderColor: "border-green-500", category: "Utility", accessType: "Shared" },
-  { id: 41, name: "CapCut Pro", logo: "CC", logoSubtext: "CapCut", price: 499, period: "1 Month", description: "Video editing.", bgColor: "bg-black", borderColor: "border-gray-600", category: "Utility", accessType: "Shared" },
-  { id: 42, name: "CapCut Pro", logo: "CC", logoSubtext: "CapCut", price: 2999, period: "1 Year", description: "Video editing pro.", bgColor: "bg-black", borderColor: "border-gray-700", category: "Utility", accessType: "Shared" },
-  { id: 43, name: "Google Storage", logo: "GS", logoSubtext: "Google", price: 399, period: "1 Year", description: "Cloud storage.", bgColor: "bg-blue-500", borderColor: "border-blue-400", category: "Utility", accessType: "Shared" },
+  { id: 39, name: "Coursera", logo: "CO", logoSubtext: "Coursera", price: 1899, period: "1 Year", description: "Online courses.", features: ["5000+ Courses", "Certificates", "Specializations", "Instant Delivery"], bgColor: "bg-blue-700", borderColor: "border-blue-600", category: "Utility", accessType: "Shared" },
+  { id: 40, name: "Duolingo", logo: "DU", logoSubtext: "Duolingo", price: 1199, period: "1 Year", description: "Language learning.", features: ["40+ Languages", "Interactive Lessons", "Progress Tracking", "Instant Delivery"], bgColor: "bg-green-600", borderColor: "border-green-500", category: "Utility", accessType: "Shared" },
+  { id: 41, name: "CapCut Pro", logo: "CC", logoSubtext: "CapCut", price: 499, period: "1 Month", description: "Video editing.", features: ["Pro Effects", "No Watermark", "4K Export", "Instant Delivery"], bgColor: "bg-black", borderColor: "border-gray-600", category: "Utility", accessType: "Shared" },
+  { id: 42, name: "CapCut Pro", logo: "CC", logoSubtext: "CapCut", price: 2999, period: "1 Year", description: "Video editing pro.", features: ["All Pro Features", "Cloud Storage", "Team Collaboration", "Instant Delivery"], bgColor: "bg-black", borderColor: "border-gray-700", category: "Utility", accessType: "Shared" },
+  { id: 43, name: "Google Storage", logo: "GS", logoSubtext: "Google", price: 399, period: "1 Year", description: "Cloud storage.", features: ["2TB Storage", "Google Drive", "Gmail Integration", "Instant Delivery"], bgColor: "bg-blue-500", borderColor: "border-blue-400", category: "Utility", accessType: "Shared" },
   // VPN
-  { id: 44, name: "Nord VPN", logo: "ND", logoSubtext: "Nord", price: 399, period: "1 Year", description: "Secure VPN.", bgColor: "bg-blue-800", borderColor: "border-blue-700", category: "VPN", accessType: "Shared" },
+  { id: 44, name: "Nord VPN", logo: "ND", logoSubtext: "Nord", price: 399, period: "1 Year", description: "Secure VPN.", features: ["Military-grade Encryption", "No-logs Policy", "5000+ Servers", "Instant Delivery"], bgColor: "bg-blue-800", borderColor: "border-blue-700", category: "VPN", accessType: "Shared" },
   // Food
-  { id: 45, name: "Zomato", logo: "ZO", logoSubtext: "Zomato", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/7/7c/Zomato_Logo.png", price: 0, period: "20% OFF", description: "Enjoy delicious meals with exclusive VisionFlix savings. On all orders above ₹999/-.", bgColor: "bg-red-600", borderColor: "border-red-500", category: "Food", accessType: "Shared", isOffer: true },
+  { id: 45, name: "Zomato", logo: "ZO", logoSubtext: "Zomato", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/7/7c/Zomato_Logo.png", price: 0, period: "20% OFF", description: "Enjoy delicious meals with exclusive VisionFlix savings. On all orders above ₹999/-.", features: ["20% Discount", "All Restaurants", "No Min Order", "Instant Code"], bgColor: "bg-red-600", borderColor: "border-red-500", category: "Food", accessType: "Shared", isOffer: true },
   // Combo Packs
-  { id: 46, name: "Student Success Pack", logo: "SP", logoSubtext: "Career", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/8/87/Student_icon.svg", price: 5699, period: "1 Year", description: "Build your future with world-class professional tools.", bgColor: "bg-gradient-to-br from-purple-600 to-blue-600", borderColor: "border-purple-400", category: "Combo Packs", accessType: "Shared", isCombo: true, comboItems: ["LinkedIn Career (1 Year)", "Coursera Plus (Unlimited Access)", "Microsoft Office 365 (Full Suite)"] },
-  { id: 47, name: "OTT Bonanza", logo: "OB", logoSubtext: "Entertainment", logoUrl: "https://cdn.worldvectorlogo.com/logos/netflix-3.svg", price: 1999, period: "1 Year", description: "All-access pass to your favorite movies and series.", bgColor: "bg-gradient-to-br from-red-600 to-orange-600", borderColor: "border-orange-500", category: "Combo Packs", accessType: "Shared", isCombo: true, comboItems: ["Netflix 4K UHD (Premium)", "Amazon Prime Video", "Zee5 Premium", "Sony LIV Premium"] },
-  { id: 48, name: "AI Creator Pack", logo: "AI", logoSubtext: "Creator", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/0/04/ChatGPT_logo.svg", price: 5999, period: "1 Year", description: "The ultimate power-pack for creators and developers.", bgColor: "bg-gradient-to-br from-emerald-600 to-cyan-600", borderColor: "border-emerald-500", category: "Combo Packs", accessType: "Shared", isCombo: true, comboItems: ["Gemini AI Pro (Family Plan)", "Lovable Pro", "Gamma AI Plus"] },
-  // Instagram Services
-  { id: 49, name: "1K Instagram Followers", logo: "IG", logoSubtext: "Followers", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/e/e7/Instagram_logo_2016.svg", price: 299, period: "Instant", description: "Grow your audience quickly with genuine profiles.", bgColor: "bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400", borderColor: "border-pink-500", category: "Instagram Services", accessType: "Shared" },
-  { id: 50, name: "1K Instagram Likes", logo: "IG", logoSubtext: "Likes", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/e/e7/Instagram_logo_2016.svg", price: 149, period: "Instant", description: "Increase engagement on your posts and reels.", bgColor: "bg-gradient-to-br from-pink-500 to-rose-500", borderColor: "border-pink-400", category: "Instagram Services", accessType: "Shared" },
-  { id: 51, name: "1K Instagram Views", logo: "IG", logoSubtext: "Views", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/e/e7/Instagram_logo_2016.svg", price: 99, period: "Instant", description: "Make your reels and videos go viral.", bgColor: "bg-gradient-to-br from-purple-600 to-blue-600", borderColor: "border-purple-500", category: "Instagram Services", accessType: "Shared" },
-  { id: 52, name: "Viral Growth Combo", logo: "IG", logoSubtext: "Viral", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/e/e7/Instagram_logo_2016.svg", price: 499, period: "Instant", description: "The ultimate package for massive engagement.", bgColor: "bg-gradient-to-br from-fuchsia-600 via-purple-500 to-blue-600", borderColor: "border-fuchsia-400", category: "Instagram Services", accessType: "Shared", isCombo: true, comboItems: ["10K Instagram Views", "1K Instagram Likes"] }
+  { id: 46, name: "Student Success Pack", logo: "SP", logoSubtext: "Career", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/8/87/Student_icon.svg", price: 5699, period: "1 Year", description: "Build your future with world-class professional tools.", features: ["LinkedIn Career", "Coursera Plus", "MS Office 365", "Best Value"], bgColor: "bg-gradient-to-br from-purple-600 to-blue-600", borderColor: "border-purple-400", category: "Combo Packs", accessType: "Shared", isCombo: true, comboItems: ["LinkedIn Career (1 Year)", "Coursera Plus (Unlimited Access)", "Microsoft Office 365 (Full Suite)"] },
+  { id: 47, name: "OTT Bonanza", logo: "OB", logoSubtext: "Entertainment", logoUrl: "https://cdn.worldvectorlogo.com/logos/netflix-3.svg", price: 1999, period: "1 Year", description: "All-access pass to your favorite movies and series.", features: ["Netflix 4K", "Prime Video", "Zee5 Premium", "Sony LIV"], bgColor: "bg-gradient-to-br from-red-600 to-orange-600", borderColor: "border-orange-500", category: "Combo Packs", accessType: "Shared", isCombo: true, comboItems: ["Netflix 4K UHD (Premium)", "Amazon Prime Video", "Zee5 Premium", "Sony LIV Premium"] },
+  { id: 48, name: "AI Creator Pack", logo: "AI", logoSubtext: "Creator", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/0/04/ChatGPT_logo.svg", price: 5999, period: "1 Year", description: "The ultimate power-pack for creators and developers.", features: ["Gemini Pro", "Lovable Pro", "Gamma AI", "Complete Bundle"], bgColor: "bg-gradient-to-br from-emerald-600 to-cyan-600", borderColor: "border-emerald-500", category: "Combo Packs", accessType: "Shared", isCombo: true, comboItems: ["Gemini AI Pro (Family Plan)", "Lovable Pro", "Gamma AI Plus"] }
 ];
 
 // Export deduplicated subscriptions - keeps latest entry for each service name
@@ -152,6 +149,10 @@ export function SubscriptionCards() {
   // Buy Confirmation Modal State
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [selectedSub, setSelectedSub] = useState<Subscription | null>(null);
+
+  // Product Detail Modal State
+  const [showProductModal, setShowProductModal] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Subscription | null>(null);
 
   // Helper function to get service background with specific show posters
   const getServiceBackground = (name: string, posterUrl?: string): string => {
@@ -203,12 +204,6 @@ export function SubscriptionCards() {
       
       // Zomato: Food delivery theme
       "Zomato": 'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.95) 85%), url(https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&q=85) no-repeat center center / cover',
-      
-      // Instagram Services - All cards use Instagram phone/social media background
-      "1K Instagram Followers": 'linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.85) 90%), url(https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&q=85) center/cover no-repeat',
-      "1K Instagram Likes": 'linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.85) 90%), url(https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&q=85) center/cover no-repeat',
-      "1K Instagram Views": 'linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.85) 90%), url(https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&q=85) center/cover no-repeat',
-      "Viral Growth Combo": 'linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.85) 90%), url(https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&q=85) center/cover no-repeat',
       
       // Canva Edu: Education design theme
       "Canva Edu": 'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.95) 85%), url(https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800&q=85) no-repeat center center / cover',
@@ -293,12 +288,7 @@ export function SubscriptionCards() {
       "MS Office 365": 'linear-gradient(135deg, #d83b01 0%, #000000 100%)',
       "Student Pack": 'linear-gradient(135deg, #7c3aed 0%, #000000 100%)',
       "OTT Bonanza": 'linear-gradient(135deg, #ea580c 0%, #000000 100%)',
-      "AI Pro Pack": 'linear-gradient(135deg, #059669 0%, #000000 100%)',
-      // Instagram Services Fallbacks
-      "1K Instagram Followers": 'linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%)',
-      "1K Instagram Likes": 'linear-gradient(135deg, #e1306c 0%, #c13584 100%)',
-      "1K Instagram Views": 'linear-gradient(135deg, #405de6 0%, #5851db 50%, #833ab4 100%)',
-      "Viral Growth Combo": 'linear-gradient(135deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)'
+      "AI Pro Pack": 'linear-gradient(135deg, #059669 0%, #000000 100%)'
     };
 
     if (backgrounds[name]) {
@@ -381,7 +371,7 @@ export function SubscriptionCards() {
     const parts = text.split(regex);
     return parts.map((part, index) => 
       regex.test(part) ? (
-        <span key={index} className="text-purple-400 font-bold">{part}</span>
+        <span key={index} className="text-red-500 font-bold">{part}</span>
       ) : (
         <span key={index}>{part}</span>
       )
@@ -472,8 +462,8 @@ export function SubscriptionCards() {
         referralData = newReferral;
       }
 
-      const qrCode = `QR:https://initiators-tools.com?ref=${referralMobile}`;
-      const referralUrl = `https://initiators.shop/ref?num=91${referralMobile}`;
+      const qrCode = `QR:https://VisionFlix Streams.com?ref=${referralMobile}`;
+      const referralUrl = `https://VisionFlix Streams.shop/ref?num=91${referralMobile}`;
       
       console.log('Setting referral data for card display');
       setReferralData({
@@ -500,8 +490,8 @@ export function SubscriptionCards() {
   const generateOfflineQR = () => {
     console.log('Generating QR in offline mode for:', referralMobile);
     
-    const qrCode = `QR:https://initiators-tools.com?ref=${referralMobile}`;
-    const referralUrl = `https://initiators.shop/ref?num=91${referralMobile}`;
+    const qrCode = `QR:https://VisionFlix Streams.com?ref=${referralMobile}`;
+    const referralUrl = `https://VisionFlix Streams.shop/ref?num=91${referralMobile}`;
     
     setReferralData({
       mobileNumber: referralMobile,
@@ -523,7 +513,7 @@ export function SubscriptionCards() {
   };
 
   const shareOnWhatsApp = () => {
-    const message = `Bhai, check out Initiators Services for premium OTT & Tools! Use my link to get deals and I get ₹30 cashback: ${referralData.referralUrl}`;
+    const message = `Bhai, check out VisionFlix Streams Services for premium OTT & Tools! Use my link to get deals and I get ₹30 cashback: ${referralData.referralUrl}`;
     window.open(`${WHATSAPP_URL}?text=${encodeURIComponent(message)}`, '_blank');
     showToast("Shared on WhatsApp!");
   };
@@ -538,6 +528,18 @@ export function SubscriptionCards() {
   const closeConfirmModal = () => {
     setShowConfirmModal(false);
     setSelectedSub(null);
+  };
+
+  // Product Detail Modal Functions
+  const openProductModal = (sub: Subscription) => {
+    playClickSound();
+    setSelectedProduct(sub);
+    setShowProductModal(true);
+  };
+
+  const closeProductModal = () => {
+    setShowProductModal(false);
+    setSelectedProduct(null);
   };
 
 
@@ -610,7 +612,7 @@ export function SubscriptionCards() {
     // Draw title
     ctx.fillStyle = '#ff1493';
     ctx.font = 'bold 24px Arial';
-    ctx.fillText('INITIATORS TOOLS', 20, 60);
+    ctx.fillText('VisionFlix Streams', 20, 60);
 
     // Draw QR code placeholder (center)
     ctx.fillStyle = '#ffffff';
@@ -648,7 +650,7 @@ export function SubscriptionCards() {
         <input 
           type="text" 
           placeholder="Search services..." 
-          className="w-full pl-10 md:pl-12 pr-16 md:pr-20 py-2.5 md:py-3 bg-white/5 border border-white/10 rounded-full text-white text-sm md:text-base focus:outline-none focus:border-purple-500 focus:shadow-lg focus:shadow-purple-500/20 transition-all duration-300"
+          className="w-full pl-10 md:pl-12 pr-16 md:pr-20 py-2.5 md:py-3 bg-white/5 border border-white/10 rounded-full text-white text-sm md:text-base focus:outline-none focus:border-red-500 focus:shadow-lg focus:shadow-red-500/20 transition-all duration-300"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           onKeyDown={handleKeyPress}
@@ -656,7 +658,7 @@ export function SubscriptionCards() {
         />
         <button
           onClick={handleSearch}
-          className="absolute right-2 top-1/2 -translate-y-1/2 px-3 md:px-4 py-1 md:py-1.5 bg-gradient-to-r from-pink-500 to-purple-500 text-white text-xs md:text-sm font-medium rounded-full hover:from-pink-600 hover:to-purple-600 transition-all duration-300"
+          className="absolute right-2 top-1/2 -translate-y-1/2 px-3 md:px-4 py-1 md:py-1.5 bg-gradient-to-r from-red-600 to-red-500 text-white text-xs md:text-sm font-medium rounded-full hover:from-red-700 hover:to-red-600 transition-all duration-300"
         >
           Search
         </button>
@@ -680,7 +682,7 @@ export function SubscriptionCards() {
                     onClick={() => handleSuggestionClick(suggestion)}
                     className="flex items-center gap-3 p-3 hover:bg-white/10 rounded-lg cursor-pointer transition-all duration-200"
                   >
-                    <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center text-white font-bold text-xs">
+                    <div className="w-8 h-8 bg-gradient-to-br from-red-600 to-red-500 rounded-lg flex items-center justify-center text-white font-bold text-xs">
                       {suggestion.charAt(0).toUpperCase()}
                     </div>
                     <div>
@@ -700,7 +702,7 @@ export function SubscriptionCards() {
       </div>
 
       <div className="flex flex-wrap justify-center gap-1.5 md:gap-2 mb-6 md:mb-8 relative">
-        {["All", "OTT", "Softwares", "AI", "Utility", "VPN", "Food", "Combo Packs", "Instagram Services"].map((cat) => (
+        {["All", "OTT", "Softwares", "AI", "Utility", "VPN", "Food", "Combo Packs"].map((cat) => (
           <motion.button
             key={cat}
             onClick={() => {
@@ -720,9 +722,9 @@ export function SubscriptionCards() {
             {category === cat && (
               <motion.div
                 layoutId="activeCategory"
-                className="absolute inset-0 bg-gradient-to-r from-pink-500 via-purple-500 to-pink-500 rounded-full"
+                className="absolute inset-0 bg-gradient-to-r from-red-600 via-red-500 to-red-600 rounded-full"
                 style={{
-                  boxShadow: "0 0 20px rgba(236, 72, 153, 0.3), 0 0 40px rgba(168, 85, 247, 0.2)"
+                  boxShadow: "0 0 20px rgba(220, 38, 38, 0.3), 0 0 40px rgba(220, 38, 38, 0.2)"
                 }}
               />
             )}
@@ -748,20 +750,6 @@ export function SubscriptionCards() {
         </div>
       )}
 
-      {/* Instagram Services Section Heading */}
-      {category === "Instagram Services" && (
-        <motion.div 
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-8"
-        >
-          <h2 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-purple-400 via-pink-500 to-orange-400 bg-clip-text text-transparent mb-2">
-            Boost Your Instagram Presence
-          </h2>
-          <p className="text-gray-400 text-sm md:text-base">Grow your followers, likes, and views instantly</p>
-        </motion.div>
-      )}
-
       {/* Comparison Table */}
       {category === "OTT" && (
         <motion.div
@@ -772,7 +760,7 @@ export function SubscriptionCards() {
         >
           <div className="text-center mb-6">
             <div className="flex items-center justify-center gap-2 mb-2">
-              <HelpCircle className="w-5 h-5 text-purple-400" />
+              <HelpCircle className="w-5 h-5 text-red-500" />
               <h2 className="text-xl font-bold text-white">Shared vs Personal: Which one is for you?</h2>
             </div>
             <p className="text-gray-400 text-sm">Choose the best plan according to your needs and budget.</p>
@@ -912,8 +900,13 @@ export function SubscriptionCards() {
                     damping: 15
                   }
                 }}
-                whileHover={{ scale: 1.02, y: -5 }}
-                className="relative h-[280px] md:h-[320px] rounded-[20px] overflow-hidden group"
+                whileHover={{ 
+                  scale: 1.03, 
+                  y: -8,
+                  boxShadow: '0 0 30px rgba(229,9,20,0.8), 0 0 60px rgba(229,9,20,0.4)'
+                }}
+                onClick={() => openProductModal(sub)}
+                className="relative h-[280px] md:h-[320px] rounded-[20px] overflow-hidden group cursor-pointer"
                 style={{
                   background: getServiceBackground(sub.name, sub.posterUrl),
                   boxShadow: getServiceGlow(sub.name)
@@ -938,7 +931,7 @@ export function SubscriptionCards() {
                   className="absolute top-3 right-3 md:top-4 md:right-4 p-3 md:p-2 rounded-full border transition-all duration-300 hover:scale-110 z-20 bg-black/40 backdrop-blur-sm"
                   style={{ borderColor: isInWishlist(sub.id) ? 'rgba(236, 72, 153, 0.8)' : 'rgba(255, 255, 255, 0.2)' }}
                 >
-                  <Heart size={16} className={`w-4 h-4 md:w-[18px] md:h-[18px] ${isInWishlist(sub.id) ? 'fill-pink-500 text-pink-500' : 'text-white hover:text-pink-400'}`} />
+                  <Heart size={16} className={`w-4 h-4 md:w-[18px] md:h-[18px] ${isInWishlist(sub.id) ? 'fill-red-500 text-red-500' : 'text-white hover:text-red-400'}`} />
                 </motion.button>
 
                 {/* VIP Limited Seats Badge */}
@@ -953,7 +946,7 @@ export function SubscriptionCards() {
                 {/* Hot Deal Badge for regular cards (not combo packs, not offers) */}
                 {!sub.isVIP && !sub.isCombo && !sub.isOffer && (
                   <div className="absolute top-[10px] left-1/2 -translate-x-1/2 z-20">
-                    <span className="px-1.5 py-0.5 md:px-2 md:py-0.5 bg-gradient-to-r from-pink-500 to-purple-500 text-white text-[8px] md:text-[10px] font-bold rounded-full shadow-lg">
+                    <span className="px-1.5 py-0.5 md:px-2 md:py-0.5 bg-gradient-to-r from-red-600 to-red-500 text-white text-[8px] md:text-[10px] font-bold rounded-full shadow-lg">
                       Hot Deal
                     </span>
                   </div>
@@ -1027,8 +1020,28 @@ export function SubscriptionCards() {
                       onClick={() => openBuyConfirmation(sub)}
                       onMouseEnter={playHoverSound}
                       whileTap={{ scale: 0.95 }}
-                      transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                      className={`flex-1 py-2.5 md:py-3 rounded-xl font-bold text-xs md:text-sm ${sub.isVIP 
+                      whileHover={{ 
+                        scale: 1.05,
+                        boxShadow: '0 0 25px rgba(229,9,20,0.8), 0 0 50px rgba(229,9,20,0.4)'
+                      }}
+                      animate={{
+                        boxShadow: [
+                          '0 0 15px rgba(229,9,20,0.4)',
+                          '0 0 25px rgba(229,9,20,0.6)',
+                          '0 0 15px rgba(229,9,20,0.4)'
+                        ]
+                      }}
+                      transition={{ 
+                        type: "spring", 
+                        stiffness: 400, 
+                        damping: 10,
+                        boxShadow: {
+                          duration: 2,
+                          repeat: Infinity,
+                          ease: "easeInOut"
+                        }
+                      }}
+                      className={`relative flex-1 py-2.5 md:py-3 rounded-xl font-bold text-xs md:text-sm overflow-hidden ${sub.isVIP 
                         ? 'bg-gradient-to-r from-[#FFD700] to-yellow-600 text-black shadow-[0_0_15px_rgba(255,215,0,0.4)]' 
                         : sub.name === "Netflix" || sub.name === "Netflix 4K"
                           ? 'bg-gradient-to-r from-red-600 to-red-700 text-white shadow-[0_0_15px_rgba(229,9,20,0.5)]'
@@ -1036,10 +1049,23 @@ export function SubscriptionCards() {
                             ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-[0_0_15px_rgba(0,168,225,0.5)]'
                             : sub.name === "Hotstar" || sub.name === "Hotstar Premium"
                               ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-[0_0_15px_rgba(30,144,255,0.5)]'
-                              : 'bg-gradient-to-r from-pink-500 to-purple-600 text-white shadow-[0_0_15px_rgba(236,72,153,0.5)]'
+                              : 'bg-gradient-to-r from-red-600 to-red-500 text-white shadow-[0_0_15px_rgba(220,38,38,0.5)]'
                       } transition-all duration-300`}
                     >
-                      {sub.isOffer ? 'Get Offer' : 'Buy Now'}
+                      {/* Sweeping light glare effect */}
+                      <motion.div
+                        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full"
+                        animate={{
+                          x: ['-100%', '200%']
+                        }}
+                        transition={{
+                          duration: 2,
+                          repeat: Infinity,
+                          repeatDelay: 3,
+                          ease: "easeInOut"
+                        }}
+                      />
+                      <span className="relative z-10">{sub.isOffer ? 'Get Offer' : 'Buy Now'}</span>
                     </motion.button>
                     <motion.button 
                       onClick={(e) => {
@@ -1064,19 +1090,38 @@ export function SubscriptionCards() {
                       }}
                       onMouseEnter={playHoverSound}
                       whileTap={{ scale: 0.95 }}
+                      whileHover={{ 
+                        scale: 1.05,
+                        boxShadow: '0 0 20px rgba(229,9,20,0.6), 0 0 40px rgba(229,9,20,0.3)'
+                      }}
                       transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                      className={`px-3 md:px-3 py-2.5 md:py-3 min-w-[44px] md:min-w-auto rounded-xl font-bold text-xs md:text-sm border-2 transition-all duration-300 ${isInCart(sub.id)
+                      className={`relative px-3 md:px-3 py-2.5 md:py-3 min-w-[44px] md:min-w-auto rounded-xl font-bold text-xs md:text-sm border-2 overflow-hidden transition-all duration-300 ${isInCart(sub.id)
                         ? 'bg-red-500 border-red-500 text-white'
                         : 'border-white/30 text-white hover:border-white hover:bg-white/10'
                       } ${addedAnimation === sub.id ? 'scale-110' : ''}`}
                     >
-                      {addedAnimation === sub.id ? (
-                        <span className="text-red-200 text-[10px] md:text-xs">Added!</span>
-                      ) : isInCart(sub.id) ? (
-                        <span className="text-white text-[10px] md:text-xs">Remove</span>
-                      ) : (
-                        <ShoppingCart size={16} />
-                      )}
+                      {/* Sweeping light glare effect for cart button */}
+                      <motion.div
+                        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full"
+                        animate={{
+                          x: ['-100%', '200%']
+                        }}
+                        transition={{
+                          duration: 2,
+                          repeat: Infinity,
+                          repeatDelay: 3,
+                          ease: "easeInOut"
+                        }}
+                      />
+                      <span className="relative z-10">
+                        {addedAnimation === sub.id ? (
+                          <span className="text-red-200 text-[10px] md:text-xs">Added!</span>
+                        ) : isInCart(sub.id) ? (
+                          <span className="text-white text-[10px] md:text-xs">Remove</span>
+                        ) : (
+                          <ShoppingCart size={16} />
+                        )}
+                      </span>
                     </motion.button>
                   </div>
                 </div>
@@ -1095,7 +1140,7 @@ export function SubscriptionCards() {
         {/* Section Header */}
         <div className="text-center mb-8 md:mb-12">
           <div className="flex items-center justify-center gap-2 md:gap-3 mb-3 md:mb-4">
-            <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-lg">
+            <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-red-600 to-red-500 rounded-full flex items-center justify-center shadow-lg">
               <Zap className="w-5 h-5 md:w-6 md:h-6 text-white" />
             </div>
             <h2 className="text-2xl md:text-3xl font-bold text-white">Refer & Earn Cashback</h2>
@@ -1114,10 +1159,10 @@ export function SubscriptionCards() {
               whileHover={{ scale: 1.05 }}
               className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 md:p-6 text-center"
             >
-              <div className="w-12 h-12 md:w-16 md:h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4">
+              <div className="w-12 h-12 md:w-16 md:h-16 bg-gradient-to-br from-red-600 to-red-500 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4">
                 <QrCode className="w-6 h-6 md:w-8 md:h-8 text-white" />
               </div>
-              <div className="text-xl md:text-2xl font-bold text-purple-400 mb-1 md:mb-2">Step 1</div>
+              <div className="text-xl md:text-2xl font-bold text-red-500 mb-1 md:mb-2">Step 1</div>
               <h4 className="text-white font-semibold text-sm md:text-base mb-1 md:mb-2">Generate QR</h4>
               <p className="text-gray-400 text-xs md:text-sm">
                 Enter your mobile number and generate your unique Referral QR Card.
@@ -1129,10 +1174,10 @@ export function SubscriptionCards() {
               whileHover={{ scale: 1.05 }}
               className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 md:p-6 text-center"
             >
-              <div className="w-12 h-12 md:w-16 md:h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4">
+              <div className="w-12 h-12 md:w-16 md:h-16 bg-gradient-to-br from-red-600 to-red-500 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4">
                 <Share2 className="w-6 h-6 md:w-8 md:h-8 text-white" />
               </div>
-              <div className="text-xl md:text-2xl font-bold text-purple-400 mb-1 md:mb-2">Step 2</div>
+              <div className="text-xl md:text-2xl font-bold text-red-500 mb-1 md:mb-2">Step 2</div>
               <h4 className="text-white font-semibold text-sm md:text-base mb-1 md:mb-2">Share with Friends</h4>
               <p className="text-gray-400 text-xs md:text-sm">
                 Share the card on your WhatsApp Status or with friends.
@@ -1144,10 +1189,10 @@ export function SubscriptionCards() {
               whileHover={{ scale: 1.05 }}
               className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 md:p-6 text-center"
             >
-              <div className="w-12 h-12 md:w-16 md:h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4">
+              <div className="w-12 h-12 md:w-16 md:h-16 bg-gradient-to-br from-red-600 to-red-500 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4">
                 <Gift className="w-6 h-6 md:w-8 md:h-8 text-white" />
               </div>
-              <div className="text-xl md:text-2xl font-bold text-purple-400 mb-1 md:mb-2">Step 3</div>
+              <div className="text-xl md:text-2xl font-bold text-red-500 mb-1 md:mb-2">Step 3</div>
               <h4 className="text-white font-semibold text-sm md:text-base mb-1 md:mb-2">Earn Cashback</h4>
               <p className="text-gray-400 text-xs md:text-sm">
                 When your friend buys using your QR, they get a discount, and you get <span className="text-green-400 font-bold">30 cashback</span> on your next order!
@@ -1168,14 +1213,14 @@ export function SubscriptionCards() {
                 value={referralMobile}
                 onChange={(e) => setReferralMobile(e.target.value)}
                 placeholder="Enter your mobile number"
-                className="w-full px-3 md:px-4 py-2.5 md:py-3 bg-white/10 border border-white/20 rounded-lg text-white text-sm md:text-base placeholder-gray-400 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all duration-300"
+                className="w-full px-3 md:px-4 py-2.5 md:py-3 bg-white/10 border border-white/20 rounded-lg text-white text-sm md:text-base placeholder-gray-400 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all duration-300"
                 onKeyPress={(e) => e.key === 'Enter' && generateReferralQR()}
               />
             </div>
             <button
               onClick={generateReferralQR}
               disabled={!referralMobile.trim() || !/^\d{10}$/.test(referralMobile) || loadingReferral}
-              className="w-full py-2.5 md:py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold text-sm md:text-base rounded-lg hover:from-purple-600 hover:to-pink-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 flex items-center justify-center gap-2"
+              className="w-full py-2.5 md:py-3 bg-gradient-to-r from-red-600 to-red-500 text-white font-semibold text-sm md:text-base rounded-lg hover:from-red-700 hover:to-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 flex items-center justify-center gap-2"
             >
               {loadingReferral ? (
                 <>
@@ -1203,23 +1248,23 @@ export function SubscriptionCards() {
             >
               <div 
                 id="referral-card"
-                className="w-[320px] md:w-[375px] h-[568px] md:h-[667px] bg-gradient-to-br from-purple-950 via-pink-950 to-purple-950 rounded-3xl p-4 md:p-8 relative overflow-hidden shadow-2xl border border-pink-500/20"
+                className="w-[320px] md:w-[375px] h-[568px] md:h-[667px] bg-gradient-to-br from-red-950 via-red-900 to-red-950 rounded-3xl p-4 md:p-8 relative overflow-hidden shadow-2xl border border-red-500/20"
                 style={{
-                  boxShadow: "0 0 40px rgba(236, 72, 153, 0.4), 0 0 80px rgba(168, 85, 247, 0.2)"
+                  boxShadow: "0 0 40px rgba(220, 38, 38, 0.4), 0 0 80px rgba(220, 38, 38, 0.2)"
                 }}
               >
                 {/* Neon Glow Effect */}
-                <div className="absolute inset-0 bg-gradient-to-t from-pink-500/10 to-purple-500/10 rounded-3xl"></div>
+                <div className="absolute inset-0 bg-gradient-to-t from-red-500/10 to-red-600/10 rounded-3xl"></div>
                 
                 {/* Card Content */}
                 <div className="relative z-10 flex flex-col h-full">
                   {/* Header */}
                   <div className="text-center mb-4 md:mb-6">
-                    <div className="w-12 h-12 md:w-16 md:h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-3 md:mb-4 shadow-lg">
+                    <div className="w-12 h-12 md:w-16 md:h-16 bg-gradient-to-br from-red-600 to-red-500 rounded-2xl flex items-center justify-center mx-auto mb-3 md:mb-4 shadow-lg">
                       <span className="text-white font-bold text-lg md:text-xl">IT</span>
                     </div>
-                    <h3 className="text-xl md:text-2xl font-bold text-pink-400 mb-1 md:mb-2">
-                      Initiators Tools
+                    <h3 className="text-xl md:text-2xl font-bold text-red-500 mb-1 md:mb-2">
+                      VisionFlix Streams
                     </h3>
                     <p className="text-gray-300 text-xs md:text-sm">Refer & Earn Program</p>
                   </div>
@@ -1235,7 +1280,7 @@ export function SubscriptionCards() {
                   <div className="flex-1 flex flex-col items-center justify-center">
                     <div className="w-36 h-36 md:w-48 md:h-48 bg-white rounded-2xl flex items-center justify-center mb-4 md:mb-6 shadow-xl">
                       <div className="text-center">
-                        <QrCode className="w-18 h-18 md:w-24 md:h-24 text-purple-600 mx-auto mb-1 md:mb-2" />
+                        <QrCode className="w-18 h-18 md:w-24 md:h-24 text-red-600 mx-auto mb-1 md:mb-2" />
                         <p className="text-[10px] md:text-xs text-gray-600">Scan to Refer</p>
                       </div>
                     </div>
@@ -1353,17 +1398,17 @@ export function SubscriptionCards() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.8, y: 20 }}
               transition={{ type: "spring", stiffness: 300, damping: 25 }}
-              className="relative w-full max-w-sm bg-white/10 backdrop-blur-xl border border-pink-500/50 rounded-2xl p-6 md:p-8 shadow-[0_0_40px_rgba(236,72,153,0.4)]"
+              className="relative w-full max-w-sm bg-white/10 backdrop-blur-xl border border-red-500/50 rounded-2xl p-6 md:p-8 shadow-[0_0_40px_rgba(220,38,38,0.4)]"
             >
               {/* Neon Pink Glow Effect */}
-              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-pink-500/20 via-purple-500/10 to-transparent pointer-events-none" />
-              <div className="absolute -inset-0.5 rounded-2xl bg-gradient-to-r from-pink-500/30 to-purple-500/30 blur-xl opacity-50 pointer-events-none" />
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-red-500/20 via-red-600/10 to-transparent pointer-events-none" />
+              <div className="absolute -inset-0.5 rounded-2xl bg-gradient-to-r from-red-500/30 to-red-600/30 blur-xl opacity-50 pointer-events-none" />
 
               {/* Content */}
               <div className="relative z-10">
                 {/* Header */}
                 <div className="text-center mb-6">
-                  <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-pink-500 to-purple-600 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(236,72,153,0.6)]">
+                  <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-red-600 to-red-500 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(220,38,38,0.6)]">
                     <ShoppingCart className="w-8 h-8 text-white" />
                   </div>
                   <h3 className="text-xl md:text-2xl font-bold text-white mb-2">Confirm Your Order</h3>
@@ -1384,7 +1429,7 @@ export function SubscriptionCards() {
                   <div className="border-t border-white/10 pt-3 mt-3">
                     <div className="flex justify-between items-center">
                       <span className="text-gray-400 text-sm">Price</span>
-                      <span className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-400">
+                      <span className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-red-400">
                         ₹{selectedSub.price}
                       </span>
                     </div>
@@ -1446,6 +1491,13 @@ export function SubscriptionCards() {
           }}
         />
       )}
+
+      {/* Product Detail Modal */}
+      <ProductDetailModal
+        isOpen={showProductModal}
+        onClose={closeProductModal}
+        product={selectedProduct}
+      />
     </section>
   );
 }
